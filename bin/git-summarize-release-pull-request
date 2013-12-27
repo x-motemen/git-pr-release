@@ -1,0 +1,141 @@
+#!/usr/bin/env ruby
+
+require 'octokit'
+require 'uri'
+require 'logger'
+require 'open3'
+
+@logger = Logger.new(STDERR)
+
+def git(*command)
+  command = [ 'git', *command.map(&:to_s) ]
+  @logger.debug "Executing `#{command.join(' ')}`"
+  out, status = Open3.capture2(*command)
+  unless status.success?
+    @logger.fatal("Executing `#{command.join(' ')}` failed: #{status}")
+    raise
+  end
+  out.each_line
+end
+
+def git_config(key)
+  begin
+    git('config', key).first.chomp
+  rescue
+    nil
+  end
+end
+
+def generate_description(pull_requests)
+  pull_requests.map do |pr|
+    "- [ ] ##{pr.number} #{pr.title}" + (pr.assignee ? " @#{pr.assignee.login}" : '')
+  end.join("\n")
+end
+
+def obtain_token!
+  token = git_config('summarize-release-pull-request.token')
+
+  unless token
+    require 'highline/import'
+    STDERR.puts 'Could not obtain config variable summarize-release-pull-request.token.'
+    STDERR.puts 'Trying to generate token...'
+
+    username = ask('username? ') { |q| q.default = ENV['USER'] }
+    password = ask('password? (not saved) ') { |q| q.echo = '*' }
+
+    temporary_client = Octokit::Client.new :login => username, :password => password
+
+    auth = temporary_client.create_authorization({ :scopes => [ 'public_repo', 'repo' ], :note => 'summerize-release' })
+    token = auth.token
+    git :config, '--global', 'summarize-release-pull-request.token', token
+  end
+
+  token
+end
+
+remote = git_config 'remote.origin.url'
+unless %r(^\w+://) === remote
+  remote = "ssh://#{remote.sub(':', '/')}"
+end
+
+remote_url = URI.parse(remote)
+repository = remote_url.path.sub(%r(^/), '').sub(/\.git$/, '')
+
+if remote_url.host != 'github.com'
+  # GitHub:Enterprise
+  OpenSSL::SSL.const_set :VERIFY_PEER, OpenSSL::SSL::VERIFY_NONE # XXX
+
+  Octokit.configure do |c|
+    c.api_endpoint = "https://#{remote_url.host}/api/v3"
+    c.web_endpoint = "https://#{remote_url.host}/"
+  end
+end
+
+## Project specific configuration
+production_branch  = git_config('summarize-release-pull-request.branch.production') || 'master'
+staging_branch     = git_config('summarize-release-pull-request.branch.staging')    || 'staging'
+
+@logger.debug "repository:        #{repository}"
+@logger.debug "production branch: #{production_branch}"
+@logger.debug "staging branch:    #{staging_branch}"
+
+client = Octokit::Client.new :access_token => obtain_token!
+
+git :remote, 'update', 'origin'
+
+merged_feature_head_sha1s = git(
+  :log, '--merges', '--pretty=format:%P', "origin/#{production_branch}..origin/#{staging_branch}"
+).map do |line|
+  main_sha1, feature_sha1 = line.chomp.split /\s+/
+  feature_sha1
+end
+
+merged_pull_request_numbers = git('ls-remote', 'origin', 'refs/pull/*/head').map do |line|
+  sha1, ref = line.chomp.split /\s+/
+
+  if merged_feature_head_sha1s.include? sha1
+    if %r<^refs/pull/(\d+)/head$>.match ref
+      $1.to_i
+    else
+      @logger.warn "Bad pull request head ref format: #{ref}"
+      nil
+    end
+  end
+end.compact
+
+if merged_pull_request_numbers.empty?
+  @logger.error 'No pull requests to be released'
+  exit 1
+else
+  @logger.debug 'Pull requests to be released: ' + merged_pull_request_numbers.map { |n| "##{n}" } .join(', ')
+end
+
+pull_requests = merged_pull_request_numbers.map do |nr|
+  pr = client.pull_request repository, nr
+  @logger.info "To be released: ##{pr.number} #{pr.title}"
+  pr
+end
+
+@logger.info 'Searching for existing release pull requests...'
+release_pr = client.pull_requests(repository).find do |pr|
+  pr.head.ref == staging_branch && pr.base.ref == production_branch
+end
+
+if release_pr
+  @logger.info 'Updating release pull request...'
+  client.update_pull_request(
+    repository, release_pr.number, nil, generate_description(pull_requests)
+  )
+else
+  @logger.info 'Creating release pull request...'
+  release_pr = client.create_pull_request(
+    repository, production_branch, staging_branch, "release #{Time.now}", generate_description(pull_requests)
+  )
+end
+
+unless release_pr
+  @logger.error 'No pull request found/created'
+  exit 1
+end
+
+@logger.info "Pull request: #{release_pr.rels[:html].href}"
