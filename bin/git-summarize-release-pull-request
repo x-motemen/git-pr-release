@@ -1,6 +1,12 @@
 #!/usr/bin/env ruby
 
-require 'octokit'
+ENV['BUNDLE_GEMFILE'] = File.join(__FILE__, '../../Gemfile')
+
+require 'rubygems'
+require 'bundler/setup'
+
+Bundler.require :default
+
 require 'uri'
 require 'logger'
 require 'open3'
