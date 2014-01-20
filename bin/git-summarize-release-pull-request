@@ -119,7 +119,13 @@ merged_pull_request_numbers = git('ls-remote', 'origin', 'refs/pull/*/head').map
 
   if merged_feature_head_sha1s.include? sha1
     if %r<^refs/pull/(\d+)/head$>.match ref
-      $1.to_i
+      pr_number = $1.to_i
+
+      if git('merge-base', sha1, "origin/#{production_branch}").first.chomp == sha1
+        say "##{pr_number} (#{sha1}) is already merged into #{production_branch}", :debug
+      else
+        pr_number
+      end
     else
       say "Bad pull request head ref format: #{ref}", :warn
       nil
@@ -146,9 +152,9 @@ end
 created = false
 
 if release_pr
-  say 'Updating release pull request...', :info
+  say "Updating release pull request ##{release_pr.number}...", :info
   client.update_pull_request(
-    repository, release_pr.number, nil, generate_description(pull_requests)
+    repository, release_pr.number, :body => generate_description(pull_requests)
   )
 else
   say 'Creating release pull request...', :info
