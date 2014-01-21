@@ -1,0 +1,21 @@
+# coding: utf-8
+lib = File.expand_path('../lib', __FILE__)
+$LOAD_PATH.unshift(lib) unless $LOAD_PATH.include?(lib)
+
+Gem::Specification.new do |spec|
+  spec.name          = "git-summarize-release-pull-request"
+  spec.version       = '0.0.1'
+  spec.authors       = ["motemen"]
+  spec.email         = ["motemen@gmail.com"]
+  spec.summary       = 'Creates a pull request which summarizes feature branches preparing for production release'
+  spec.homepage      = 'https://github.com/motemen/git-summarize-release-pull-request'
+
+  spec.files         = `git ls-files`.split($/)
+  spec.executables   = spec.files.grep(%r{^bin/}) { |f| File.basename(f) }
+  spec.test_files    = spec.files.grep(%r{^(test|spec|features)/})
+  spec.require_paths = ["lib"]
+
+  spec.add_dependency 'octokit',  '~> 2.7'
+  spec.add_dependency 'highline', '~> 1.6'
+  spec.add_dependency 'colorize', '~> 0.6'
+end

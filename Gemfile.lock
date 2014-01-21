@@ -1,0 +1,28 @@
+PATH
+  remote: .
+  specs:
+    git-summarize-release-pull-request (0.0.1)
+      colorize (~> 0.6)
+      highline (~> 1.6)
+      octokit (~> 2.7)
+
+GEM
+  remote: https://rubygems.org/
+  specs:
+    addressable (2.3.5)
+    colorize (0.6.0)
+    faraday (0.9.0)
+      multipart-post (>= 1.2, < 3)
+    highline (1.6.20)
+    multipart-post (2.0.0)
+    octokit (2.7.0)
+      sawyer (~> 0.5.2)
+    sawyer (0.5.2)
+      addressable (~> 2.3.5)
+      faraday (~> 0.8, < 0.10)
+
+PLATFORMS
+  ruby
+
+DEPENDENCIES
+  git-summarize-release-pull-request!
