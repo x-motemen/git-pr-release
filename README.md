@@ -1,6 +1,14 @@
 git-pr-release
 ==============
 
+Creates a pull request which summarizes feature branches that are to be
+released into production. Useful if your branching storategy is like below:
+
+ * Feature branches are first merged into "staging" (or release, development)
+   branch.
+ * Then the staging branch is merged into "production" branch, which is for
+   production release.
+
 Configuration
 -------------
 
@@ -22,6 +30,6 @@ Default value: `master`.
 ### `pr-release.branch.staging`
 
 The branch name that the feature branches are merged into and is going to be
-merged into the "production branch".
+merged into the "production" branch.
 
 Default value: `staging`.

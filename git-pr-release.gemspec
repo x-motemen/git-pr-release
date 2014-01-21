@@ -7,7 +7,7 @@ Gem::Specification.new do |spec|
   spec.version       = '0.0.1'
   spec.authors       = ["motemen"]
   spec.email         = ["motemen@gmail.com"]
-  spec.summary       = 'Creates a pull request which summarizes feature branches preparing for production release'
+  spec.summary       = 'Creates a pull request which summarizes feature branches that are to be released into production'
   spec.homepage      = 'https://github.com/motemen/git-pr-release'
 
   spec.files         = `git ls-files`.split($/)
