@@ -7,7 +7,8 @@ Gem::Specification.new do |spec|
   spec.version       = '0.0.1'
   spec.authors       = ["motemen"]
   spec.email         = ["motemen@gmail.com"]
-  spec.summary       = 'Creates a pull request which summarizes feature branches that are to be released into production'
+  spec.summary       = 'Creates a release pull request'
+  spec.description   = 'git-pr-release creates a pull request which summarizes feature branches that are to be released into production'
   spec.homepage      = 'https://github.com/motemen/git-pr-release'
 
   spec.files         = `git ls-files`.split($/)
@@ -18,4 +19,6 @@ Gem::Specification.new do |spec|
   spec.add_dependency 'octokit',  '~> 2.7'
   spec.add_dependency 'highline', '~> 1.6'
   spec.add_dependency 'colorize', '~> 0.6'
+
+  spec.license = 'MIT'
 end
