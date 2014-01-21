@@ -1,7 +1,7 @@
 PATH
   remote: .
   specs:
-    git-summarize-release-pull-request (0.0.1)
+    git-pr-release (0.0.1)
       colorize (~> 0.6)
       highline (~> 1.6)
       octokit (~> 2.7)
@@ -25,4 +25,4 @@ PLATFORMS
   ruby
 
 DEPENDENCIES
-  git-summarize-release-pull-request!
+  git-pr-release!

@@ -3,12 +3,12 @@ lib = File.expand_path('../lib', __FILE__)
 $LOAD_PATH.unshift(lib) unless $LOAD_PATH.include?(lib)
 
 Gem::Specification.new do |spec|
-  spec.name          = "git-summarize-release-pull-request"
+  spec.name          = "git-pr-release"
   spec.version       = '0.0.1'
   spec.authors       = ["motemen"]
   spec.email         = ["motemen@gmail.com"]
   spec.summary       = 'Creates a pull request which summarizes feature branches preparing for production release'
-  spec.homepage      = 'https://github.com/motemen/git-summarize-release-pull-request'
+  spec.homepage      = 'https://github.com/motemen/git-pr-release'
 
   spec.files         = `git ls-files`.split($/)
   spec.executables   = spec.files.grep(%r{^bin/}) { |f| File.basename(f) }

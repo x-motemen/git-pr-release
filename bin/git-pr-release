@@ -53,11 +53,11 @@ def generate_description(pull_requests)
 end
 
 def obtain_token!
-  token = git_config('summarize-release-pull-request.token')
+  token = git_config('pr-release.token')
 
   unless token
     require 'highline/import'
-    STDERR.puts 'Could not obtain config variable summarize-release-pull-request.token.'
+    STDERR.puts 'Could not obtain config variable pr-release.token.'
     STDERR.puts 'Trying to generate token...'
 
     username = ask('username? ') { |q| q.default = ENV['USER'] }
@@ -67,7 +67,7 @@ def obtain_token!
 
     auth = temporary_client.create_authorization({ :scopes => [ 'public_repo', 'repo' ], :note => 'summerize-release' })
     token = auth.token
-    git :config, '--global', 'summarize-release-pull-request.token', token
+    git :config, '--global', 'pr-release.token', token
   end
 
   token
@@ -92,8 +92,8 @@ if remote_url.host != 'github.com'
 end
 
 ## Project specific configuration
-production_branch  = git_config('summarize-release-pull-request.branch.production') || 'master'
-staging_branch     = git_config('summarize-release-pull-request.branch.staging')    || 'staging'
+production_branch  = git_config('pr-release.branch.production') || 'master'
+staging_branch     = git_config('pr-release.branch.staging')    || 'staging'
 
 say "Repository:        #{repository}", :debug
 say "Production branch: #{production_branch}", :debug
