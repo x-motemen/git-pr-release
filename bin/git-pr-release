@@ -1,10 +1,22 @@
 #!/usr/bin/env ruby
 
-require 'rubygems'
 require 'uri'
+require 'erb'
 require 'open3'
 require 'octokit'
 require 'colorize'
+
+class PullRequest
+  attr_reader :pr
+
+  def initialize(pr)
+    @pr = pr
+  end
+
+  def to_checklist_item
+    "- [ ] ##{pr.number} #{pr.title}" + (pr.assignee ? " @#{pr.assignee.login}" : '')
+  end
+end
 
 def say(message, level)
   color = case level
@@ -46,10 +58,22 @@ def git_config(key)
   end
 end
 
-def generate_description(pull_requests)
-  pull_requests.map do |pr|
-    "- [ ] ##{pr.number} #{pr.title}" + (pr.assignee ? " @#{pr.assignee.login}" : '')
-  end.join("\n")
+def build_pr_body(prs)
+  pull_requests = prs.map { |pr| PullRequest.new(pr) }
+
+  template = <<-DEFAULT_TEMPLATE
+<% pull_requests.each do |pr| -%>
+<%=  pr.to_checklist_item %>
+<% end -%>
+  DEFAULT_TEMPLATE
+
+  if path = git_config('pr-release.template.path')
+    template_path = File.join(git('rev-parse', '--show-toplevel').first.chomp, path)
+    template = File.read(template_path)
+  end
+
+  erb = ERB.new template, nil, '-'
+  erb.result binding
 end
 
 def obtain_token!
@@ -147,15 +171,20 @@ end
 
 created = false
 
+pr_body = build_pr_body pull_requests
+
+say 'Pull request body:', :debug
+say pr_body, :debug
+
 if release_pr
   say "Updating release pull request ##{release_pr.number}...", :info
   client.update_pull_request(
-    repository, release_pr.number, :body => generate_description(pull_requests)
+    repository, release_pr.number, :body => pr_body
   )
 else
   say 'Creating release pull request...', :info
   release_pr = client.create_pull_request(
-    repository, production_branch, staging_branch, "release #{Time.now}", generate_description(pull_requests)
+    repository, production_branch, staging_branch, "release #{Time.now}", pr_body
   )
   created = true
 end
