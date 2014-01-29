@@ -83,6 +83,43 @@ def build_pr_title_and_body(prs)
   content.split(/\n/, 2)
 end
 
+def merge_pr_body(old_body, new_body)
+  # Try to take over checklist statuses
+  pr_body_lines = []
+
+  Diff::LCS.traverse_balanced(old_body.split(/\r?\n/), new_body.split(/\r?\n/)) do |event|
+    say "diff: #{event.inspect}", :trace
+    action, old, new = *event
+    old_nr, old_line = *old
+    new_nr, new_line = *new
+
+    case action
+    when '=', '+'
+      say "Use line as is: #{new_line}", :trace
+      pr_body_lines << new_line
+    when '-'
+      say "Use old line: #{old_line}", :trace
+      pr_body_lines << old_line
+    when '!'
+      if [ old_line, new_line ].all? { |line| /^- \[[ x]\]/ === line }
+        say "Found checklist diff; use old one: #{old_line}", :trace
+        pr_body_lines << old_line
+      else
+        # not a checklist diff, use both line
+        say "Use line as is: #{old_line}", :trace
+        pr_body_lines << old_line
+
+        say "Use line as is: #{new_line}", :trace
+        pr_body_lines << new_line
+      end
+    else
+      say "Unknown diff event: #{event}", :warn
+    end
+  end
+
+  pr_body_lines.join("\n")
+end
+
 def obtain_token!
   token = git_config('pr-release.token')
 
@@ -193,51 +230,11 @@ release_pr = nil
 if existing_release_pr
   say "Updating release pull request ##{existing_release_pr.number}...", :info
 
-  # Try to take over checklist statuses
-  pr_body_lines = []
-
-  Diff::LCS.traverse_balanced(existing_release_pr.body.split(/\r?\n/), pr_body.split(/\r?\n/)) do |event|
-    say "diff: #{event.inspect}", :trace
-    action, old, new = *event
-    old_nr, old_line = *old
-    new_nr, new_line = *new
-
-    case action
-    when '=', '+'
-      say "Use line as is: #{new_line}", :trace
-      pr_body_lines << new_line
-    when '-'
-      say "Use old line: #{old_line}", :trace
-      pr_body_lines << old_line
-    when '!'
-      if [ old_line, new_line ].all? { |line| /^- \[[ x]\]/ === line }
-        say "Found checklist diff; use old one: #{old_line}", :trace
-        pr_body_lines << old_line
-      else
-        # not a checklist diff, use both line
-        say "Use line as is: #{old_line}", :trace
-        pr_body_lines << old_line
-
-        say "Use line as is: #{new_line}", :trace
-        pr_body_lines << new_line
-      end
-    else
-      say "Unknown diff event: #{event}", :warn
-    end
-  end
+  merged_pr_body = merge_pr_body existing_release_pr.body, pr_body
 
   release_pr = client.update_pull_request(
-    repository, existing_release_pr.number, :title => pr_title, :body => pr_body_lines.join("\n")
+    repository, existing_release_pr.number, :title => pr_title, :body => merged_pr_body
   )
-
-  if ENV['DEBUG']
-    Dir.mktmpdir do |dir|
-      File.open("#{dir}/old", 'w') { |io| io.puts(existing_release_pr.body.split(/\r?\n/)) }
-      File.open("#{dir}/new", 'w') { |io| io.puts(pr_body_lines) }
-      say 'diffs:', :trace
-      system 'diff', '-u', "#{dir}/old", "#{dir}/new"
-    end
-  end
 else
   say 'Creating release pull request...', :info
   release_pr = client.create_pull_request(
