@@ -19,6 +19,7 @@ Gem::Specification.new do |spec|
   spec.add_dependency 'octokit',  '~> 2.7'
   spec.add_dependency 'highline', '~> 1.6'
   spec.add_dependency 'colorize', '~> 0.6'
+  spec.add_dependency 'diff-lcs', '~> 1.2'
 
   spec.license = 'MIT'
 end

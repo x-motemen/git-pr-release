@@ -3,6 +3,7 @@ PATH
   specs:
     git-pr-release (0.0.1)
       colorize (~> 0.6)
+      diff-lcs (~> 1.2)
       highline (~> 1.6)
       octokit (~> 2.7)
 
@@ -11,13 +12,14 @@ GEM
   specs:
     addressable (2.3.5)
     colorize (0.6.0)
+    diff-lcs (1.2.5)
     faraday (0.9.0)
       multipart-post (>= 1.2, < 3)
     highline (1.6.20)
     multipart-post (2.0.0)
     octokit (2.7.0)
       sawyer (~> 0.5.2)
-    sawyer (0.5.2)
+    sawyer (0.5.3)
       addressable (~> 2.3.5)
       faraday (~> 0.8, < 0.10)
 

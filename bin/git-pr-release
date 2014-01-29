@@ -3,8 +3,10 @@
 require 'uri'
 require 'erb'
 require 'open3'
+require 'tmpdir'
 require 'octokit'
 require 'colorize'
+require 'diff/lcs'
 
 class PullRequest
   attr_reader :pr
@@ -115,7 +117,8 @@ if remote_url.host != 'github.com'
   end
 end
 
-## Project specific configuration
+### Set up configuration
+
 production_branch  = git_config('pr-release.branch.production') || 'master'
 staging_branch     = git_config('pr-release.branch.staging')    || 'staging'
 
@@ -126,6 +129,8 @@ say "Staging branch:    #{staging_branch}", :debug
 client = Octokit::Client.new :access_token => obtain_token!
 
 git :remote, 'update', 'origin'
+
+### Fetch merged PRs
 
 merged_feature_head_sha1s = git(
   :log, '--merges', '--pretty=format:%P', "origin/#{production_branch}..origin/#{staging_branch}"
@@ -164,8 +169,10 @@ pull_requests = merged_pull_request_numbers.map do |nr|
   pr
 end
 
+### Create a release PR
+
 say 'Searching for existing release pull requests...', :info
-release_pr = client.pull_requests(repository).find do |pr|
+existing_release_pr = client.pull_requests(repository).find do |pr|
   pr.head.ref == staging_branch && pr.base.ref == production_branch
 end
 
@@ -176,11 +183,55 @@ pr_body = build_pr_body pull_requests
 say 'Pull request body:', :debug
 say pr_body, :debug
 
-if release_pr
-  say "Updating release pull request ##{release_pr.number}...", :info
-  client.update_pull_request(
-    repository, release_pr.number, :body => pr_body
+release_pr = nil
+
+if existing_release_pr
+  say "Updating release pull request ##{existing_release_pr.number}...", :info
+
+  # Try to take over checklist statuses
+  pr_body_lines = []
+  Diff::LCS.traverse_balanced(existing_release_pr.body.split(/\r?\n/), pr_body.split(/\r?\n/)) do |event|
+    say "diff: #{event.inspect}", :trace
+    action, old, new = *event
+    old_nr, old_line = *old
+    new_nr, new_line = *new
+
+    case action
+    when '=', '+'
+      say "Use line as is: #{new_line}", :trace
+      pr_body_lines << new_line
+    when '-'
+      say "Use old line: #{old_line}", :trace
+      pr_body_lines << old_line
+    when '!'
+      if [ old_line, new_line ].all? { |line| /^- \[[ x]\]/ === line }
+        say "Found checklist diff; use old one: #{old_line}", :trace
+        pr_body_lines << old_line
+      else
+        # not a checklist diff, use both line
+        say "Use line as is: #{old_line}", :trace
+        pr_body_lines << old_line
+
+        say "Use line as is: #{new_line}", :trace
+        pr_body_lines << new_line
+      end
+    else
+      say "Unknown diff event: #{event}", :warn
+    end
+  end
+
+  release_pr = client.update_pull_request(
+    repository, existing_release_pr.number, :body => pr_body_lines.join("\n")
   )
+
+  if ENV['DEBUG']
+    Dir.mktmpdir do |dir|
+      File.open("#{dir}/old", 'w') { |io| io.puts(existing_release_pr.body.split(/\r?\n/)) }
+      File.open("#{dir}/new", 'w') { |io| io.puts(pr_body_lines) }
+      say 'diffs:', :trace
+      system 'diff', '-u', "#{dir}/old", "#{dir}/new"
+    end
+  end
 else
   say 'Creating release pull request...', :info
   release_pr = client.create_pull_request(
