@@ -60,14 +60,18 @@ def git_config(key)
   end
 end
 
-def build_pr_body(prs)
-  pull_requests = prs.map { |pr| PullRequest.new(pr) }
-
-  template = <<-DEFAULT_TEMPLATE
+# First line will be the title of the PR
+DEFAULT_PR_TEMPLATE = <<ERB
+Release <%= Time.now %>
 <% pull_requests.each do |pr| -%>
 <%=  pr.to_checklist_item %>
 <% end -%>
-  DEFAULT_TEMPLATE
+ERB
+
+def build_pr_title_and_body(prs)
+  pull_requests = prs.map { |pr| PullRequest.new(pr) }
+
+  template = DEFAULT_PR_TEMPLATE
 
   if path = git_config('pr-release.template.path')
     template_path = File.join(git('rev-parse', '--show-toplevel').first.chomp, path)
@@ -75,7 +79,8 @@ def build_pr_body(prs)
   end
 
   erb = ERB.new template, nil, '-'
-  erb.result binding
+  content = erb.result binding
+  content.split(/\n/, 2)
 end
 
 def obtain_token!
@@ -178,7 +183,7 @@ end
 
 created = false
 
-pr_body = build_pr_body pull_requests
+pr_title, pr_body = build_pr_title_and_body pull_requests
 
 say 'Pull request body:', :debug
 say pr_body, :debug
@@ -190,6 +195,7 @@ if existing_release_pr
 
   # Try to take over checklist statuses
   pr_body_lines = []
+
   Diff::LCS.traverse_balanced(existing_release_pr.body.split(/\r?\n/), pr_body.split(/\r?\n/)) do |event|
     say "diff: #{event.inspect}", :trace
     action, old, new = *event
@@ -221,7 +227,7 @@ if existing_release_pr
   end
 
   release_pr = client.update_pull_request(
-    repository, existing_release_pr.number, :body => pr_body_lines.join("\n")
+    repository, existing_release_pr.number, :title => pr_title, :body => pr_body_lines.join("\n")
   )
 
   if ENV['DEBUG']
@@ -235,7 +241,7 @@ if existing_release_pr
 else
   say 'Creating release pull request...', :info
   release_pr = client.create_pull_request(
-    repository, production_branch, staging_branch, "release #{Time.now}", pr_body
+    repository, production_branch, staging_branch, pr_title, pr_body
   )
   created = true
 end
