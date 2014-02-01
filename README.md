@@ -33,3 +33,16 @@ The branch name that the feature branches are merged into and is going to be
 merged into the "production" branch.
 
 Default value: `staging`.
+
+### `pr-release.template`
+
+The template file path (relative to the workidir top) for pull requests created. Its first line is used for the PR title, the rest for the body. This is an ERB template.
+
+If not specified, the content below is used as the template (embedded in the code):
+
+```erb
+Release <%= Time.now %>
+<% pull_requests.each do |pr| -%>
+<%=  pr.to_checklist_item %>
+<% end -%>
+```
