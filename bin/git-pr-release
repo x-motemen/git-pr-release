@@ -4,6 +4,8 @@ require 'uri'
 require 'erb'
 require 'open3'
 require 'tmpdir'
+require 'optparse'
+
 require 'octokit'
 require 'colorize'
 require 'diff/lcs'
@@ -180,6 +182,12 @@ if host
   end
 end
 
+OptionParser.new do |opts|
+  opts.on('-n', '--dry-run', 'Do not create/update a PR. Just prints out') do |v|
+    @dry_run = v
+  end
+end.parse!
+
 ### Set up configuration
 
 production_branch  = git_config('branch.production') || 'master'
@@ -253,15 +261,30 @@ if existing_release_pr
 
   merged_pr_body = merge_pr_body existing_release_pr.body, pr_body
 
-  release_pr = client.update_pull_request(
-    repository, existing_release_pr.number, :title => pr_title, :body => merged_pr_body
-  )
+  if @dry_run
+    say 'Dry-run. Not updating PR', :info
+    say pr_title, :notice
+    say merged_pr_body, :notice
+    exit
+  else
+    release_pr = client.update_pull_request(
+      repository, existing_release_pr.number, :title => pr_title, :body => merged_pr_body
+    )
+  end
 else
   say 'Creating release pull request...', :info
-  release_pr = client.create_pull_request(
-    repository, production_branch, staging_branch, pr_title, pr_body
-  )
-  created = true
+
+  if @dry_run
+    say 'Dry-run. Not creating PR', :info
+    say pr_title, :notice
+    say pr_body, :notice
+    exit
+  else
+    release_pr = client.create_pull_request(
+      repository, production_branch, staging_branch, pr_title, pr_body
+    )
+    created = true
+  end
 end
 
 unless release_pr
