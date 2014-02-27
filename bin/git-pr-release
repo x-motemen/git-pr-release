@@ -54,9 +54,9 @@ end
 
 def git_config(key)
   begin
-    git('config', key).first.chomp
+    git('config', '-f', '.git-pr-release', key).first.chomp
   rescue
-    nil
+    git('config', key).first.chomp rescue nil
   end
 end
 
