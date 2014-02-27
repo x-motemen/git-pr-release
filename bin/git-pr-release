@@ -53,11 +53,23 @@ end
 
 
 def git_config(key)
+  host, _ = host_and_repository()
+
+  plain_key = [ 'pr-release', key ].join('.')
+  host_aware_key = [ 'pr-release', host, key ].compact.join('.')
+
   begin
-    git('config', '-f', '.git-pr-release', key).first.chomp
+    git(:config, '-f', '.git-pr-release', plain_key).first.chomp
   rescue
-    git('config', key).first.chomp rescue nil
+    git(:config, host_aware_key).first.chomp rescue nil
   end
+end
+
+def git_config_set(key, value)
+  host, _ = host_and_repository()
+  host_aware_key = [ 'pr-release', host, key ].compact.join('.')
+
+  git :config, '--global', host_aware_key, value
 end
 
 # First line will be the title of the PR
@@ -121,11 +133,11 @@ def merge_pr_body(old_body, new_body)
 end
 
 def obtain_token!
-  token = git_config('pr-release.token')
+  token = git_config('token')
 
   unless token
     require 'highline/import'
-    STDERR.puts 'Could not obtain config variable pr-release.token.'
+    STDERR.puts 'Could not obtain GitHub API token.'
     STDERR.puts 'Trying to generate token...'
 
     username = ask('username? ') { |q| q.default = ENV['USER'] }
@@ -135,34 +147,43 @@ def obtain_token!
 
     auth = temporary_client.create_authorization({ :scopes => [ 'public_repo', 'repo' ], :note => 'summerize-release' })
     token = auth.token
-    git :config, '--global', 'pr-release.token', token
+    git_config_set 'token', token
   end
 
   token
 end
 
-remote = git_config 'remote.origin.url'
-unless %r(^\w+://) === remote
-  remote = "ssh://#{remote.sub(':', '/')}"
+def host_and_repository
+  @host_and_repository ||= begin
+    remote = git(:config, 'remote.origin.url').first.chomp
+    unless %r(^\w+://) === remote
+      remote = "ssh://#{remote.sub(':', '/')}"
+    end
+
+    remote_url = URI.parse(remote)
+    repository = remote_url.path.sub(%r(^/), '').sub(/\.git$/, '')
+
+    host = remote_url.host == 'github.com' ? nil : remote_url.host
+    [ host, repository ]
+  end
 end
 
-remote_url = URI.parse(remote)
-repository = remote_url.path.sub(%r(^/), '').sub(/\.git$/, '')
+host, repository = host_and_repository
 
-if remote_url.host != 'github.com'
+if host
   # GitHub:Enterprise
   OpenSSL::SSL.const_set :VERIFY_PEER, OpenSSL::SSL::VERIFY_NONE # XXX
 
   Octokit.configure do |c|
-    c.api_endpoint = "https://#{remote_url.host}/api/v3"
-    c.web_endpoint = "https://#{remote_url.host}/"
+    c.api_endpoint = "https://#{host}/api/v3"
+    c.web_endpoint = "https://#{host}/"
   end
 end
 
 ### Set up configuration
 
-production_branch  = git_config('pr-release.branch.production') || 'master'
-staging_branch     = git_config('pr-release.branch.staging')    || 'staging'
+production_branch  = git_config('branch.production') || 'master'
+staging_branch     = git_config('branch.staging')    || 'staging'
 
 say "Repository:        #{repository}", :debug
 say "Production branch: #{production_branch}", :debug
