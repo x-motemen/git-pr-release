@@ -87,7 +87,7 @@ def build_pr_title_and_body(prs)
 
   template = DEFAULT_PR_TEMPLATE
 
-  if path = git_config('pr-release.template')
+  if path = git_config('template')
     template_path = File.join(git('rev-parse', '--show-toplevel').first.chomp, path)
     template = File.read(template_path)
   end
