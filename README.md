@@ -1,4 +1,4 @@
-git-pr-release
+git-pr-release [![Gem Version](https://badge.fury.io/rb/git-pr-release.png)](http://badge.fury.io/rb/git-pr-release)
 ==============
 
 Creates a pull request which summarizes feature branches that are to be
