@@ -135,7 +135,7 @@ def merge_pr_body(old_body, new_body)
 end
 
 def obtain_token!
-  token = git_config('token')
+  token = ENV.fetch('GIT_PR_RELEASE_TOKEN') { git_config('token') }
 
   unless token
     require 'highline/import'

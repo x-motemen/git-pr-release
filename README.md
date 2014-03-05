@@ -21,6 +21,8 @@ Token for GitHub API.
 If not set, you will be asked to input username/password for one time only,
 and this configuration variable will be stored.
 
+You can specify this value by `GIT_PR_RELEASE_TOKEN` environment variable.
+
 ### `pr-release.branch.production`
 
 The branch name that is deployed in production environment.
