@@ -243,48 +243,45 @@ end
 ### Create a release PR
 
 say 'Searching for existing release pull requests...', :info
-existing_release_pr = client.pull_requests(repository).find do |pr|
+target_release_pr = client.pull_requests(repository).find do |pr|
   pr.head.ref == staging_branch && pr.base.ref == production_branch
 end
 
 created = false
 
-pr_title, pr_body = build_pr_title_and_body pull_requests
-
-say 'Pull request body:', :debug
-say pr_body, :debug
-
-release_pr = nil
-
-if existing_release_pr
-  say "Updating release pull request ##{existing_release_pr.number}...", :info
-
-  merged_pr_body = merge_pr_body existing_release_pr.body, pr_body
-
-  if @dry_run
-    say 'Dry-run. Not updating PR', :info
-    say pr_title, :notice
-    say merged_pr_body, :notice
-    exit
-  else
-    release_pr = client.update_pull_request(
-      repository, existing_release_pr.number, :title => pr_title, :body => merged_pr_body
-    )
-  end
+if target_release_pr
+  say "Updating release pull request ##{target_release_pr.number}...", :info
 else
   say 'Creating release pull request...', :info
 
   if @dry_run
     say 'Dry-run. Not creating PR', :info
-    say pr_title, :notice
-    say pr_body, :notice
     exit
   else
-    release_pr = client.create_pull_request(
-      repository, production_branch, staging_branch, pr_title, pr_body
+    target_release_pr = client.create_pull_request(
+      repository, production_branch, staging_branch, 'Preparing release pull request...', ''
     )
     created = true
   end
+end
+
+pr_title, pr_body = build_pr_title_and_body target_release_pr, pull_requests
+merged_pr_body = merge_pr_body target_release_pr.body, pr_body
+
+say 'Pull request body:', :debug
+say merged_pr_body, :debug
+
+release_pr = nil
+
+if @dry_run
+  say 'Dry-run. Not updating PR', :info
+  say pr_title, :notice
+  say merged_pr_body, :notice
+  exit
+else
+  release_pr = client.update_pull_request(
+    repository, target_release_pr.number, :title => pr_title, :body => merged_pr_body
+  )
 end
 
 unless release_pr
