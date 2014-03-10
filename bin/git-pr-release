@@ -20,6 +20,10 @@ class PullRequest
   def to_checklist_item
     "- [ ] ##{pr.number} #{pr.title}" + (pr.assignee ? " @#{pr.assignee.login}" : '')
   end
+
+  def html_link
+    pr._links.html.href
+  end
 end
 
 def say(message, level)
@@ -82,7 +86,8 @@ Release <%= Time.now %>
 <% end -%>
 ERB
 
-def build_pr_title_and_body(prs)
+def build_pr_title_and_body(target_pr, prs)
+  target_pull_request = PullRequest.new(target_pr)
   pull_requests = prs.map { |pr| PullRequest.new(pr) }
 
   template = DEFAULT_PR_TEMPLATE
