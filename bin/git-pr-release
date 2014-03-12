@@ -22,7 +22,21 @@ class PullRequest
   end
 
   def html_link
-    pr._links.html.href
+    pr.rels[:html].href
+  end
+end
+
+class DummyPullRequest
+  def initialize
+    # nop
+  end
+
+  def to_checklist_item
+    "- [ ] #??? THIS IS DUMMY PULL REQUEST"
+  end
+
+  def html_link
+    'http://github.com/DUMMY/DUMMY/issues/?'
   end
 end
 
@@ -87,7 +101,7 @@ Release <%= Time.now %>
 ERB
 
 def build_pr_title_and_body(target_pr, prs)
-  target_pull_request = PullRequest.new(target_pr)
+  target_pull_request = target_pr ? PullRequest.new(target_pr) : DummyPullRequest.new
   pull_requests = prs.map { |pr| PullRequest.new(pr) }
 
   template = DEFAULT_PR_TEMPLATE
@@ -248,50 +262,50 @@ end
 ### Create a release PR
 
 say 'Searching for existing release pull requests...', :info
-target_release_pr = client.pull_requests(repository).find do |pr|
+existing_pull_request = client.pull_requests(repository).find do |pr|
   pr.head.ref == staging_branch && pr.base.ref == production_branch
 end
-
-created = false
-
-if target_release_pr
-  say "Updating release pull request ##{target_release_pr.number}...", :info
-else
-  say 'Creating release pull request...', :info
-
-  if @dry_run
-    say 'Dry-run. Not creating PR', :info
-    exit
-  else
-    target_release_pr = client.create_pull_request(
-      repository, production_branch, staging_branch, 'Preparing release pull request...', ''
-    )
-    created = true
-  end
-end
-
-pr_title, pr_body = build_pr_title_and_body target_release_pr, pull_requests
-merged_pr_body = merge_pr_body target_release_pr.body, pr_body
-
-say 'Pull request body:', :debug
-say merged_pr_body, :debug
-
-release_pr = nil
+create_mode = existing_pull_request.nil?
 
 if @dry_run
+  pr_title, new_body = build_pr_title_and_body existing_pull_request, pull_requests
+  pr_body = create_mode ? new_body : merge_pr_body(existing_pull_request.body, new_body)
+
   say 'Dry-run. Not updating PR', :info
   say pr_title, :notice
-  say merged_pr_body, :notice
+  say pr_body, :notice
   exit
-else
-  release_pr = client.update_pull_request(
-    repository, target_release_pr.number, :title => pr_title, :body => merged_pr_body
-  )
 end
 
-unless release_pr
-  say 'No pull request found/created', :error
+pr_title, pr_body = nil, nil
+target_pull_request = nil
+
+if create_mode
+  created_pull_request = client.create_pull_request(
+    repository, production_branch, staging_branch, 'Preparing release pull request...', ''
+  )
+  unless created_pull_request
+    say 'Failed to create a new pull request', :error
+    exit 1
+  end
+  pr_title, pr_body = build_pr_title_and_body created_pull_request, pull_requests
+  target_pull_request = created_pull_request
+else
+  pr_title, new_body = build_pr_title_and_body existing_pull_request, pull_requests
+  pr_body = merge_pr_body(existing_pull_request.body, new_body)
+  target_pull_request = existing_pull_request
+end
+
+say 'Pull request body:', :debug
+say pr_body, :debug
+
+updated_pull_request = client.update_pull_request(
+  repository, target_pull_request.number, :title => pr_title, :body => pr_body
+)
+
+unless updated_pull_request
+  say 'Failed to update a pull request', :error
   exit 1
 end
 
-say "#{created ? 'Created' : 'Updated'} pull request: #{release_pr.rels[:html].href}", :notice
+say "#{create_mode ? 'Created' : 'Updated'} pull request: #{updated_pull_request.rels[:html].href}", :notice
