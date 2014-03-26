@@ -18,7 +18,8 @@ class PullRequest
   end
 
   def to_checklist_item
-    "- [ ] ##{pr.number} #{pr.title}" + (pr.assignee ? " @#{pr.assignee.login}" : '')
+    "- [ ] ##{pr.number} #{pr.title}" +
+       (pr.assignee ? " @#{pr.assignee.login}" : pr.user ? " @#{pr.user.login}" : "")
   end
 
   def html_link
