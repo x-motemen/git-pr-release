@@ -225,8 +225,8 @@ OptionParser.new do |opts|
   opts.on('-n', '--dry-run', 'Do not create/update a PR. Just prints out') do |v|
     @dry_run = v
   end
-  opts.on('--dump', 'Show data of target PRs in JSON format') do |v|
-    @dump = v
+  opts.on('--json', 'Show data of target PRs in JSON format') do |v|
+    @json = v
   end
 end.parse!
 
@@ -332,4 +332,4 @@ else
   say "#{create_mode ? 'Created' : 'Updated'} pull request: #{updated_pull_request.rels[:html].href}", :notice
 end
 
-dump_result_as_json( existing_pull_request, pull_requests ) if @dump
+dump_result_as_json( existing_pull_request, pull_requests ) if @json
