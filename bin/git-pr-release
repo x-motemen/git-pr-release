@@ -129,7 +129,7 @@ end
 def dump_result_as_json(release_pr, merged_prs)
   puts( {
     :release_pull_request => (release_pr ? PullRequest.new(release_pr) : DummyPullRequest.new).to_hash,
-    :merged_pull_requeste => merged_prs.map { |pr| PullRequest.new(pr).to_hash }
+    :merged_pull_requests => merged_prs.map { |pr| PullRequest.new(pr).to_hash }
   }.to_json )
 end
 
