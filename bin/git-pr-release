@@ -4,6 +4,7 @@ require 'uri'
 require 'erb'
 require 'open3'
 require 'tmpdir'
+require 'json'
 require 'optparse'
 
 require 'octokit'
@@ -25,6 +26,10 @@ class PullRequest
   def html_link
     pr.rels[:html].href
   end
+
+  def to_hash
+    { :data => @pr.to_hash }
+  end
 end
 
 class DummyPullRequest
@@ -38,6 +43,10 @@ class DummyPullRequest
 
   def html_link
     'http://github.com/DUMMY/DUMMY/issues/?'
+  end
+
+  def to_hash
+    { :data => {} }
   end
 end
 
@@ -59,7 +68,7 @@ def say(message, level)
       :red
     end
 
-  puts message.colorize(color)
+  STDERR.puts message.colorize(color)
 end
 
 def git(*command)
@@ -101,9 +110,9 @@ Release <%= Time.now %>
 <% end -%>
 ERB
 
-def build_pr_title_and_body(target_pr, prs)
-  target_pull_request = target_pr ? PullRequest.new(target_pr) : DummyPullRequest.new
-  pull_requests = prs.map { |pr| PullRequest.new(pr) }
+def build_pr_title_and_body(release_pr, merged_prs)
+  release_pull_request = target_pull_request = release_pr ? PullRequest.new(release_pr) : DummyPullRequest.new
+  merged_pull_requests = pull_requests = merged_prs.map { |pr| PullRequest.new(pr) }
 
   template = DEFAULT_PR_TEMPLATE
 
@@ -115,6 +124,13 @@ def build_pr_title_and_body(target_pr, prs)
   erb = ERB.new template, nil, '-'
   content = erb.result binding
   content.split(/\n/, 2)
+end
+
+def dump_result_as_json(release_pr, merged_prs)
+  puts( {
+    :release_pull_request => (release_pr ? PullRequest.new(release_pr) : DummyPullRequest.new).to_hash,
+    :merged_pull_requests => merged_prs.map { |pr| PullRequest.new(pr).to_hash }
+  }.to_json )
 end
 
 def merge_pr_body(old_body, new_body)
@@ -206,6 +222,9 @@ OptionParser.new do |opts|
   opts.on('-n', '--dry-run', 'Do not create/update a PR. Just prints out') do |v|
     @dry_run = v
   end
+  opts.on('--json', 'Show data of target PRs in JSON format') do |v|
+    @json = v
+  end
 end.parse!
 
 ### Set up configuration
@@ -254,7 +273,7 @@ if merged_pull_request_numbers.empty?
   exit 1
 end
 
-pull_requests = merged_pull_request_numbers.map do |nr|
+merged_prs = merged_pull_request_numbers.map do |nr|
   pr = client.pull_request repository, nr
   say "To be released: ##{pr.number} #{pr.title}", :notice
   pr
@@ -263,45 +282,46 @@ end
 ### Create a release PR
 
 say 'Searching for existing release pull requests...', :info
-existing_pull_request = client.pull_requests(repository).find do |pr|
+found_release_pr = client.pull_requests(repository).find do |pr|
   pr.head.ref == staging_branch && pr.base.ref == production_branch
 end
-create_mode = existing_pull_request.nil?
+create_mode = found_release_pr.nil?
 
 if @dry_run
-  pr_title, new_body = build_pr_title_and_body existing_pull_request, pull_requests
-  pr_body = create_mode ? new_body : merge_pr_body(existing_pull_request.body, new_body)
+  pr_title, new_body = build_pr_title_and_body found_release_pr, merged_prs
+  pr_body = create_mode ? new_body : merge_pr_body(found_release_pr.body, new_body)
 
   say 'Dry-run. Not updating PR', :info
   say pr_title, :notice
   say pr_body, :notice
-  exit
+  dump_result_as_json( found_release_pr, merged_prs ) if @json
+  exit 0
 end
 
 pr_title, pr_body = nil, nil
-target_pull_request = nil
+release_pr = nil
 
 if create_mode
-  created_pull_request = client.create_pull_request(
+  created_pr = client.create_pull_request(
     repository, production_branch, staging_branch, 'Preparing release pull request...', ''
   )
-  unless created_pull_request
+  unless created_pr
     say 'Failed to create a new pull request', :error
     exit 1
   end
-  pr_title, pr_body = build_pr_title_and_body created_pull_request, pull_requests
-  target_pull_request = created_pull_request
+  pr_title, pr_body = build_pr_title_and_body created_pr, merged_prs
+  release_pr = created_pr
 else
-  pr_title, new_body = build_pr_title_and_body existing_pull_request, pull_requests
-  pr_body = merge_pr_body(existing_pull_request.body, new_body)
-  target_pull_request = existing_pull_request
+  pr_title, new_body = build_pr_title_and_body found_release_pr, merged_prs
+  pr_body = merge_pr_body(found_release_pr.body, new_body)
+  release_pr = found_release_pr
 end
 
 say 'Pull request body:', :debug
 say pr_body, :debug
 
 updated_pull_request = client.update_pull_request(
-  repository, target_pull_request.number, :title => pr_title, :body => pr_body
+  repository, release_pr.number, :title => pr_title, :body => pr_body
 )
 
 unless updated_pull_request
@@ -310,3 +330,4 @@ unless updated_pull_request
 end
 
 say "#{create_mode ? 'Created' : 'Updated'} pull request: #{updated_pull_request.rels[:html].href}", :notice
+dump_result_as_json( release_pr, merged_prs ) if @json
