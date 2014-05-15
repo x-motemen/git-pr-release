@@ -12,7 +12,9 @@ released into production. Useful if your branching storategy is like below:
 Configuration
 -------------
 
-All configuration are taken using `git config`.
+All configuration are taken using `git config`. You can write these variables
+in file `.git-pr-release` (instead of `.git/config` or `~/.gitconfig`) to share project-wise configuration to other
+collaborators.
 
 ### `pr-release.token`
 
@@ -38,7 +40,9 @@ Default value: `staging`.
 
 ### `pr-release.template`
 
-The template file path (relative to the workidir top) for pull requests created. Its first line is used for the PR title, the rest for the body. This is an ERB template.
+The template file path (relative to the workidir top) for pull requests
+created. Its first line is used for the PR title, the rest for the body. This
+is an ERB template.
 
 If not specified, the content below is used as the template (embedded in the code):
 
@@ -48,3 +52,8 @@ Release <%= Time.now %>
 <%=  pr.to_checklist_item %>
 <% end -%>
 ```
+
+Author
+------
+
+motemen <motemen@gmail.com>
