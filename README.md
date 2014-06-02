@@ -9,6 +9,8 @@ released into production. Useful if your branching storategy is like below:
  * Then the staging branch is merged into "production" branch, which is for
    production release.
 
+![Screenshot](https://cloud.githubusercontent.com/assets/113420/3147184/61bf2eec-ea53-11e3-835b-50d63ed11b39.png)
+
 Configuration
 -------------
 
