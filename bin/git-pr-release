@@ -200,7 +200,7 @@ def request_authorization(client, two_factor_code)
   begin
     auth = client.create_authorization(params)
   rescue Octokit::OneTimePasswordRequired
-    two_factor_code = ask('two-factor authentication code?')
+    two_factor_code = ask('two-factor authentication code? ')
     auth = request_authorization(client, two_factor_code)
   end
 
