@@ -1,15 +1,20 @@
 git-pr-release <a href="http://badge.fury.io/rb/git-pr-release"><img src="https://badge.fury.io/rb/git-pr-release@2x.png" alt="Gem Version" height="18"></a>
 ==============
 
-Creates a pull request which summarizes feature branches that are to be
-released into production. Useful if your branching storategy is like below:
+Creates a "release pull request", whose body consists of features list or
+pull requests that are to be released into production. It's especially useful for QA and
+pre-release checks. `git-pr-release` automatically collect pull requests
+merged into master branch and generates the content of the release
+pull request.
+
+![Screenshot](https://cloud.githubusercontent.com/assets/113420/3147184/61bf2eec-ea53-11e3-835b-50d63ed11b39.png)
+
+Suitable for branching strategy like below (similar to git-flow):
 
  * Feature branches are first merged into "staging" (or release, development)
    branch.
  * Then the staging branch is merged into "production" branch, which is for
    production release.
-
-![Screenshot](https://cloud.githubusercontent.com/assets/113420/3147184/61bf2eec-ea53-11e3-835b-50d63ed11b39.png)
 
 Configuration
 -------------
