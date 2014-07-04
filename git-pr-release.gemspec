@@ -21,5 +21,9 @@ Gem::Specification.new do |spec|
   spec.add_dependency 'colorize', '~> 0.6'
   spec.add_dependency 'diff-lcs', '~> 1.2'
 
+  spec.add_development_dependency 'rspec'
+  spec.add_development_dependency 'webmock'
+  spec.add_development_dependency 'vcr'
+
   spec.license = 'MIT'
 end
