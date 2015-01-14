@@ -317,6 +317,43 @@ def create_release_pr(client, repository, production_branch, staging_branch)
   dump_result_as_json( release_pr, merged_prs ) if @json
 end
 
+def create_release(client, repository, production_branch, number)
+  say 'Searching for existing release pull requests...', :info
+  pulls = client.pull_requests(repository, 'closed', :base => production_branch)
+  if number === :latest
+    pull = pulls.first
+  else
+    pull = pulls.find { |p| p.number == number }
+  end
+  unless pull
+    say 'No closed release pull requests found', :error
+    exit 1
+  end
+
+  releases = client.releases(repository)
+  if releases.any? { |release| pull.base.sha == release.target_commitish }
+    say 'A release is already created for the latest release pull request', :error
+    exit 1
+  end
+
+  now = Time.now
+  tag_name = "pull-#{pull.number}"
+  name = "#{now.to_s} ##{pull.number}"
+  body = <<-BODY
+Release PR: ##{pull.number}
+
+#{pull.body}
+  BODY
+  release = client.create_release(
+    repository,
+    tag_name,
+    :target_commitish => pull.base.sha,
+    :name => name,
+    :body => body
+  )
+  say "Created release: #{release.html_url}", :notice
+end
+
 host, repository = host_and_repository
 
 if host
@@ -336,6 +373,9 @@ OptionParser.new do |opts|
   opts.on('--json', 'Show data of target PRs in JSON format') do |v|
     @json = v
   end
+  opts.on('--release [PR Number]', 'Create a "release" from specified pull request number or latest release PR') do |v|
+    @release = v.to_i || :latest
+  end
 end.parse!
 
 ### Set up configuration
@@ -351,5 +391,8 @@ client = Octokit::Client.new :access_token => obtain_token!
 
 git :remote, 'update', 'origin'
 
-create_release_pr(client, repository, production_branch, staging_branch)
-
+if @release
+  create_release(client, repository, production_branch, @release)
+else
+  create_release_pr(client, repository, production_branch, staging_branch)
+end
