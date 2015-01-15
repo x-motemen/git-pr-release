@@ -320,10 +320,11 @@ end
 def create_release(client, repository, production_branch, number)
   say 'Searching for existing release pull requests...', :info
   pulls = client.pull_requests(repository, 'closed', :base => production_branch)
-  if number === :latest
+  say "closed pulls: #{pulls.map(&:number)}", :debug
+  if number == :latest
     pull = pulls.first
   else
-    pull = pulls.find { |p| p.number == number }
+    pull = pulls.find { |p| p.number == number.to_i }
   end
   unless pull
     say 'No closed release pull requests found', :error
@@ -374,7 +375,7 @@ OptionParser.new do |opts|
     @json = v
   end
   opts.on('--release [PR Number]', 'Create a "release" from specified pull request number or latest release PR') do |v|
-    @release = v.to_i || :latest
+    @release = v || :latest
   end
 end.parse!
 
