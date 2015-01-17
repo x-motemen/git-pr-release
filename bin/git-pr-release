@@ -224,6 +224,8 @@ def host_and_repository
 end
 
 def create_release_pr(client, repository, production_branch, staging_branch)
+  git :remote, 'update', 'origin'
+
   ### Fetch merged PRs
 
   merged_feature_head_sha1s = git(
@@ -389,8 +391,6 @@ say "Production branch: #{production_branch}", :debug
 say "Staging branch:    #{staging_branch}", :debug
 
 client = Octokit::Client.new :access_token => obtain_token!
-
-git :remote, 'update', 'origin'
 
 if @release
   create_release(client, repository, production_branch, @release)
