@@ -341,7 +341,7 @@ def create_release(client, repository, production_branch, number)
 
   now = Time.now
   tag_name = "pull-#{pull.number}"
-  name = "#{now.to_s} ##{pull.number}"
+  name = pull.title
   body = <<-BODY
 Release PR: ##{pull.number}
 
