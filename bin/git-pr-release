@@ -340,7 +340,13 @@ def create_release(client, repository, production_branch, number)
   end
 
   now = Time.now
-  tag_name = "pull-#{pull.number}"
+  p git_config('release.tag')
+  tag_name = case git_config('release.tag')
+    when 'pull.title'
+      pull.title
+    else
+      "pull-#{pull.number}"
+    end
   name = pull.title
   body = <<-BODY
 Release PR: ##{pull.number}
@@ -376,7 +382,7 @@ OptionParser.new do |opts|
   opts.on('--json', 'Show data of target PRs in JSON format') do |v|
     @json = v
   end
-  opts.on('--release [PR Number]', 'Create a "release" from specified pull request number or latest release PR') do |v|
+  opts.on('--release [PR Number]', 'Create a "release" from specified "PR Number" or latest release PR') do |v|
     @release = v || :latest
   end
 end.parse!
