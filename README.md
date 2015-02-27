@@ -16,6 +16,15 @@ Suitable for branching strategy like below (similar to git-flow):
  * Then the staging branch is merged into "production" branch, which is for
    production release.
 
+
+The `--release` flag
+--------------------
+
+After you created a "release pull request", you may want to have the related "release" in github.
+```
+git-pr-release --release
+```
+
 Configuration
 -------------
 
@@ -60,7 +69,15 @@ Release <%= Time.now %>
 <% end -%>
 ```
 
+### `pr-release.release.tag`
+
+The `--release` feature will create a tag with format of "pull-#{pull.number}" by default.
+If your release PR titles are simple enough for tags, specify `pull.title`.
+
+
 Author
 ------
 
 motemen <motemen@gmail.com>, original in-house version written by @hitode909.
+
+hiroshi <hiroshi3110@gmail.com> (The `--release` feature)
