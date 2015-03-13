@@ -60,6 +60,21 @@ Release <%= Time.now %>
 <% end -%>
 ```
 
+Errors and exit statuses
+------------------------
+
+### No pull requests to be released
+
+exit status is 1.
+
+### Failed to create a new pull request
+
+exit status is 2.
+
+### Failed to update a pull request
+
+exit status is 3.
+
 Author
 ------
 
