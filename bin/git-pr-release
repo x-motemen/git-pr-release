@@ -346,5 +346,18 @@ unless updated_pull_request
   exit 3
 end
 
+labels = git_config('labels')
+unless labels.nil?
+  labels = labels.split(',')
+  labeled_pull_request = client.add_labels_to_an_issue(
+    repository, release_pr.number, labels
+  )
+  
+  unless labeled_pull_request
+    say 'Failed to add labels to a pull request', :error
+    exit 4
+  end
+end
+
 say "#{create_mode ? 'Created' : 'Updated'} pull request: #{updated_pull_request.rels[:html].href}", :notice
 dump_result_as_json( release_pr, merged_prs ) if @json
