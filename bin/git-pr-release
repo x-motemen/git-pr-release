@@ -348,7 +348,7 @@ end
 
 labels = git_config('labels')
 if not labels.nil? and not labels.empty?
-  labels = labels.split(',')
+  labels = labels.split(/\s*,\s*/)
   labeled_pull_request = client.add_labels_to_an_issue(
     repository, release_pr.number, labels
   )
