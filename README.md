@@ -60,6 +60,14 @@ Release <%= Time.now %>
 <% end -%>
 ```
 
+### `pr-release.labels`
+
+The labels list for adding to pull requests created.
+This value should be comma-separated strings.
+
+If not specified, any labels will not be added for PRs.
+
+
 Errors and exit statuses
 ------------------------
 
@@ -74,6 +82,10 @@ exit status is 2.
 ### Failed to update a pull request
 
 exit status is 3.
+
+### Failed to add labels
+
+exit status is 4.
 
 Author
 ------
