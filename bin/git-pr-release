@@ -347,12 +347,12 @@ unless updated_pull_request
 end
 
 labels = git_config('labels')
-unless labels.nil?
+if not labels.nil? and not labels.empty?
   labels = labels.split(',')
   labeled_pull_request = client.add_labels_to_an_issue(
     repository, release_pr.number, labels
   )
-  
+
   unless labeled_pull_request
     say 'Failed to add labels to a pull request', :error
     exit 4
