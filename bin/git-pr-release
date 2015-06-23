@@ -84,7 +84,7 @@ end
 
 
 def git_config(key)
-  host, _ = host_and_repository()
+  host, _ = host_and_repository_and_scheme()
 
   plain_key = [ 'pr-release', key ].join('.')
   host_aware_key = [ 'pr-release', host, key ].compact.join('.')
@@ -97,7 +97,7 @@ def git_config(key)
 end
 
 def git_config_set(key, value)
-  host, _ = host_and_repository()
+  host, _ = host_and_repository_and_scheme()
   host_aware_key = [ 'pr-release', host, key ].compact.join('.')
 
   git :config, '--global', host_aware_key, value
@@ -208,8 +208,8 @@ def request_authorization(client, two_factor_code)
   auth
 end
 
-def host_and_repository
-  @host_and_repository ||= begin
+def host_and_repository_and_scheme
+  @host_and_repository_and_scheme ||= begin
     remote = git(:config, 'remote.origin.url').first.chomp
     unless %r(^\w+://) === remote
       remote = "ssh://#{remote.sub(':', '/')}"
@@ -219,19 +219,19 @@ def host_and_repository
     repository = remote_url.path.sub(%r(^/), '').sub(/\.git$/, '')
 
     host = remote_url.host == 'github.com' ? nil : remote_url.host
-    [ host, repository ]
+    [ host, repository, remote_url.scheme === 'http' ? 'http' : 'https' ]
   end
 end
 
-host, repository = host_and_repository
+host, repository, scheme = host_and_repository_and_scheme
 
 if host
   # GitHub:Enterprise
   OpenSSL::SSL.const_set :VERIFY_PEER, OpenSSL::SSL::VERIFY_NONE # XXX
 
   Octokit.configure do |c|
-    c.api_endpoint = "https://#{host}/api/v3"
-    c.web_endpoint = "https://#{host}/"
+    c.api_endpoint = "#{scheme}://#{host}/api/v3"
+    c.web_endpoint = "#{scheme}://#{host}/"
   end
 end
 
