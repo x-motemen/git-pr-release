@@ -219,7 +219,7 @@ def host_and_repository_and_scheme
     repository = remote_url.path.sub(%r(^/), '').sub(/\.git$/, '')
 
     host = remote_url.host == 'github.com' ? nil : remote_url.host
-    [ host, repository, remote_url.scheme ]
+    [ host, repository, remote_url.scheme === 'http' ? 'http' : 'https' ]
   end
 end
 
