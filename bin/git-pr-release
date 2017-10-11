@@ -251,6 +251,9 @@ OptionParser.new do |opts|
   opts.on('--json', 'Show data of target PRs in JSON format') do |v|
     @json = v
   end
+  opts.on('--no-fetch', 'Do not fetch from remote repo before determining target PRs (CI friendly)') do |v|
+    @no_fetch = v
+  end
 end.parse!
 
 ### Set up configuration
@@ -264,7 +267,7 @@ say "Staging branch:    #{staging_branch}", :debug
 
 client = Octokit::Client.new :access_token => obtain_token!
 
-git :remote, 'update', 'origin'
+git :remote, 'update', 'origin' unless @no_fetch
 
 ### Fetch merged PRs
 
