@@ -38,13 +38,12 @@ class PullRequest
               else
                 pr.assignee ? "@#{pr.assignee.login}" : pr.user ? "@#{pr.user.login}" : nil
               end
-    puts "mention: #{mention}"
 
     mention ? " #{mention}" : ""
   end
 
   def self.mention_type
-    @mention_type ||= (git_config('mention-type') || 'default').tap { |t| puts "mention-type: #{t}" }
+    @mention_type ||= (git_config('mention') || 'default')
   end
 end
 
