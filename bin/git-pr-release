@@ -20,8 +20,7 @@ class PullRequest
   end
 
   def to_checklist_item
-    "- [ ] ##{pr.number} #{pr.title}" +
-       (pr.assignee ? " @#{pr.assignee.login}" : pr.user ? " @#{pr.user.login}" : "")
+    "- [ ] ##{pr.number} #{pr.title}" + mention
   end
 
   def html_link
@@ -30,6 +29,21 @@ class PullRequest
 
   def to_hash
     { :data => @pr.to_hash }
+  end
+
+  def mention
+    mention = case PullRequest.mention_type
+              when 'author'
+                pr.user ? "@#{pr.user.login}" : nil
+              else
+                pr.assignee ? "@#{pr.assignee.login}" : pr.user ? "@#{pr.user.login}" : nil
+              end
+
+    mention ? " #{mention}" : ""
+  end
+
+  def self.mention_type
+    @mention_type ||= (git_config('mention') || 'default')
   end
 end
 
