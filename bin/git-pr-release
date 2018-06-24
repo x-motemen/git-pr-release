@@ -152,36 +152,13 @@ end
 def merge_pr_body(old_body, new_body)
   # Try to take over checklist statuses
   pr_body_lines = []
+  old_body_lines = old_body.split(/\r?\n/)
+  new_body_lines = new_body.split(/\r?\n/)
 
-  Diff::LCS.traverse_balanced(old_body.split(/\r?\n/), new_body.split(/\r?\n/)) do |event|
-    say "diff: #{event.inspect}", :trace
-    action, old, new = *event
-    old_nr, old_line = *old
-    new_nr, new_line = *new
+  additional_body_lines = new_body_lines - old_body_lines
 
-    case action
-    when '=', '+'
-      say "Use line as is: #{new_line}", :trace
-      pr_body_lines << new_line
-    when '-'
-      say "Use old line: #{old_line}", :trace
-      pr_body_lines << old_line
-    when '!'
-      if [ old_line, new_line ].all? { |line| /^- \[[ x]\]/ === line }
-        say "Found checklist diff; use old one: #{old_line}", :trace
-        pr_body_lines << old_line
-      else
-        # not a checklist diff, use both line
-        say "Use line as is: #{old_line}", :trace
-        pr_body_lines << old_line
-
-        say "Use line as is: #{new_line}", :trace
-        pr_body_lines << new_line
-      end
-    else
-      say "Unknown diff event: #{event}", :warn
-    end
-  end
+  sepalator = ['', '## Additional PRs', '']
+  pr_body_lines = old_body_lines + sepalator + additional_body_lines
 
   pr_body_lines.join("\n")
 end
