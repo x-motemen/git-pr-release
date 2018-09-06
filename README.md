@@ -36,12 +36,16 @@ You can specify this value by `GIT_PR_RELEASE_TOKEN` environment variable.
 
 The branch name that is deployed in production environment.
 
+You can specify this value by `GIT_PR_RELEASE_BRANCH_PRODUCTION` environment variable.
+
 Default value: `master`.
 
 ### `pr-release.branch.staging`
 
 The branch name that the feature branches are merged into and is going to be
 merged into the "production" branch.
+
+You can specify this value by `GIT_PR_RELEASE_BRANCH_STAGING` environment variable.
 
 Default value: `staging`.
 
