@@ -272,8 +272,8 @@ end.parse!
 
 ### Set up configuration
 
-production_branch  = git_config('branch.production') || 'master'
-staging_branch     = git_config('branch.staging')    || 'staging'
+production_branch = ENV.fetch('GIT_PR_RELEASE_BRANCH_PRODUCTION') { git_config('branch.production') } || 'master'
+staging_branch    = ENV.fetch('GIT_PR_RELEASE_BRANCH_STAGING') { git_config('branch.staging') }       || 'staging'
 
 say "Repository:        #{repository}", :debug
 say "Production branch: #{production_branch}", :debug
