@@ -55,6 +55,8 @@ The template file path (relative to the workidir top) for pull requests
 created. Its first line is used for the PR title, the rest for the body. This
 is an ERB template.
 
+You can specify this value by `GIT_PR_RELEASE_TEMPLATE` environment variable.
+
 If not specified, the content below is used as the template (embedded in the code):
 
 ```erb
@@ -68,6 +70,8 @@ Release <%= Time.now %>
 
 The labels list for adding to pull requests created.
 This value should be comma-separated strings.
+
+You can specify this value by `GIT_PR_RELEASE_LABELS` environment variable.
 
 If not specified, any labels will not be added for PRs.
 
