@@ -131,7 +131,7 @@ def build_pr_title_and_body(release_pr, merged_prs, changed_files)
 
   template = DEFAULT_PR_TEMPLATE
 
-  if path = git_config('template')
+  if path = ENV.fetch('GIT_PR_RELEASE_TEMPLATE') { git_config('template') }
     template_path = File.join(git('rev-parse', '--show-toplevel').first.chomp, path)
     template = File.read(template_path)
   end
@@ -376,7 +376,7 @@ unless updated_pull_request
   exit 3
 end
 
-labels = git_config('labels')
+labels = ENV.fetch('GIT_PR_RELEASE_LABELS') { git_config('labels') }
 if not labels.nil? and not labels.empty?
   labels = labels.split(/\s*,\s*/)
   labeled_pull_request = client.add_labels_to_an_issue(
