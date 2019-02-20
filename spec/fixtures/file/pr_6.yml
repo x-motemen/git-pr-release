@@ -1,0 +1,339 @@
+---
+:url: https://api.github.com/repos/motemen/git-pr-release/pulls/6
+:id: 16585502
+:node_id: MDExOlB1bGxSZXF1ZXN0MTY1ODU1MDI=
+:html_url: https://github.com/motemen/git-pr-release/pull/6
+:diff_url: https://github.com/motemen/git-pr-release/pull/6.diff
+:patch_url: https://github.com/motemen/git-pr-release/pull/6.patch
+:issue_url: https://api.github.com/repos/motemen/git-pr-release/issues/6
+:number: 6
+:state: closed
+:locked: false
+:title: Support two factor auth
+:user:
+  :login: ninjinkun
+  :id: 113420
+  :node_id: MDQ6VXNlcjExMzQyMA==
+  :avatar_url: https://avatars1.githubusercontent.com/u/113420?v=4
+  :gravatar_id: ''
+  :url: https://api.github.com/users/ninjinkun
+  :html_url: https://github.com/ninjinkun
+  :followers_url: https://api.github.com/users/ninjinkun/followers
+  :following_url: https://api.github.com/users/ninjinkun/following{/other_user}
+  :gists_url: https://api.github.com/users/ninjinkun/gists{/gist_id}
+  :starred_url: https://api.github.com/users/ninjinkun/starred{/owner}{/repo}
+  :subscriptions_url: https://api.github.com/users/ninjinkun/subscriptions
+  :organizations_url: https://api.github.com/users/ninjinkun/orgs
+  :repos_url: https://api.github.com/users/ninjinkun/repos
+  :events_url: https://api.github.com/users/ninjinkun/events{/privacy}
+  :received_events_url: https://api.github.com/users/ninjinkun/received_events
+  :type: User
+  :site_admin: false
+:body: 'Currently `git-pr-release` don''t support two factor auth in interactive configuration
+  mode. This patch shows prompt `two-factor authentication code?` and try to request
+  again.
+
+'
+:created_at: 2014-06-02 06:55:44.000000000 Z
+:updated_at: 2014-06-21 05:22:22.000000000 Z
+:closed_at: 2014-06-02 08:02:02.000000000 Z
+:merged_at: 2014-06-02 08:02:02.000000000 Z
+:merge_commit_sha: c66dfa90eed853507ae0e2876df3cb4dc7ce5286
+:assignee: 
+:assignees: []
+:requested_reviewers: []
+:requested_teams: []
+:labels: []
+:milestone: 
+:commits_url: https://api.github.com/repos/motemen/git-pr-release/pulls/6/commits
+:review_comments_url: https://api.github.com/repos/motemen/git-pr-release/pulls/6/comments
+:review_comment_url: https://api.github.com/repos/motemen/git-pr-release/pulls/comments{/number}
+:comments_url: https://api.github.com/repos/motemen/git-pr-release/issues/6/comments
+:statuses_url: https://api.github.com/repos/motemen/git-pr-release/statuses/67d936fb57851f85db28249e91dfa0d8ccfe530b
+:head:
+  :label: ninjinkun:support-two-factor-auth
+  :ref: support-two-factor-auth
+  :sha: 67d936fb57851f85db28249e91dfa0d8ccfe530b
+  :user:
+    :login: ninjinkun
+    :id: 113420
+    :node_id: MDQ6VXNlcjExMzQyMA==
+    :avatar_url: https://avatars1.githubusercontent.com/u/113420?v=4
+    :gravatar_id: ''
+    :url: https://api.github.com/users/ninjinkun
+    :html_url: https://github.com/ninjinkun
+    :followers_url: https://api.github.com/users/ninjinkun/followers
+    :following_url: https://api.github.com/users/ninjinkun/following{/other_user}
+    :gists_url: https://api.github.com/users/ninjinkun/gists{/gist_id}
+    :starred_url: https://api.github.com/users/ninjinkun/starred{/owner}{/repo}
+    :subscriptions_url: https://api.github.com/users/ninjinkun/subscriptions
+    :organizations_url: https://api.github.com/users/ninjinkun/orgs
+    :repos_url: https://api.github.com/users/ninjinkun/repos
+    :events_url: https://api.github.com/users/ninjinkun/events{/privacy}
+    :received_events_url: https://api.github.com/users/ninjinkun/received_events
+    :type: User
+    :site_admin: false
+  :repo:
+    :id: 20395231
+    :node_id: MDEwOlJlcG9zaXRvcnkyMDM5NTIzMQ==
+    :name: git-pr-release
+    :full_name: ninjinkun/git-pr-release
+    :private: false
+    :owner:
+      :login: ninjinkun
+      :id: 113420
+      :node_id: MDQ6VXNlcjExMzQyMA==
+      :avatar_url: https://avatars1.githubusercontent.com/u/113420?v=4
+      :gravatar_id: ''
+      :url: https://api.github.com/users/ninjinkun
+      :html_url: https://github.com/ninjinkun
+      :followers_url: https://api.github.com/users/ninjinkun/followers
+      :following_url: https://api.github.com/users/ninjinkun/following{/other_user}
+      :gists_url: https://api.github.com/users/ninjinkun/gists{/gist_id}
+      :starred_url: https://api.github.com/users/ninjinkun/starred{/owner}{/repo}
+      :subscriptions_url: https://api.github.com/users/ninjinkun/subscriptions
+      :organizations_url: https://api.github.com/users/ninjinkun/orgs
+      :repos_url: https://api.github.com/users/ninjinkun/repos
+      :events_url: https://api.github.com/users/ninjinkun/events{/privacy}
+      :received_events_url: https://api.github.com/users/ninjinkun/received_events
+      :type: User
+      :site_admin: false
+    :html_url: https://github.com/ninjinkun/git-pr-release
+    :description: Creates a pull request which summarizes feature branches that are
+      to be released into production
+    :fork: true
+    :url: https://api.github.com/repos/ninjinkun/git-pr-release
+    :forks_url: https://api.github.com/repos/ninjinkun/git-pr-release/forks
+    :keys_url: https://api.github.com/repos/ninjinkun/git-pr-release/keys{/key_id}
+    :collaborators_url: https://api.github.com/repos/ninjinkun/git-pr-release/collaborators{/collaborator}
+    :teams_url: https://api.github.com/repos/ninjinkun/git-pr-release/teams
+    :hooks_url: https://api.github.com/repos/ninjinkun/git-pr-release/hooks
+    :issue_events_url: https://api.github.com/repos/ninjinkun/git-pr-release/issues/events{/number}
+    :events_url: https://api.github.com/repos/ninjinkun/git-pr-release/events
+    :assignees_url: https://api.github.com/repos/ninjinkun/git-pr-release/assignees{/user}
+    :branches_url: https://api.github.com/repos/ninjinkun/git-pr-release/branches{/branch}
+    :tags_url: https://api.github.com/repos/ninjinkun/git-pr-release/tags
+    :blobs_url: https://api.github.com/repos/ninjinkun/git-pr-release/git/blobs{/sha}
+    :git_tags_url: https://api.github.com/repos/ninjinkun/git-pr-release/git/tags{/sha}
+    :git_refs_url: https://api.github.com/repos/ninjinkun/git-pr-release/git/refs{/sha}
+    :trees_url: https://api.github.com/repos/ninjinkun/git-pr-release/git/trees{/sha}
+    :statuses_url: https://api.github.com/repos/ninjinkun/git-pr-release/statuses/{sha}
+    :languages_url: https://api.github.com/repos/ninjinkun/git-pr-release/languages
+    :stargazers_url: https://api.github.com/repos/ninjinkun/git-pr-release/stargazers
+    :contributors_url: https://api.github.com/repos/ninjinkun/git-pr-release/contributors
+    :subscribers_url: https://api.github.com/repos/ninjinkun/git-pr-release/subscribers
+    :subscription_url: https://api.github.com/repos/ninjinkun/git-pr-release/subscription
+    :commits_url: https://api.github.com/repos/ninjinkun/git-pr-release/commits{/sha}
+    :git_commits_url: https://api.github.com/repos/ninjinkun/git-pr-release/git/commits{/sha}
+    :comments_url: https://api.github.com/repos/ninjinkun/git-pr-release/comments{/number}
+    :issue_comment_url: https://api.github.com/repos/ninjinkun/git-pr-release/issues/comments{/number}
+    :contents_url: https://api.github.com/repos/ninjinkun/git-pr-release/contents/{+path}
+    :compare_url: https://api.github.com/repos/ninjinkun/git-pr-release/compare/{base}...{head}
+    :merges_url: https://api.github.com/repos/ninjinkun/git-pr-release/merges
+    :archive_url: https://api.github.com/repos/ninjinkun/git-pr-release/{archive_format}{/ref}
+    :downloads_url: https://api.github.com/repos/ninjinkun/git-pr-release/downloads
+    :issues_url: https://api.github.com/repos/ninjinkun/git-pr-release/issues{/number}
+    :pulls_url: https://api.github.com/repos/ninjinkun/git-pr-release/pulls{/number}
+    :milestones_url: https://api.github.com/repos/ninjinkun/git-pr-release/milestones{/number}
+    :notifications_url: https://api.github.com/repos/ninjinkun/git-pr-release/notifications{?since,all,participating}
+    :labels_url: https://api.github.com/repos/ninjinkun/git-pr-release/labels{/name}
+    :releases_url: https://api.github.com/repos/ninjinkun/git-pr-release/releases{/id}
+    :deployments_url: https://api.github.com/repos/ninjinkun/git-pr-release/deployments
+    :created_at: 2014-06-02 06:41:45.000000000 Z
+    :updated_at: 2014-06-03 06:26:14.000000000 Z
+    :pushed_at: 2014-06-03 06:26:13.000000000 Z
+    :git_url: git://github.com/ninjinkun/git-pr-release.git
+    :ssh_url: git@github.com:ninjinkun/git-pr-release.git
+    :clone_url: https://github.com/ninjinkun/git-pr-release.git
+    :svn_url: https://github.com/ninjinkun/git-pr-release
+    :homepage: https://rubygems.org/gems/git-pr-release
+    :size: 192
+    :stargazers_count: 0
+    :watchers_count: 0
+    :language: Ruby
+    :has_issues: false
+    :has_projects: true
+    :has_downloads: true
+    :has_wiki: true
+    :has_pages: false
+    :forks_count: 0
+    :mirror_url: 
+    :archived: false
+    :open_issues_count: 0
+    :license:
+      :key: mit
+      :name: MIT License
+      :spdx_id: MIT
+      :url: https://api.github.com/licenses/mit
+      :node_id: MDc6TGljZW5zZTEz
+    :forks: 0
+    :open_issues: 0
+    :watchers: 0
+    :default_branch: master
+:base:
+  :label: motemen:master
+  :ref: master
+  :sha: a0d1fd72732d705270878d22601c44e0533641e1
+  :user:
+    :login: motemen
+    :id: 8465
+    :node_id: MDQ6VXNlcjg0NjU=
+    :avatar_url: https://avatars2.githubusercontent.com/u/8465?v=4
+    :gravatar_id: ''
+    :url: https://api.github.com/users/motemen
+    :html_url: https://github.com/motemen
+    :followers_url: https://api.github.com/users/motemen/followers
+    :following_url: https://api.github.com/users/motemen/following{/other_user}
+    :gists_url: https://api.github.com/users/motemen/gists{/gist_id}
+    :starred_url: https://api.github.com/users/motemen/starred{/owner}{/repo}
+    :subscriptions_url: https://api.github.com/users/motemen/subscriptions
+    :organizations_url: https://api.github.com/users/motemen/orgs
+    :repos_url: https://api.github.com/users/motemen/repos
+    :events_url: https://api.github.com/users/motemen/events{/privacy}
+    :received_events_url: https://api.github.com/users/motemen/received_events
+    :type: User
+    :site_admin: false
+  :repo:
+    :id: 15468156
+    :node_id: MDEwOlJlcG9zaXRvcnkxNTQ2ODE1Ng==
+    :name: git-pr-release
+    :full_name: motemen/git-pr-release
+    :private: false
+    :owner:
+      :login: motemen
+      :id: 8465
+      :node_id: MDQ6VXNlcjg0NjU=
+      :avatar_url: https://avatars2.githubusercontent.com/u/8465?v=4
+      :gravatar_id: ''
+      :url: https://api.github.com/users/motemen
+      :html_url: https://github.com/motemen
+      :followers_url: https://api.github.com/users/motemen/followers
+      :following_url: https://api.github.com/users/motemen/following{/other_user}
+      :gists_url: https://api.github.com/users/motemen/gists{/gist_id}
+      :starred_url: https://api.github.com/users/motemen/starred{/owner}{/repo}
+      :subscriptions_url: https://api.github.com/users/motemen/subscriptions
+      :organizations_url: https://api.github.com/users/motemen/orgs
+      :repos_url: https://api.github.com/users/motemen/repos
+      :events_url: https://api.github.com/users/motemen/events{/privacy}
+      :received_events_url: https://api.github.com/users/motemen/received_events
+      :type: User
+      :site_admin: false
+    :html_url: https://github.com/motemen/git-pr-release
+    :description: Release pull request generator
+    :fork: false
+    :url: https://api.github.com/repos/motemen/git-pr-release
+    :forks_url: https://api.github.com/repos/motemen/git-pr-release/forks
+    :keys_url: https://api.github.com/repos/motemen/git-pr-release/keys{/key_id}
+    :collaborators_url: https://api.github.com/repos/motemen/git-pr-release/collaborators{/collaborator}
+    :teams_url: https://api.github.com/repos/motemen/git-pr-release/teams
+    :hooks_url: https://api.github.com/repos/motemen/git-pr-release/hooks
+    :issue_events_url: https://api.github.com/repos/motemen/git-pr-release/issues/events{/number}
+    :events_url: https://api.github.com/repos/motemen/git-pr-release/events
+    :assignees_url: https://api.github.com/repos/motemen/git-pr-release/assignees{/user}
+    :branches_url: https://api.github.com/repos/motemen/git-pr-release/branches{/branch}
+    :tags_url: https://api.github.com/repos/motemen/git-pr-release/tags
+    :blobs_url: https://api.github.com/repos/motemen/git-pr-release/git/blobs{/sha}
+    :git_tags_url: https://api.github.com/repos/motemen/git-pr-release/git/tags{/sha}
+    :git_refs_url: https://api.github.com/repos/motemen/git-pr-release/git/refs{/sha}
+    :trees_url: https://api.github.com/repos/motemen/git-pr-release/git/trees{/sha}
+    :statuses_url: https://api.github.com/repos/motemen/git-pr-release/statuses/{sha}
+    :languages_url: https://api.github.com/repos/motemen/git-pr-release/languages
+    :stargazers_url: https://api.github.com/repos/motemen/git-pr-release/stargazers
+    :contributors_url: https://api.github.com/repos/motemen/git-pr-release/contributors
+    :subscribers_url: https://api.github.com/repos/motemen/git-pr-release/subscribers
+    :subscription_url: https://api.github.com/repos/motemen/git-pr-release/subscription
+    :commits_url: https://api.github.com/repos/motemen/git-pr-release/commits{/sha}
+    :git_commits_url: https://api.github.com/repos/motemen/git-pr-release/git/commits{/sha}
+    :comments_url: https://api.github.com/repos/motemen/git-pr-release/comments{/number}
+    :issue_comment_url: https://api.github.com/repos/motemen/git-pr-release/issues/comments{/number}
+    :contents_url: https://api.github.com/repos/motemen/git-pr-release/contents/{+path}
+    :compare_url: https://api.github.com/repos/motemen/git-pr-release/compare/{base}...{head}
+    :merges_url: https://api.github.com/repos/motemen/git-pr-release/merges
+    :archive_url: https://api.github.com/repos/motemen/git-pr-release/{archive_format}{/ref}
+    :downloads_url: https://api.github.com/repos/motemen/git-pr-release/downloads
+    :issues_url: https://api.github.com/repos/motemen/git-pr-release/issues{/number}
+    :pulls_url: https://api.github.com/repos/motemen/git-pr-release/pulls{/number}
+    :milestones_url: https://api.github.com/repos/motemen/git-pr-release/milestones{/number}
+    :notifications_url: https://api.github.com/repos/motemen/git-pr-release/notifications{?since,all,participating}
+    :labels_url: https://api.github.com/repos/motemen/git-pr-release/labels{/name}
+    :releases_url: https://api.github.com/repos/motemen/git-pr-release/releases{/id}
+    :deployments_url: https://api.github.com/repos/motemen/git-pr-release/deployments
+    :created_at: 2013-12-27 06:35:52.000000000 Z
+    :updated_at: 2019-02-18 01:40:52.000000000 Z
+    :pushed_at: 2018-11-15 10:45:07.000000000 Z
+    :git_url: git://github.com/motemen/git-pr-release.git
+    :ssh_url: git@github.com:motemen/git-pr-release.git
+    :clone_url: https://github.com/motemen/git-pr-release.git
+    :svn_url: https://github.com/motemen/git-pr-release
+    :homepage: https://rubygems.org/gems/git-pr-release
+    :size: 62
+    :stargazers_count: 359
+    :watchers_count: 359
+    :language: Ruby
+    :has_issues: true
+    :has_projects: true
+    :has_downloads: true
+    :has_wiki: true
+    :has_pages: false
+    :forks_count: 28
+    :mirror_url: 
+    :archived: false
+    :open_issues_count: 6
+    :license:
+      :key: mit
+      :name: MIT License
+      :spdx_id: MIT
+      :url: https://api.github.com/licenses/mit
+      :node_id: MDc6TGljZW5zZTEz
+    :forks: 28
+    :open_issues: 6
+    :watchers: 359
+    :default_branch: master
+:_links:
+  :self:
+    :href: https://api.github.com/repos/motemen/git-pr-release/pulls/6
+  :html:
+    :href: https://github.com/motemen/git-pr-release/pull/6
+  :issue:
+    :href: https://api.github.com/repos/motemen/git-pr-release/issues/6
+  :comments:
+    :href: https://api.github.com/repos/motemen/git-pr-release/issues/6/comments
+  :review_comments:
+    :href: https://api.github.com/repos/motemen/git-pr-release/pulls/6/comments
+  :review_comment:
+    :href: https://api.github.com/repos/motemen/git-pr-release/pulls/comments{/number}
+  :commits:
+    :href: https://api.github.com/repos/motemen/git-pr-release/pulls/6/commits
+  :statuses:
+    :href: https://api.github.com/repos/motemen/git-pr-release/statuses/67d936fb57851f85db28249e91dfa0d8ccfe530b
+:author_association: CONTRIBUTOR
+:merged: true
+:mergeable: 
+:rebaseable: 
+:mergeable_state: unknown
+:merged_by:
+  :login: motemen
+  :id: 8465
+  :node_id: MDQ6VXNlcjg0NjU=
+  :avatar_url: https://avatars2.githubusercontent.com/u/8465?v=4
+  :gravatar_id: ''
+  :url: https://api.github.com/users/motemen
+  :html_url: https://github.com/motemen
+  :followers_url: https://api.github.com/users/motemen/followers
+  :following_url: https://api.github.com/users/motemen/following{/other_user}
+  :gists_url: https://api.github.com/users/motemen/gists{/gist_id}
+  :starred_url: https://api.github.com/users/motemen/starred{/owner}{/repo}
+  :subscriptions_url: https://api.github.com/users/motemen/subscriptions
+  :organizations_url: https://api.github.com/users/motemen/orgs
+  :repos_url: https://api.github.com/users/motemen/repos
+  :events_url: https://api.github.com/users/motemen/events{/privacy}
+  :received_events_url: https://api.github.com/users/motemen/received_events
+  :type: User
+  :site_admin: false
+:comments: 2
+:review_comments: 2
+:maintainer_can_modify: false
+:commits: 2
+:additions: 17
+:deletions: 1
+:changed_files: 1
