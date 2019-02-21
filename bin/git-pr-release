@@ -153,7 +153,16 @@ def merge_pr_body(old_body, new_body)
   # Try to take over checklist statuses
   pr_body_lines = []
 
-  Diff::LCS.traverse_balanced(old_body.split(/\r?\n/), new_body.split(/\r?\n/)) do |event|
+  check_status = {}
+  old_body.split(/\r?\n/).each { |line|
+    line.match(/^- \[(?<check_value>[ x])\] #(?<issue_number>\d+)/) { |m|
+      say "Found pull-request checkbox \##{m[:issue_number]} is #{m[:check_value]}.", :trace
+      check_status[m[:issue_number]] = m[:check_value]
+    }
+  }
+  old_body_unchecked = old_body.gsub /^- \[[ x]\] \#(\d+)/, '- [ ] #\1'
+
+  Diff::LCS.traverse_balanced(old_body_unchecked.split(/\r?\n/), new_body.split(/\r?\n/)) do |event|
     say "diff: #{event.inspect}", :trace
     action, old, new = *event
     old_nr, old_line = *old
@@ -167,7 +176,7 @@ def merge_pr_body(old_body, new_body)
       say "Use old line: #{old_line}", :trace
       pr_body_lines << old_line
     when '!'
-      if [ old_line, new_line ].all? { |line| /^- \[[ x]\]/ === line }
+      if [ old_line, new_line ].all? { |line| /^- \[ \]/ === line }
         say "Found checklist diff; use old one: #{old_line}", :trace
         pr_body_lines << old_line
       else
@@ -183,7 +192,13 @@ def merge_pr_body(old_body, new_body)
     end
   end
 
-  pr_body_lines.join("\n")
+  merged_body = pr_body_lines.join("\n")
+  check_status.each { |issue_number, check_value|
+    say "Update pull-request checkbox \##{issue_number} to #{check_value}.", :trace
+    merged_body.gsub! /^- \[ \] \##{issue_number}/, "- [#{check_value}] \##{issue_number}"
+  }
+
+  merged_body
 end
 
 def obtain_token!
