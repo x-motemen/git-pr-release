@@ -1,0 +1,14 @@
+---
+:sha: 2bcc5ec915521df50825ad08118665c66ad072be
+:filename: bin/git-pr-release
+:status: modified
+:additions: 1
+:deletions: 1
+:changes: 2
+:blob_url: https://github.com/motemen/git-pr-release/blob/bbcd2a04ef394e91be44c24e93e52fdbca944060/bin/git-pr-release
+:raw_url: https://github.com/motemen/git-pr-release/raw/bbcd2a04ef394e91be44c24e93e52fdbca944060/bin/git-pr-release
+:contents_url: https://api.github.com/repos/motemen/git-pr-release/contents/bin/git-pr-release?ref=bbcd2a04ef394e91be44c24e93e52fdbca944060
+:patch: "@@ -87,7 +87,7 @@ def build_pr_title_and_body(prs)\n \n   template = DEFAULT_PR_TEMPLATE\n
+  \n-  if path = git_config('pr-release.template')\n+  if path = git_config('template')\n
+  \    template_path = File.join(git('rev-parse', '--show-toplevel').first.chomp,
+  path)\n     template = File.read(template_path)\n   end"
