@@ -1,0 +1,330 @@
+---
+:url: https://api.github.com/repos/motemen/git-pr-release/pulls/1
+:id: 13194147
+:node_id: MDExOlB1bGxSZXF1ZXN0MTMxOTQxNDc=
+:html_url: https://github.com/motemen/git-pr-release/pull/1
+:diff_url: https://github.com/motemen/git-pr-release/pull/1.diff
+:patch_url: https://github.com/motemen/git-pr-release/pull/1.patch
+:issue_url: https://api.github.com/repos/motemen/git-pr-release/issues/1
+:number: 1
+:state: closed
+:locked: false
+:title: No need to append key prefix for template config
+:user:
+  :login: hakobe
+  :id: 6882
+  :node_id: MDQ6VXNlcjY4ODI=
+  :avatar_url: https://avatars0.githubusercontent.com/u/6882?v=4
+  :gravatar_id: ''
+  :url: https://api.github.com/users/hakobe
+  :html_url: https://github.com/hakobe
+  :followers_url: https://api.github.com/users/hakobe/followers
+  :following_url: https://api.github.com/users/hakobe/following{/other_user}
+  :gists_url: https://api.github.com/users/hakobe/gists{/gist_id}
+  :starred_url: https://api.github.com/users/hakobe/starred{/owner}{/repo}
+  :subscriptions_url: https://api.github.com/users/hakobe/subscriptions
+  :organizations_url: https://api.github.com/users/hakobe/orgs
+  :repos_url: https://api.github.com/users/hakobe/repos
+  :events_url: https://api.github.com/users/hakobe/events{/privacy}
+  :received_events_url: https://api.github.com/users/hakobe/received_events
+  :type: User
+  :site_admin: false
+:body: "`git_config('pr-release.template')` loads config value from key `pr-release.pr-release.template`.\n"
+:created_at: 2014-03-05 02:48:51.000000000 Z
+:updated_at: 2014-07-10 03:13:44.000000000 Z
+:closed_at: 2014-03-05 02:59:52.000000000 Z
+:merged_at: 2014-03-05 02:59:52.000000000 Z
+:merge_commit_sha: d40cebeaa7cd69c5eabb6e76de7314891d9cd743
+:assignee: 
+:assignees: []
+:requested_reviewers: []
+:requested_teams: []
+:labels: []
+:milestone: 
+:commits_url: https://api.github.com/repos/motemen/git-pr-release/pulls/1/commits
+:review_comments_url: https://api.github.com/repos/motemen/git-pr-release/pulls/1/comments
+:review_comment_url: https://api.github.com/repos/motemen/git-pr-release/pulls/comments{/number}
+:comments_url: https://api.github.com/repos/motemen/git-pr-release/issues/1/comments
+:statuses_url: https://api.github.com/repos/motemen/git-pr-release/statuses/bbcd2a04ef394e91be44c24e93e52fdbca944060
+:head:
+  :label: hakobe:fix/template-config-key
+  :ref: fix/template-config-key
+  :sha: bbcd2a04ef394e91be44c24e93e52fdbca944060
+  :user:
+    :login: hakobe
+    :id: 6882
+    :node_id: MDQ6VXNlcjY4ODI=
+    :avatar_url: https://avatars0.githubusercontent.com/u/6882?v=4
+    :gravatar_id: ''
+    :url: https://api.github.com/users/hakobe
+    :html_url: https://github.com/hakobe
+    :followers_url: https://api.github.com/users/hakobe/followers
+    :following_url: https://api.github.com/users/hakobe/following{/other_user}
+    :gists_url: https://api.github.com/users/hakobe/gists{/gist_id}
+    :starred_url: https://api.github.com/users/hakobe/starred{/owner}{/repo}
+    :subscriptions_url: https://api.github.com/users/hakobe/subscriptions
+    :organizations_url: https://api.github.com/users/hakobe/orgs
+    :repos_url: https://api.github.com/users/hakobe/repos
+    :events_url: https://api.github.com/users/hakobe/events{/privacy}
+    :received_events_url: https://api.github.com/users/hakobe/received_events
+    :type: User
+    :site_admin: false
+  :repo:
+    :id: 17425170
+    :node_id: MDEwOlJlcG9zaXRvcnkxNzQyNTE3MA==
+    :name: git-pr-release
+    :full_name: hakobe/git-pr-release
+    :private: false
+    :owner:
+      :login: hakobe
+      :id: 6882
+      :node_id: MDQ6VXNlcjY4ODI=
+      :avatar_url: https://avatars0.githubusercontent.com/u/6882?v=4
+      :gravatar_id: ''
+      :url: https://api.github.com/users/hakobe
+      :html_url: https://github.com/hakobe
+      :followers_url: https://api.github.com/users/hakobe/followers
+      :following_url: https://api.github.com/users/hakobe/following{/other_user}
+      :gists_url: https://api.github.com/users/hakobe/gists{/gist_id}
+      :starred_url: https://api.github.com/users/hakobe/starred{/owner}{/repo}
+      :subscriptions_url: https://api.github.com/users/hakobe/subscriptions
+      :organizations_url: https://api.github.com/users/hakobe/orgs
+      :repos_url: https://api.github.com/users/hakobe/repos
+      :events_url: https://api.github.com/users/hakobe/events{/privacy}
+      :received_events_url: https://api.github.com/users/hakobe/received_events
+      :type: User
+      :site_admin: false
+    :html_url: https://github.com/hakobe/git-pr-release
+    :description: Creates a pull request which summarizes feature branches that are
+      to be released into production
+    :fork: true
+    :url: https://api.github.com/repos/hakobe/git-pr-release
+    :forks_url: https://api.github.com/repos/hakobe/git-pr-release/forks
+    :keys_url: https://api.github.com/repos/hakobe/git-pr-release/keys{/key_id}
+    :collaborators_url: https://api.github.com/repos/hakobe/git-pr-release/collaborators{/collaborator}
+    :teams_url: https://api.github.com/repos/hakobe/git-pr-release/teams
+    :hooks_url: https://api.github.com/repos/hakobe/git-pr-release/hooks
+    :issue_events_url: https://api.github.com/repos/hakobe/git-pr-release/issues/events{/number}
+    :events_url: https://api.github.com/repos/hakobe/git-pr-release/events
+    :assignees_url: https://api.github.com/repos/hakobe/git-pr-release/assignees{/user}
+    :branches_url: https://api.github.com/repos/hakobe/git-pr-release/branches{/branch}
+    :tags_url: https://api.github.com/repos/hakobe/git-pr-release/tags
+    :blobs_url: https://api.github.com/repos/hakobe/git-pr-release/git/blobs{/sha}
+    :git_tags_url: https://api.github.com/repos/hakobe/git-pr-release/git/tags{/sha}
+    :git_refs_url: https://api.github.com/repos/hakobe/git-pr-release/git/refs{/sha}
+    :trees_url: https://api.github.com/repos/hakobe/git-pr-release/git/trees{/sha}
+    :statuses_url: https://api.github.com/repos/hakobe/git-pr-release/statuses/{sha}
+    :languages_url: https://api.github.com/repos/hakobe/git-pr-release/languages
+    :stargazers_url: https://api.github.com/repos/hakobe/git-pr-release/stargazers
+    :contributors_url: https://api.github.com/repos/hakobe/git-pr-release/contributors
+    :subscribers_url: https://api.github.com/repos/hakobe/git-pr-release/subscribers
+    :subscription_url: https://api.github.com/repos/hakobe/git-pr-release/subscription
+    :commits_url: https://api.github.com/repos/hakobe/git-pr-release/commits{/sha}
+    :git_commits_url: https://api.github.com/repos/hakobe/git-pr-release/git/commits{/sha}
+    :comments_url: https://api.github.com/repos/hakobe/git-pr-release/comments{/number}
+    :issue_comment_url: https://api.github.com/repos/hakobe/git-pr-release/issues/comments{/number}
+    :contents_url: https://api.github.com/repos/hakobe/git-pr-release/contents/{+path}
+    :compare_url: https://api.github.com/repos/hakobe/git-pr-release/compare/{base}...{head}
+    :merges_url: https://api.github.com/repos/hakobe/git-pr-release/merges
+    :archive_url: https://api.github.com/repos/hakobe/git-pr-release/{archive_format}{/ref}
+    :downloads_url: https://api.github.com/repos/hakobe/git-pr-release/downloads
+    :issues_url: https://api.github.com/repos/hakobe/git-pr-release/issues{/number}
+    :pulls_url: https://api.github.com/repos/hakobe/git-pr-release/pulls{/number}
+    :milestones_url: https://api.github.com/repos/hakobe/git-pr-release/milestones{/number}
+    :notifications_url: https://api.github.com/repos/hakobe/git-pr-release/notifications{?since,all,participating}
+    :labels_url: https://api.github.com/repos/hakobe/git-pr-release/labels{/name}
+    :releases_url: https://api.github.com/repos/hakobe/git-pr-release/releases{/id}
+    :deployments_url: https://api.github.com/repos/hakobe/git-pr-release/deployments
+    :created_at: 2014-03-05 02:20:59.000000000 Z
+    :updated_at: 2014-05-13 01:42:58.000000000 Z
+    :pushed_at: 2014-05-12 11:42:34.000000000 Z
+    :git_url: git://github.com/hakobe/git-pr-release.git
+    :ssh_url: git@github.com:hakobe/git-pr-release.git
+    :clone_url: https://github.com/hakobe/git-pr-release.git
+    :svn_url: https://github.com/hakobe/git-pr-release
+    :homepage: https://rubygems.org/gems/git-pr-release
+    :size: 236
+    :stargazers_count: 0
+    :watchers_count: 0
+    :language: Ruby
+    :has_issues: false
+    :has_projects: true
+    :has_downloads: true
+    :has_wiki: true
+    :has_pages: false
+    :forks_count: 0
+    :mirror_url: 
+    :archived: false
+    :open_issues_count: 0
+    :license: 
+    :forks: 0
+    :open_issues: 0
+    :watchers: 0
+    :default_branch: master
+:base:
+  :label: motemen:master
+  :ref: master
+  :sha: adcd1d55438db0116f2583368466f1bf101ac0d0
+  :user:
+    :login: motemen
+    :id: 8465
+    :node_id: MDQ6VXNlcjg0NjU=
+    :avatar_url: https://avatars2.githubusercontent.com/u/8465?v=4
+    :gravatar_id: ''
+    :url: https://api.github.com/users/motemen
+    :html_url: https://github.com/motemen
+    :followers_url: https://api.github.com/users/motemen/followers
+    :following_url: https://api.github.com/users/motemen/following{/other_user}
+    :gists_url: https://api.github.com/users/motemen/gists{/gist_id}
+    :starred_url: https://api.github.com/users/motemen/starred{/owner}{/repo}
+    :subscriptions_url: https://api.github.com/users/motemen/subscriptions
+    :organizations_url: https://api.github.com/users/motemen/orgs
+    :repos_url: https://api.github.com/users/motemen/repos
+    :events_url: https://api.github.com/users/motemen/events{/privacy}
+    :received_events_url: https://api.github.com/users/motemen/received_events
+    :type: User
+    :site_admin: false
+  :repo:
+    :id: 15468156
+    :node_id: MDEwOlJlcG9zaXRvcnkxNTQ2ODE1Ng==
+    :name: git-pr-release
+    :full_name: motemen/git-pr-release
+    :private: false
+    :owner:
+      :login: motemen
+      :id: 8465
+      :node_id: MDQ6VXNlcjg0NjU=
+      :avatar_url: https://avatars2.githubusercontent.com/u/8465?v=4
+      :gravatar_id: ''
+      :url: https://api.github.com/users/motemen
+      :html_url: https://github.com/motemen
+      :followers_url: https://api.github.com/users/motemen/followers
+      :following_url: https://api.github.com/users/motemen/following{/other_user}
+      :gists_url: https://api.github.com/users/motemen/gists{/gist_id}
+      :starred_url: https://api.github.com/users/motemen/starred{/owner}{/repo}
+      :subscriptions_url: https://api.github.com/users/motemen/subscriptions
+      :organizations_url: https://api.github.com/users/motemen/orgs
+      :repos_url: https://api.github.com/users/motemen/repos
+      :events_url: https://api.github.com/users/motemen/events{/privacy}
+      :received_events_url: https://api.github.com/users/motemen/received_events
+      :type: User
+      :site_admin: false
+    :html_url: https://github.com/motemen/git-pr-release
+    :description: Release pull request generator
+    :fork: false
+    :url: https://api.github.com/repos/motemen/git-pr-release
+    :forks_url: https://api.github.com/repos/motemen/git-pr-release/forks
+    :keys_url: https://api.github.com/repos/motemen/git-pr-release/keys{/key_id}
+    :collaborators_url: https://api.github.com/repos/motemen/git-pr-release/collaborators{/collaborator}
+    :teams_url: https://api.github.com/repos/motemen/git-pr-release/teams
+    :hooks_url: https://api.github.com/repos/motemen/git-pr-release/hooks
+    :issue_events_url: https://api.github.com/repos/motemen/git-pr-release/issues/events{/number}
+    :events_url: https://api.github.com/repos/motemen/git-pr-release/events
+    :assignees_url: https://api.github.com/repos/motemen/git-pr-release/assignees{/user}
+    :branches_url: https://api.github.com/repos/motemen/git-pr-release/branches{/branch}
+    :tags_url: https://api.github.com/repos/motemen/git-pr-release/tags
+    :blobs_url: https://api.github.com/repos/motemen/git-pr-release/git/blobs{/sha}
+    :git_tags_url: https://api.github.com/repos/motemen/git-pr-release/git/tags{/sha}
+    :git_refs_url: https://api.github.com/repos/motemen/git-pr-release/git/refs{/sha}
+    :trees_url: https://api.github.com/repos/motemen/git-pr-release/git/trees{/sha}
+    :statuses_url: https://api.github.com/repos/motemen/git-pr-release/statuses/{sha}
+    :languages_url: https://api.github.com/repos/motemen/git-pr-release/languages
+    :stargazers_url: https://api.github.com/repos/motemen/git-pr-release/stargazers
+    :contributors_url: https://api.github.com/repos/motemen/git-pr-release/contributors
+    :subscribers_url: https://api.github.com/repos/motemen/git-pr-release/subscribers
+    :subscription_url: https://api.github.com/repos/motemen/git-pr-release/subscription
+    :commits_url: https://api.github.com/repos/motemen/git-pr-release/commits{/sha}
+    :git_commits_url: https://api.github.com/repos/motemen/git-pr-release/git/commits{/sha}
+    :comments_url: https://api.github.com/repos/motemen/git-pr-release/comments{/number}
+    :issue_comment_url: https://api.github.com/repos/motemen/git-pr-release/issues/comments{/number}
+    :contents_url: https://api.github.com/repos/motemen/git-pr-release/contents/{+path}
+    :compare_url: https://api.github.com/repos/motemen/git-pr-release/compare/{base}...{head}
+    :merges_url: https://api.github.com/repos/motemen/git-pr-release/merges
+    :archive_url: https://api.github.com/repos/motemen/git-pr-release/{archive_format}{/ref}
+    :downloads_url: https://api.github.com/repos/motemen/git-pr-release/downloads
+    :issues_url: https://api.github.com/repos/motemen/git-pr-release/issues{/number}
+    :pulls_url: https://api.github.com/repos/motemen/git-pr-release/pulls{/number}
+    :milestones_url: https://api.github.com/repos/motemen/git-pr-release/milestones{/number}
+    :notifications_url: https://api.github.com/repos/motemen/git-pr-release/notifications{?since,all,participating}
+    :labels_url: https://api.github.com/repos/motemen/git-pr-release/labels{/name}
+    :releases_url: https://api.github.com/repos/motemen/git-pr-release/releases{/id}
+    :deployments_url: https://api.github.com/repos/motemen/git-pr-release/deployments
+    :created_at: 2013-12-27 06:35:52.000000000 Z
+    :updated_at: 2019-02-18 01:40:52.000000000 Z
+    :pushed_at: 2018-11-15 10:45:07.000000000 Z
+    :git_url: git://github.com/motemen/git-pr-release.git
+    :ssh_url: git@github.com:motemen/git-pr-release.git
+    :clone_url: https://github.com/motemen/git-pr-release.git
+    :svn_url: https://github.com/motemen/git-pr-release
+    :homepage: https://rubygems.org/gems/git-pr-release
+    :size: 62
+    :stargazers_count: 359
+    :watchers_count: 359
+    :language: Ruby
+    :has_issues: true
+    :has_projects: true
+    :has_downloads: true
+    :has_wiki: true
+    :has_pages: false
+    :forks_count: 28
+    :mirror_url: 
+    :archived: false
+    :open_issues_count: 6
+    :license:
+      :key: mit
+      :name: MIT License
+      :spdx_id: MIT
+      :url: https://api.github.com/licenses/mit
+      :node_id: MDc6TGljZW5zZTEz
+    :forks: 28
+    :open_issues: 6
+    :watchers: 359
+    :default_branch: master
+:_links:
+  :self:
+    :href: https://api.github.com/repos/motemen/git-pr-release/pulls/1
+  :html:
+    :href: https://github.com/motemen/git-pr-release/pull/1
+  :issue:
+    :href: https://api.github.com/repos/motemen/git-pr-release/issues/1
+  :comments:
+    :href: https://api.github.com/repos/motemen/git-pr-release/issues/1/comments
+  :review_comments:
+    :href: https://api.github.com/repos/motemen/git-pr-release/pulls/1/comments
+  :review_comment:
+    :href: https://api.github.com/repos/motemen/git-pr-release/pulls/comments{/number}
+  :commits:
+    :href: https://api.github.com/repos/motemen/git-pr-release/pulls/1/commits
+  :statuses:
+    :href: https://api.github.com/repos/motemen/git-pr-release/statuses/bbcd2a04ef394e91be44c24e93e52fdbca944060
+:author_association: COLLABORATOR
+:merged: true
+:mergeable: 
+:rebaseable: 
+:mergeable_state: unknown
+:merged_by:
+  :login: motemen
+  :id: 8465
+  :node_id: MDQ6VXNlcjg0NjU=
+  :avatar_url: https://avatars2.githubusercontent.com/u/8465?v=4
+  :gravatar_id: ''
+  :url: https://api.github.com/users/motemen
+  :html_url: https://github.com/motemen
+  :followers_url: https://api.github.com/users/motemen/followers
+  :following_url: https://api.github.com/users/motemen/following{/other_user}
+  :gists_url: https://api.github.com/users/motemen/gists{/gist_id}
+  :starred_url: https://api.github.com/users/motemen/starred{/owner}{/repo}
+  :subscriptions_url: https://api.github.com/users/motemen/subscriptions
+  :organizations_url: https://api.github.com/users/motemen/orgs
+  :repos_url: https://api.github.com/users/motemen/repos
+  :events_url: https://api.github.com/users/motemen/events{/privacy}
+  :received_events_url: https://api.github.com/users/motemen/received_events
+  :type: User
+  :site_admin: false
+:comments: 2
+:review_comments: 0
+:maintainer_can_modify: false
+:commits: 1
+:additions: 1
+:deletions: 1
+:changed_files: 1
