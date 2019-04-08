@@ -409,4 +409,4 @@ def main
   dump_result_as_json( release_pr, merged_prs, changed_files ) if @json
 end
 
-main if $0 == __FILE__
+main if $0 == __FILE__ || $0 == File.join(Gem.dir, "bin", "git-pr-release")
