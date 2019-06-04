@@ -1,5 +1,6 @@
 require "timecop"
 require "yaml"
+require "git/pr/release"
 
 RSpec.configure do |config|
   config.expect_with :rspec do |expectations|

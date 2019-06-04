@@ -1,6 +1,4 @@
-load File.expand_path("../bin/git-pr-release", __dir__)
-
-RSpec.describe "git-pr-release" do
+RSpec.describe Git::Pr::Release do
   before do
     Timecop.freeze(Time.parse("2019-02-20 22:58:35"))
 
