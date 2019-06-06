@@ -1,0 +1,5 @@
+#!/usr/bin/env ruby
+
+require "git/pr/release"
+
+Git::Pr::Release::CLI.start
