@@ -150,6 +150,21 @@ module Git
             end
           end
 
+          reviewers = ENV.fetch('GIT_PR_RELEASE_REVIEWERS') { git_config('reviewers') } || ''
+          team_reviewers = ENV.fetch('GIT_PR_RELEASE_TEAM_REVIEWERS') { git_config('team-reviewers') } || ''
+          if not reviewers.empty? or not team_reviewers.empty?
+            reviewers = reviewers.split(/\s*,\s*/)
+            team_reviewers = team_reviewers.split(/\s*,\s*/)
+            pull_request_with_reviewers = client.request_pull_request_review(
+              repository, release_pr.number, reviewers: reviewers, team_reviewers: team_reviewers
+            )
+
+            unless pull_request_with_reviewers
+              say 'Failed to add reviewers to a pull request', :error
+              exit 5
+            end
+          end
+
           say "#{create_mode ? 'Created' : 'Updated'} pull request: #{updated_pull_request.rels[:html].href}", :notice
           dump_result_as_json( release_pr, merged_prs, changed_files ) if @json
         end

@@ -75,6 +75,24 @@ You can specify this value by `GIT_PR_RELEASE_LABELS` environment variable.
 
 If not specified, any labels will not be added for PRs.
 
+### `pr-release.reviewers`
+
+The reviewers list for adding to pull requests created.
+This value should be comma-separated strings.
+
+You can specify this value by `GIT_PR_RELEASE_REVIEWERS` environment variable.
+
+If not specified, any reviewers will not be added for PRs.
+
+### `pr-release.team-reviewers`
+
+The team reviewers list for adding to pull requests created.
+This value should be comma-separated strings.
+
+You can specify this value by `GIT_PR_RELEASE_TEAM_REVIEWERS` environment variable.
+
+If not specified, any team reviewers will not be added for PRs.
+
 
 Errors and exit statuses
 ------------------------
