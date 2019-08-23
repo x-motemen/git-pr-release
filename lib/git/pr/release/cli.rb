@@ -27,7 +27,7 @@ module Git
               @json = v
             end
             opts.on('--no-fetch', 'Do not fetch from remote repo before determining target PRs (CI friendly)') do |v|
-              @no_fetch = v
+              @no_fetch = !v
             end
           end.parse!
 
