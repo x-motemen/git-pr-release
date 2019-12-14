@@ -1,4 +1,5 @@
 RSpec.describe Git::Pr::Release do
+  include Git::Pr::Release::Util
   before do
     Timecop.freeze(Time.parse("2019-02-20 22:58:35"))
 
