@@ -1,6 +1,6 @@
 require 'octokit'
 
-require_relative 'util'
+require_relative 'util_top_level'
 
 module Git
   module Pr
