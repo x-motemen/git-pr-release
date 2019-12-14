@@ -70,7 +70,7 @@ RSpec.describe Git::Pr::Release do
 
       expect(parsed_output.keys).to eq %w[release_pull_request merged_pull_requests changed_files]
       expect(parsed_output["release_pull_request"]).to eq({ "data" => JSON.parse(@release_pr.to_hash.to_json) })
-      expect(parsed_output["merged_pull_requests"]).to eq @merged_prs.map {|e| JSON.parse(PullRequest.new(e).to_hash.to_json) }
+      expect(parsed_output["merged_pull_requests"]).to eq @merged_prs.map {|e| JSON.parse(Git::Pr::Release::PullRequest.new(e).to_hash.to_json) }
       expect(parsed_output["changed_files"]).to eq @changed_files.map {|e| JSON.parse(e.to_hash.to_json) }
     }
   end
