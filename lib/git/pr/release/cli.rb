@@ -6,6 +6,7 @@ module Git
     module Release
       class CLI
         include Git::Pr::Release::Util
+        extend Git::Pr::Release::Util
         def self.start
           host, repository, scheme = host_and_repository_and_scheme
 
