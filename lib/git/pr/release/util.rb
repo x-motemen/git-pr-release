@@ -201,7 +201,12 @@ ERB
           return [] if pull_request.nil?
 
           host, repository, scheme = host_and_repository_and_scheme
-          return client.pull_request_files repository, pull_request.number
+
+          # Fetch files as many as possible
+          client.auto_paginate = true
+          files = client.pull_request_files repository, pull_request.number
+          client.auto_paginate = false
+          return files
         end
       end
     end
