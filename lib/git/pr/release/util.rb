@@ -200,6 +200,8 @@ ERB
         def pull_request_files(client, pull_request)
           return [] if pull_request.nil?
 
+          host, repository, scheme = host_and_repository_and_scheme
+
           # Fetch files as many as possible
           client.auto_paginate = true
           files = client.pull_request_files repository, pull_request.number
