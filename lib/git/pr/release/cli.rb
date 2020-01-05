@@ -8,7 +8,8 @@ module Git
         include Git::Pr::Release::Util
 
         def self.start
-          self.new.start
+          result = self.new.start
+          exit result
         end
 
         def start
@@ -77,7 +78,7 @@ module Git
 
           if merged_pull_request_numbers.empty?
             say 'No pull requests to be released', :error
-            exit 1
+            return 1
           end
 
           merged_prs = merged_pull_request_numbers.map do |nr|
@@ -105,7 +106,7 @@ module Git
             say pr_title, :notice
             say pr_body, :notice
             dump_result_as_json( found_release_pr, merged_prs, changed_files ) if @json
-            exit 0
+            return 0
           end
 
           pr_title, pr_body = nil, nil
@@ -117,7 +118,7 @@ module Git
             )
             unless created_pr
               say 'Failed to create a new pull request', :error
-              exit 2
+              return 2
             end
             changed_files = pull_request_files(client, created_pr) # Refetch changed files from created_pr
             pr_title, pr_body = build_pr_title_and_body created_pr, merged_prs, changed_files
@@ -137,7 +138,7 @@ module Git
 
           unless updated_pull_request
             say 'Failed to update a pull request', :error
-            exit 3
+            return 3
           end
 
           labels = ENV.fetch('GIT_PR_RELEASE_LABELS') { git_config('labels') }
@@ -149,12 +150,14 @@ module Git
 
             unless labeled_pull_request
               say 'Failed to add labels to a pull request', :error
-              exit 4
+              return 4
             end
           end
 
           say "#{create_mode ? 'Created' : 'Updated'} pull request: #{updated_pull_request.rels[:html].href}", :notice
           dump_result_as_json( release_pr, merged_prs, changed_files ) if @json
+
+          return 0
         end
 
         def client

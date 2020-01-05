@@ -86,6 +86,6 @@ RSpec.describe Git::Pr::Release::CLI do
       expect(@cli).to receive(:git_config).with("labels") { nil }
     }
 
-    it { is_expected.to eq nil }
+    it { is_expected.to eq 0 }
   end
 end
