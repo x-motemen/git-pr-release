@@ -12,11 +12,11 @@ RSpec.describe Git::Pr::Release::CLI do
       end
 
       ### Set up configuration
-      expect(@cli).to receive(:host_and_repository_and_scheme).with(no_args) {
-        ["github.com", "motemen/git-pr-release", "https"]
-      }
-      expect(@cli).to receive(:git_config).with("branch.production") { nil }
-      expect(@cli).to receive(:git_config).with("branch.staging") { nil }
+      expect(@cli).to receive(:configure)
+      allow(@cli).to receive(:repository) { "motemen/git-pr-release" }
+      allow(@cli).to receive(:production_branch) { "master" }
+      allow(@cli).to receive(:staging_branch) { "staging" }
+
       expect(@cli).to receive(:git).with(:remote, "update", "origin") {
         []
       }
