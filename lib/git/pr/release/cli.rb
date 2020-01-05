@@ -29,46 +29,8 @@ module Git
           ### Set up configuration
           configure
 
-          git :remote, 'update', 'origin' unless @no_fetch
-
           ### Fetch merged PRs
-
-          merged_feature_head_sha1s = git(
-            :log, '--merges', '--pretty=format:%P', "origin/#{production_branch}..origin/#{staging_branch}"
-          ).map do |line|
-            main_sha1, feature_sha1 = line.chomp.split /\s+/
-            feature_sha1
-          end
-
-          merged_pull_request_numbers = git('ls-remote', 'origin', 'refs/pull/*/head').map do |line|
-            sha1, ref = line.chomp.split /\s+/
-
-            if merged_feature_head_sha1s.include? sha1
-              if %r<^refs/pull/(\d+)/head$>.match ref
-                pr_number = $1.to_i
-
-                if git('merge-base', sha1, "origin/#{production_branch}").first.chomp == sha1
-                  say "##{pr_number} (#{sha1}) is already merged into #{production_branch}", :debug
-                else
-                  pr_number
-                end
-              else
-                say "Bad pull request head ref format: #{ref}", :warn
-                nil
-              end
-            end
-          end.compact
-
-          if merged_pull_request_numbers.empty?
-            say 'No pull requests to be released', :error
-            return 1
-          end
-
-          merged_prs = merged_pull_request_numbers.map do |nr|
-            pr = client.pull_request repository, nr
-            say "To be released: ##{pr.number} #{pr.title}", :notice
-            pr
-          end
+          merged_prs = fetch_merged_prs
 
           ### Create a release PR
 
@@ -166,6 +128,49 @@ module Git
           say "Repository:        #{repository}", :debug
           say "Production branch: #{production_branch}", :debug
           say "Staging branch:    #{staging_branch}", :debug
+        end
+
+        def fetch_merged_prs
+          git :remote, 'update', 'origin' unless @no_fetch
+
+          merged_feature_head_sha1s = git(
+            :log, '--merges', '--pretty=format:%P', "origin/#{production_branch}..origin/#{staging_branch}"
+          ).map do |line|
+            main_sha1, feature_sha1 = line.chomp.split /\s+/
+            feature_sha1
+          end
+
+          merged_pull_request_numbers = git('ls-remote', 'origin', 'refs/pull/*/head').map do |line|
+            sha1, ref = line.chomp.split /\s+/
+
+            if merged_feature_head_sha1s.include? sha1
+              if %r<^refs/pull/(\d+)/head$>.match ref
+                pr_number = $1.to_i
+
+                if git('merge-base', sha1, "origin/#{production_branch}").first.chomp == sha1
+                  say "##{pr_number} (#{sha1}) is already merged into #{production_branch}", :debug
+                else
+                  pr_number
+                end
+              else
+                say "Bad pull request head ref format: #{ref}", :warn
+                nil
+              end
+            end
+          end.compact
+
+          if merged_pull_request_numbers.empty?
+            say 'No pull requests to be released', :error
+            return 1
+          end
+
+          merged_prs = merged_pull_request_numbers.map do |nr|
+            pr = client.pull_request repository, nr
+            say "To be released: ##{pr.number} #{pr.title}", :notice
+            pr
+          end
+
+          merged_prs
         end
       end
     end
