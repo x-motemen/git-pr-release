@@ -108,31 +108,28 @@ module Git
           found_release_pr = detect_existing_release_pr
           create_mode = found_release_pr.nil?
 
-          # Fetch changed files of a release PR
-          changed_files = if create_mode
-                            []
-                          else
-                            pull_request_files(found_release_pr)
-                          end
+          if create_mode
+            if @dry_run
+              release_pr = nil
+              changed_files = []
+            else
+              release_pr = prepare_release_pr
+              changed_files = pull_request_files(release_pr)
+            end
+          else
+            release_pr = found_release_pr
+            changed_files = pull_request_files(release_pr)
+          end
+
+          pr_title, pr_body = build_and_merge_pr_title_and_body(release_pr, merged_prs, changed_files)
 
           if @dry_run
-            pr_title, new_body = build_pr_title_and_body found_release_pr, merged_prs, changed_files
-            pr_body = create_mode ? new_body : merge_pr_body(found_release_pr.body, new_body)
-
             say 'Dry-run. Not updating PR', :info
             say pr_title, :notice
             say pr_body, :notice
-            dump_result_as_json( found_release_pr, merged_prs, changed_files ) if @json
+            dump_result_as_json( release_pr, merged_prs, changed_files ) if @json
             return
           end
-
-          release_pr = if create_mode
-                         prepare_release_pr
-                       else
-                         found_release_pr
-                       end
-
-          pr_title, pr_body = build_and_merge_pr_title_and_body(release_pr, merged_prs)
 
           update_release_pr(release_pr, pr_title, pr_body)
 
@@ -155,9 +152,9 @@ module Git
           )
         end
 
-        def build_and_merge_pr_title_and_body(release_pr, merged_prs)
-          changed_files = pull_request_files(release_pr)
-          old_body = release_pr.body
+        def build_and_merge_pr_title_and_body(release_pr, merged_prs, changed_files)
+          # release_pr is nil when dry_run && create_mode
+          old_body = release_pr ? release_pr.body : ""
           pr_title, new_body = build_pr_title_and_body(release_pr, merged_prs, changed_files)
 
           [pr_title, merge_pr_body(old_body, new_body)]

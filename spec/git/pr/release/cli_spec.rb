@@ -185,12 +185,6 @@ RSpec.describe Git::Pr::Release::CLI do
       ]
 
       allow(@cli).to receive(:detect_existing_release_pr) { existing_release_pr }
-      @created_pr = double(
-        number: 1023,
-        rels: { html: double(href: "https://github.com/motemen/git-pr-release/pull/1023") },
-        body: "",
-      )
-      allow(@cli).to receive(:prepare_release_pr) { @created_pr }
       @pr_title = "Release 2020-01-04 16:51:09 +0900"
       @pr_body = <<~BODY.chomp
         - [ ] #3 Provides a creating release pull-request object for template @hakobe
@@ -200,36 +194,72 @@ RSpec.describe Git::Pr::Release::CLI do
         [@pr_title, @pr_body]
       }
       allow(@cli).to receive(:update_release_pr)
-      allow(@cli).to receive(:pull_request_files)
+      @changed_files = [double(Sawyer::Resource)]
+      allow(@cli).to receive(:pull_request_files) { @changed_files }
       allow(@cli).to receive(:set_labels_to_release_pr)
     }
 
     context "When create_mode" do
+      before {
+        @created_pr = Sawyer::Resource.new(@agent, YAML.load_file(file_fixture("pr_1.yml")))
+        allow(@cli).to receive(:prepare_release_pr) { @created_pr }
+      }
+
       let(:existing_release_pr) { nil }
+
       it {
         subject
 
         expect(@cli).to have_received(:detect_existing_release_pr)
-        expect(@cli).not_to have_received(:pull_request_files)
         expect(@cli).to have_received(:prepare_release_pr)
-        expect(@cli).to have_received(:build_and_merge_pr_title_and_body)
+        expect(@cli).to have_received(:pull_request_files)
+        expect(@cli).to have_received(:build_and_merge_pr_title_and_body).with(@created_pr, @merged_prs, @changed_files)
         expect(@cli).to have_received(:update_release_pr).with(@created_pr, @pr_title, @pr_body)
         expect(@cli).to have_received(:set_labels_to_release_pr).with(@created_pr)
       }
     end
 
     context "When not create_mode" do
-      let(:existing_release_pr) { @created_pr }
+      before {
+        allow(@cli).to receive(:prepare_release_pr)
+      }
+
+      let(:existing_release_pr) { double(
+        number: 1023,
+        rels: { html: double(href: "https://github.com/motemen/git-pr-release/pull/1023") },
+      )}
 
       it {
         subject
 
         expect(@cli).to have_received(:detect_existing_release_pr)
-        expect(@cli).to have_received(:pull_request_files).with(@created_pr)
+        expect(@cli).to have_received(:pull_request_files).with(existing_release_pr)
         expect(@cli).not_to have_received(:prepare_release_pr)
-        expect(@cli).to have_received(:build_and_merge_pr_title_and_body)
-        expect(@cli).to have_received(:update_release_pr).with(@created_pr, @pr_title, @pr_body)
-        expect(@cli).to have_received(:set_labels_to_release_pr).with(@created_pr)
+        expect(@cli).to have_received(:build_and_merge_pr_title_and_body).with(existing_release_pr, @merged_prs, @changed_files)
+        expect(@cli).to have_received(:update_release_pr).with(existing_release_pr, @pr_title, @pr_body)
+        expect(@cli).to have_received(:set_labels_to_release_pr).with(existing_release_pr)
+      }
+    end
+
+    context "When dry_run with create_mode" do
+      before {
+        @created_pr = Sawyer::Resource.new(@agent, YAML.load_file(file_fixture("pr_1.yml")))
+        allow(@cli).to receive(:prepare_release_pr) { @created_pr }
+
+        @cli.instance_variable_set(:@dry_run, true)
+      }
+
+      let(:existing_release_pr) { nil }
+
+      it {
+        subject
+
+        expect(@cli).to have_received(:detect_existing_release_pr)
+        expect(@cli).not_to have_received(:prepare_release_pr)
+        expect(@cli).not_to have_received(:pull_request_files)
+        expect(@cli).to have_received(:build_and_merge_pr_title_and_body).with(nil, @merged_prs, [])
+        expect(@cli).not_to have_received(:update_release_pr).with(@created_pr, @pr_title, @pr_body)
+        expect(@cli).not_to have_received(:set_labels_to_release_pr).with(@created_pr)
       }
     end
   end
@@ -263,27 +293,40 @@ RSpec.describe Git::Pr::Release::CLI do
   end
 
   describe "#build_and_merge_pr_title_and_body" do
-    subject { @cli.build_and_merge_pr_title_and_body(@release_pr, @merged_prs) }
+    subject { @cli.build_and_merge_pr_title_and_body(release_pr, @merged_prs, changed_files) }
 
     before {
       @cli = Git::Pr::Release::CLI.new
 
       @merged_prs = [double(Sawyer::Resource)]
-      @release_pr = double(number: 1023, body: "Old Body")
-
-      @changed_files = [double(Sawyer::Resource)]
-      allow(@cli).to receive(:pull_request_files) { @changed_files }
       allow(@cli).to receive(:build_pr_title_and_body) { ["PR Title", "PR Body"] }
       allow(@cli).to receive(:merge_pr_body) { "Merged Body" }
     }
 
-    it {
-      is_expected.to eq ["PR Title", "Merged Body"]
+    context "When release_pr exists" do
+      let(:release_pr) { double(body: "Old Body") }
+      let(:changed_files) { [double(Sawyer::Resource)] }
 
-      expect(@cli).to have_received(:pull_request_files).with(@release_pr)
-      expect(@cli).to have_received(:build_pr_title_and_body).with(@release_pr, @merged_prs, @changed_files)
-      expect(@cli).to have_received(:merge_pr_body).with("Old Body", "PR Body")
-    }
+      it {
+        is_expected.to eq ["PR Title", "Merged Body"]
+
+        expect(@cli).to have_received(:build_pr_title_and_body).with(release_pr, @merged_prs, changed_files)
+        expect(@cli).to have_received(:merge_pr_body).with("Old Body", "PR Body")
+      }
+    end
+
+    context "When release_pr is nil" do
+      # = When dry_run with create_mode
+      let(:release_pr) { nil }
+      let(:changed_files) { [] }
+
+      it {
+        is_expected.to eq ["PR Title", "Merged Body"]
+
+        expect(@cli).to have_received(:build_pr_title_and_body).with(release_pr, @merged_prs, changed_files)
+        expect(@cli).to have_received(:merge_pr_body).with("", "PR Body")
+      }
+    end
   end
 
   describe "#update_release_pr" do
