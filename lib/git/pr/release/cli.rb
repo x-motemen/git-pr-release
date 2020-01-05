@@ -6,8 +6,12 @@ module Git
     module Release
       class CLI
         include Git::Pr::Release::Util
-        extend Git::Pr::Release::Util
+
         def self.start
+          self.new.start
+        end
+
+        def start
           host, repository, scheme = host_and_repository_and_scheme
 
           if host
@@ -153,7 +157,7 @@ module Git
           dump_result_as_json( release_pr, merged_prs, changed_files ) if @json
         end
 
-        def self.client
+        def client
           @client ||= Octokit::Client.new :access_token => obtain_token!
         end
       end
