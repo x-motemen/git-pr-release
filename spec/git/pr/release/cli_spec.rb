@@ -182,7 +182,8 @@ RSpec.describe Git::Pr::Release::CLI do
       client = double(Octokit::Client)
       created_pr = double(
         number: 1023,
-        rels: { html: double(href: "https://github.com/motemen/git-pr-release/pull/1023") }
+        rels: { html: double(href: "https://github.com/motemen/git-pr-release/pull/1023") },
+        body: "",
       )
       expect(@cli).to receive(:prepare_release_pr) { created_pr }
       pr_title = "Release 2020-01-04 16:51:09 +0900"
@@ -193,7 +194,7 @@ RSpec.describe Git::Pr::Release::CLI do
       expect(@cli).to receive(:build_pr_title_and_body) {
         [pr_title, pr_body]
       }
-      expect(@cli).to receive(:update_release_pr).with(created_pr, pr_title, pr_body) { 0 }
+      expect(@cli).to receive(:update_release_pr).with(created_pr, pr_title, pr_body.chomp) { 0 }
       allow(@cli).to receive(:client).with(no_args) {
         client
       }

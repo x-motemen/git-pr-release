@@ -122,7 +122,6 @@ module Git
             return 0
           end
 
-          pr_title, pr_body = nil, nil
           release_pr = nil
 
           if create_mode
@@ -131,14 +130,11 @@ module Git
               say 'Failed to create a new pull request', :error
               return 2
             end
-
-            changed_files = pull_request_files(client, release_pr) # Refetch changed files from created_pr
-            pr_title, pr_body = build_pr_title_and_body release_pr, merged_prs, changed_files
           else
-            pr_title, new_body = build_pr_title_and_body found_release_pr, merged_prs, changed_files
-            pr_body = merge_pr_body(found_release_pr.body, new_body)
             release_pr = found_release_pr
           end
+
+          pr_title, pr_body = build_and_merge_pr_title_and_body(release_pr, merged_prs)
 
           exit_code = update_release_pr(release_pr, pr_title, pr_body)
           return exit_code if exit_code != 0
@@ -163,6 +159,14 @@ module Git
           client.create_pull_request(
             repository, production_branch, staging_branch, 'Preparing release pull request...', ''
           )
+        end
+
+        def build_and_merge_pr_title_and_body(release_pr, merged_prs)
+          changed_files = pull_request_files(client, release_pr)
+          old_body = release_pr.body
+          pr_title, new_body = build_pr_title_and_body(release_pr, merged_prs, changed_files)
+
+          [pr_title, merge_pr_body(old_body, new_body)]
         end
 
         def update_release_pr(release_pr, pr_title, pr_body)
