@@ -168,16 +168,16 @@ module Git
 
         def set_labels_to_release_pr(release_pr)
           labels = ENV.fetch('GIT_PR_RELEASE_LABELS') { git_config('labels') }
-          if not labels.nil? and not labels.empty?
-            labels = labels.split(/\s*,\s*/)
-            labeled_pull_request = client.add_labels_to_an_issue(
-              repository, release_pr.number, labels
-            )
+          return 0 if labels.nil? || labels.empty?
 
-            unless labeled_pull_request
-              say 'Failed to add labels to a pull request', :error
-              return 4
-            end
+          labels = labels.split(/\s*,\s*/)
+          labeled_pull_request = client.add_labels_to_an_issue(
+            repository, release_pr.number, labels
+          )
+
+          unless labeled_pull_request
+            say 'Failed to add labels to a pull request', :error
+            return 4
           end
 
           return 0

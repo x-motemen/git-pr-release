@@ -252,18 +252,39 @@ RSpec.describe Git::Pr::Release::CLI do
       around do |example|
         original = ENV.to_hash
         begin
-          ENV["GIT_PR_RELEASE_LABELS"] = "release"
+          ENV["GIT_PR_RELEASE_LABELS"] = env_labels
           example.run
         ensure
           ENV.replace(original)
         end
       end
 
-      it "add lavel" do
-        is_expected.to eq 0
-        expect(@client).to have_received(:add_labels_to_an_issue).with(
-          "motemen/git-pr-release", 1023, ["release"]
-        )
+      context "string" do
+        let(:env_labels) { "release" }
+        it "add lavel" do
+          is_expected.to eq 0
+          expect(@client).to have_received(:add_labels_to_an_issue).with(
+            "motemen/git-pr-release", 1023, ["release"]
+          )
+        end
+      end
+
+      context "comma separated string" do
+        let(:env_labels) { "release,release2" }
+        it "add lavel" do
+          is_expected.to eq 0
+          expect(@client).to have_received(:add_labels_to_an_issue).with(
+            "motemen/git-pr-release", 1023, ["release", "release2"]
+          )
+        end
+      end
+
+      context "empty string" do
+        let(:env_labels) { "" }
+        it "do nothing" do
+          is_expected.to eq 0
+          expect(@client).not_to have_received(:add_labels_to_an_issue)
+        end
       end
     end
 
