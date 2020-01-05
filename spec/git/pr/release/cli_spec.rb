@@ -216,9 +216,68 @@ RSpec.describe Git::Pr::Release::CLI do
       }
       expect(@cli).to receive(:pull_request_files).with(client, nil) { nil }
       expect(@cli).to receive(:pull_request_files).with(client, created_pr) { nil }
-      expect(@cli).to receive(:git_config).with("labels") { nil }
+
+      expect(@cli).to receive(:set_labels_to_release_pr).with(created_pr) { 0 }
     }
 
     it { is_expected.to eq 0 }
+  end
+
+  describe "#set_labels_to_release_pr" do
+    subject { @cli.set_labels_to_release_pr(@release_pr) }
+
+    before {
+      @cli = Git::Pr::Release::CLI.new
+      @release_pr = double(number: 1023)
+
+      allow(@cli).to receive(:repository) { "motemen/git-pr-release" }
+
+      @client = double(Octokit::Client)
+      allow(@client).to receive(:add_labels_to_an_issue) { @release_pr }
+      allow(@cli).to receive(:client).with(no_args) { @client }
+    }
+
+    context "Without config" do
+      before {
+        allow(@cli).to receive(:git_config).with("labels") { nil }
+      }
+
+      it "do nothing" do
+        is_expected.to eq 0
+        expect(@client).not_to have_received(:add_labels_to_an_issue)
+      end
+    end
+
+    context "With ENV" do
+      around do |example|
+        original = ENV.to_hash
+        begin
+          ENV["GIT_PR_RELEASE_LABELS"] = "release"
+          example.run
+        ensure
+          ENV.replace(original)
+        end
+      end
+
+      it "add lavel" do
+        is_expected.to eq 0
+        expect(@client).to have_received(:add_labels_to_an_issue).with(
+          "motemen/git-pr-release", 1023, ["release"]
+        )
+      end
+    end
+
+    context "With git_config" do
+      before {
+        allow(@cli).to receive(:git_config).with("labels") { "release" }
+      }
+
+      it "add lavel" do
+        is_expected.to eq 0
+        expect(@client).to have_received(:add_labels_to_an_issue).with(
+          "motemen/git-pr-release", 1023, ["release"]
+        )
+      end
+    end
   end
 end
