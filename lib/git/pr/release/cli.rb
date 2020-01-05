@@ -142,6 +142,26 @@ module Git
             release_pr = found_release_pr
           end
 
+          exit_code = update_release_pr(release_pr, pr_title, pr_body)
+          return exit_code if exit_code != 0
+
+          exit_code = set_labels_to_release_pr(release_pr)
+          return exit_code if exit_code != 0
+
+          say "#{create_mode ? 'Created' : 'Updated'} pull request: #{release_pr.rels[:html].href}", :notice
+          dump_result_as_json( release_pr, merged_prs, changed_files ) if @json
+
+          return 0
+        end
+
+        def detect_existing_release_pr
+          say 'Searching for existing release pull requests...', :info
+          client.pull_requests(repository).find do |pr|
+            pr.head.ref == staging_branch && pr.base.ref == production_branch
+          end
+        end
+
+        def update_release_pr(release_pr, pr_title, pr_body)
           say 'Pull request body:', :debug
           say pr_body, :debug
 
@@ -154,20 +174,7 @@ module Git
             return 3
           end
 
-          exit_code = set_labels_to_release_pr(release_pr)
-          return exit_code if exit_code != 0
-
-          say "#{create_mode ? 'Created' : 'Updated'} pull request: #{updated_pull_request.rels[:html].href}", :notice
-          dump_result_as_json( release_pr, merged_prs, changed_files ) if @json
-
           return 0
-        end
-
-        def detect_existing_release_pr
-          say 'Searching for existing release pull requests...', :info
-          client.pull_requests(repository).find do |pr|
-            pr.head.ref == staging_branch && pr.base.ref == production_branch
-          end
         end
 
         def set_labels_to_release_pr(release_pr)
