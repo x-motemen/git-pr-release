@@ -109,7 +109,11 @@ module Git
           create_mode = found_release_pr.nil?
 
           # Fetch changed files of a release PR
-          changed_files = pull_request_files(found_release_pr)
+          changed_files = if create_mode
+                            []
+                          else
+                            pull_request_files(found_release_pr)
+                          end
 
           if @dry_run
             pr_title, new_body = build_pr_title_and_body found_release_pr, merged_prs, changed_files

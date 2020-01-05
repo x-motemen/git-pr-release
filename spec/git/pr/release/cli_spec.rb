@@ -211,7 +211,6 @@ RSpec.describe Git::Pr::Release::CLI do
       expect(@cli).to have_received(:prepare_release_pr)
       expect(@cli).to have_received(:build_and_merge_pr_title_and_body)
       expect(@cli).to have_received(:update_release_pr).with(@created_pr, @pr_title, @pr_body)
-      expect(@cli).to have_received(:pull_request_files).with(nil)
       expect(@cli).to have_received(:set_labels_to_release_pr).with(@created_pr)
     }
   end
