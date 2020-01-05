@@ -88,4 +88,83 @@ RSpec.describe Git::Pr::Release::CLI do
 
     it { is_expected.to eq 0 }
   end
+
+  describe "#configure" do
+    subject { @cli.configure }
+
+    before { @cli = Git::Pr::Release::CLI.new }
+
+    context "When default" do
+      before {
+        allow(@cli).to receive(:host_and_repository_and_scheme) {
+          [nil, "motemen/git-pr-release", "https"]
+        }
+        allow(@cli).to receive(:git_config).with("branch.production") { nil }
+        allow(@cli).to receive(:git_config).with("branch.staging") { nil }
+      }
+
+      it "configured as default" do
+        subject
+
+        expect(Octokit.api_endpoint).to eq "https://api.github.com/"
+        expect(Octokit.web_endpoint).to eq "https://github.com/"
+
+        expect(@cli.instance_variable_get(:@repository)).to eq "motemen/git-pr-release"
+        expect(@cli.instance_variable_get(:@production_branch)).to eq "master"
+        expect(@cli.instance_variable_get(:@staging_branch)).to eq "staging"
+      end
+    end
+
+    context "When GitHub Enterprise Server" do
+      before {
+        allow(@cli).to receive(:host_and_repository_and_scheme) {
+          ["example.com", "motemen/git-pr-release", "https"]
+        }
+      }
+      after {
+        Octokit.reset!
+      }
+
+      it "octokit is configured" do
+        subject
+
+        expect(Octokit.api_endpoint).to eq "https://example.com/api/v3/"
+        expect(Octokit.web_endpoint).to eq "https://example.com/"
+      end
+    end
+
+    context "When branches are set by ENV" do
+      around do |example|
+        original = ENV.to_hash
+        begin
+          ENV["GIT_PR_RELEASE_BRANCH_PRODUCTION"] = "prod"
+          ENV["GIT_PR_RELEASE_BRANCH_STAGING"]    = "dev"
+          example.run
+        ensure
+          ENV.replace(original)
+        end
+      end
+
+      it "branches are configured" do
+        subject
+
+        expect(@cli.instance_variable_get(:@production_branch)).to eq "prod"
+        expect(@cli.instance_variable_get(:@staging_branch)).to eq "dev"
+      end
+    end
+
+    context "When branches are set by git_config" do
+      before {
+        allow(@cli).to receive(:git_config).with("branch.production") { "production" }
+        allow(@cli).to receive(:git_config).with("branch.staging") { "develop" }
+      }
+
+      it "branches are configured" do
+        subject
+
+        expect(@cli.instance_variable_get(:@production_branch)).to eq "production"
+        expect(@cli.instance_variable_get(:@staging_branch)).to eq "develop"
+      end
+    end
+  end
 end
