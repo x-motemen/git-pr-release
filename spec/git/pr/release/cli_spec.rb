@@ -144,4 +144,54 @@ RSpec.describe Git::Pr::Release::CLI do
       end
     end
   end
+
+  describe "#fetch_merged_prs" do
+    subject { @cli.fetch_merged_prs }
+
+    before {
+      @cli = Git::Pr::Release::CLI.new
+
+      agent = Sawyer::Agent.new("http://example.com/") do |conn|
+        conn.builder.handlers.delete(Faraday::Adapter::NetHttp)
+        conn.adapter(:test, Faraday::Adapter::Test::Stubs.new)
+      end
+
+      allow(@cli).to receive(:repository) { "motemen/git-pr-release" }
+      allow(@cli).to receive(:production_branch) { "master" }
+      allow(@cli).to receive(:staging_branch) { "staging" }
+
+      expect(@cli).to receive(:git).with(:remote, "update", "origin") {
+        []
+      }
+
+      expect(@cli).to receive(:git).with(:log, "--merges", "--pretty=format:%P", "origin/master..origin/staging") {
+        <<~GIT_LOG.each_line
+          ad694b9c2b868e8801f9209f0ad5dd5458c49854 42bd43b80c973c8f348df3521745201be05bf194
+          b620bead10831d2e4e15be392e0a435d3470a0ad 5c977a1827387ac7b7a85c7b827ee119165f1823
+        GIT_LOG
+      }
+      expect(@cli).to receive(:git).with("ls-remote", "origin", "refs/pull/*/head") {
+        <<~GIT_LS_REMOTE.each_line
+          bbcd2a04ef394e91be44c24e93e52fdbca944060        refs/pull/1/head
+          5c977a1827387ac7b7a85c7b827ee119165f1823        refs/pull/3/head
+          42bd43b80c973c8f348df3521745201be05bf194        refs/pull/4/head
+        GIT_LS_REMOTE
+      }
+      expect(@cli).to receive(:git).with("merge-base", "5c977a1827387ac7b7a85c7b827ee119165f1823", "origin/master") {
+        "b620bead10831d2e4e15be392e0a435d3470a0ad".each_line
+      }
+      expect(@cli).to receive(:git).with("merge-base", "42bd43b80c973c8f348df3521745201be05bf194", "origin/master") {
+        "b620bead10831d2e4e15be392e0a435d3470a0ad".each_line
+      }
+
+      client = double(Octokit::Client)
+      @pr_3 = Sawyer::Resource.new(agent, YAML.load_file(file_fixture("pr_3.yml")))
+      @pr_4 = Sawyer::Resource.new(agent, YAML.load_file(file_fixture("pr_4.yml")))
+      expect(client).to receive(:pull_request).with("motemen/git-pr-release", 3) { @pr_3 }
+      expect(client).to receive(:pull_request).with("motemen/git-pr-release", 4) { @pr_4 }
+      allow(@cli).to receive(:client).with(no_args) { client }
+    }
+
+    it { is_expected.to eq [@pr_3, @pr_4] }
+  end
 end
