@@ -199,16 +199,7 @@ RSpec.describe Git::Pr::Release::CLI do
       expect(@cli).to receive(:build_pr_title_and_body) {
         [pr_title, pr_body]
       }
-      expect(client).to receive(:update_pull_request).with(
-        "motemen/git-pr-release",
-        1023,
-        {
-          body: pr_body,
-          title: pr_title,
-        }
-      ) {
-        created_pr
-      }
+      expect(@cli).to receive(:update_release_pr).with(created_pr, pr_title, pr_body) { 0 }
       allow(@cli).to receive(:client).with(no_args) {
         client
       }
@@ -219,6 +210,35 @@ RSpec.describe Git::Pr::Release::CLI do
     }
 
     it { is_expected.to eq 0 }
+  end
+
+  describe "#update_release_pr" do
+    subject { @cli.update_release_pr(@release_pr, "PR Title", "PR Body") }
+
+    before {
+      @cli = Git::Pr::Release::CLI.new
+
+      allow(@cli).to receive(:repository) { "motemen/git-pr-release" }
+
+      @release_pr = double(number: 1023)
+
+      @client = double(Octokit::Client)
+      allow(@client).to receive(:update_pull_request) { @release_pr }
+      allow(@cli).to receive(:client) { @client }
+    }
+
+    it {
+      is_expected.to eq 0
+
+      expect(@client).to have_received(:update_pull_request).with(
+        "motemen/git-pr-release",
+        1023,
+        {
+          title: "PR Title",
+          body: "PR Body",
+        }
+      )
+    }
   end
 
   describe "#detect_existing_release_pr" do
