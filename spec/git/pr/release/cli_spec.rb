@@ -18,49 +18,16 @@ RSpec.describe Git::Pr::Release::CLI do
       allow(@cli).to receive(:staging_branch) { "staging" }
 
       ### Fetch merged PRs
+      pr_3 = Sawyer::Resource.new(@agent, YAML.load_file(file_fixture("pr_3.yml")))
+      pr_4 = Sawyer::Resource.new(@agent, YAML.load_file(file_fixture("pr_4.yml")))
       expect(@cli).to receive(:fetch_merged_prs) {
-        [
-          Sawyer::Resource.new(@agent, YAML.load_file(file_fixture("pr_3.yml"))),
-          Sawyer::Resource.new(@agent, YAML.load_file(file_fixture("pr_4.yml"))),
-        ]
+        [pr_3, pr_4]
       }
 
       ### Create a release PR
-      client = double(Octokit::Client)
-      expect(client).to receive(:pull_requests).with("motemen/git-pr-release") {
-        []
+      expect(@cli).to receive(:create_release_pr).with([pr_3, pr_4]) {
+        0
       }
-      created_pr = double(
-        number: 1023,
-        rels: { html: double(href: "https://github.com/motemen/git-pr-release/pull/1023") }
-      )
-      expect(client).to receive(:create_pull_request).with("motemen/git-pr-release", "master", "staging", "Preparing release pull request...", "") {
-        created_pr
-      }
-      pr_title = "Release 2020-01-04 16:51:09 +0900"
-      pr_body = <<~BODY
-        - [ ] #3 Provides a creating release pull-request object for template @hakobe
-        - [ ] #4 use user who create PR if there is no assignee @motemen
-      BODY
-      expect(@cli).to receive(:build_pr_title_and_body) {
-        [pr_title, pr_body]
-      }
-      expect(client).to receive(:update_pull_request).with(
-        "motemen/git-pr-release",
-        1023,
-        {
-          body: pr_body,
-          title: pr_title,
-        }
-      ) {
-        created_pr
-      }
-      allow(@cli).to receive(:client).with(no_args) {
-        client
-      }
-      expect(@cli).to receive(:pull_request_files).with(client, nil) { nil }
-      expect(@cli).to receive(:pull_request_files).with(client, created_pr) { nil }
-      expect(@cli).to receive(:git_config).with("labels") { nil }
     }
 
     it { is_expected.to eq 0 }
@@ -193,5 +160,65 @@ RSpec.describe Git::Pr::Release::CLI do
     }
 
     it { is_expected.to eq [@pr_3, @pr_4] }
+  end
+
+  describe "#create_release_pr" do
+    subject { @cli.create_release_pr(@merged_prs) }
+
+    before {
+      @cli = Git::Pr::Release::CLI.new
+
+      @agent = Sawyer::Agent.new("http://example.com/") do |conn|
+        conn.builder.handlers.delete(Faraday::Adapter::NetHttp)
+        conn.adapter(:test, Faraday::Adapter::Test::Stubs.new)
+      end
+
+      @merged_prs = [
+        Sawyer::Resource.new(@agent, YAML.load_file(file_fixture("pr_3.yml"))),
+        Sawyer::Resource.new(@agent, YAML.load_file(file_fixture("pr_4.yml"))),
+      ]
+
+      allow(@cli).to receive(:repository) { "motemen/git-pr-release" }
+      allow(@cli).to receive(:production_branch) { "master" }
+      allow(@cli).to receive(:staging_branch) { "staging" }
+
+      client = double(Octokit::Client)
+      expect(client).to receive(:pull_requests).with("motemen/git-pr-release") {
+        []
+      }
+      created_pr = double(
+        number: 1023,
+        rels: { html: double(href: "https://github.com/motemen/git-pr-release/pull/1023") }
+      )
+      expect(client).to receive(:create_pull_request).with("motemen/git-pr-release", "master", "staging", "Preparing release pull request...", "") {
+        created_pr
+      }
+      pr_title = "Release 2020-01-04 16:51:09 +0900"
+      pr_body = <<~BODY
+        - [ ] #3 Provides a creating release pull-request object for template @hakobe
+        - [ ] #4 use user who create PR if there is no assignee @motemen
+      BODY
+      expect(@cli).to receive(:build_pr_title_and_body) {
+        [pr_title, pr_body]
+      }
+      expect(client).to receive(:update_pull_request).with(
+        "motemen/git-pr-release",
+        1023,
+        {
+          body: pr_body,
+          title: pr_title,
+        }
+      ) {
+        created_pr
+      }
+      allow(@cli).to receive(:client).with(no_args) {
+        client
+      }
+      expect(@cli).to receive(:pull_request_files).with(client, nil) { nil }
+      expect(@cli).to receive(:pull_request_files).with(client, created_pr) { nil }
+      expect(@cli).to receive(:git_config).with("labels") { nil }
+    }
+
+    it { is_expected.to eq 0 }
   end
 end
