@@ -178,19 +178,13 @@ RSpec.describe Git::Pr::Release::CLI do
         Sawyer::Resource.new(@agent, YAML.load_file(file_fixture("pr_4.yml"))),
       ]
 
-      allow(@cli).to receive(:repository) { "motemen/git-pr-release" }
-      allow(@cli).to receive(:production_branch) { "master" }
-      allow(@cli).to receive(:staging_branch) { "staging" }
-
       expect(@cli).to receive(:detect_existing_release_pr)
       client = double(Octokit::Client)
       created_pr = double(
         number: 1023,
         rels: { html: double(href: "https://github.com/motemen/git-pr-release/pull/1023") }
       )
-      expect(client).to receive(:create_pull_request).with("motemen/git-pr-release", "master", "staging", "Preparing release pull request...", "") {
-        created_pr
-      }
+      expect(@cli).to receive(:prepare_release_pr) { created_pr }
       pr_title = "Release 2020-01-04 16:51:09 +0900"
       pr_body = <<~BODY
         - [ ] #3 Provides a creating release pull-request object for template @hakobe
@@ -210,6 +204,34 @@ RSpec.describe Git::Pr::Release::CLI do
     }
 
     it { is_expected.to eq 0 }
+  end
+
+  describe "#prepare_release_pr" do
+    subject { @cli.prepare_release_pr }
+
+    before {
+      @cli = Git::Pr::Release::CLI.new
+
+      allow(@cli).to receive(:repository) { "motemen/git-pr-release" }
+      allow(@cli).to receive(:production_branch) { "master" }
+      allow(@cli).to receive(:staging_branch) { "staging" }
+
+      @client = double(Octokit::Client)
+      allow(@client).to receive(:create_pull_request)
+      allow(@cli).to receive(:client) { @client }
+    }
+
+    it {
+      subject
+
+      expect(@client).to have_received(:create_pull_request).with(
+        "motemen/git-pr-release",
+        "master",
+        "staging",
+        "Preparing release pull request...",
+        "", # empby body
+      )
+    }
   end
 
   describe "#update_release_pr" do
