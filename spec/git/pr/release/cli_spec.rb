@@ -179,7 +179,6 @@ RSpec.describe Git::Pr::Release::CLI do
       ]
 
       expect(@cli).to receive(:detect_existing_release_pr)
-      client = double(Octokit::Client)
       created_pr = double(
         number: 1023,
         rels: { html: double(href: "https://github.com/motemen/git-pr-release/pull/1023") },
@@ -195,10 +194,7 @@ RSpec.describe Git::Pr::Release::CLI do
         [pr_title, pr_body]
       }
       expect(@cli).to receive(:update_release_pr).with(created_pr, pr_title, pr_body) { 0 }
-      allow(@cli).to receive(:client).with(no_args) {
-        client
-      }
-      expect(@cli).to receive(:pull_request_files).with(client, nil) { nil }
+      expect(@cli).to receive(:pull_request_files).with(nil) { nil }
 
       expect(@cli).to receive(:set_labels_to_release_pr).with(created_pr) { 0 }
     }
@@ -252,7 +248,7 @@ RSpec.describe Git::Pr::Release::CLI do
     it {
       is_expected.to eq ["PR Title", "Merged Body"]
 
-      expect(@cli).to have_received(:pull_request_files).with(@client, @release_pr)
+      expect(@cli).to have_received(:pull_request_files).with(@release_pr)
       expect(@cli).to have_received(:build_pr_title_and_body).with(@release_pr, @merged_prs, @changed_files)
       expect(@cli).to have_received(:merge_pr_body).with("Old Body", "PR Body")
     }
@@ -396,5 +392,28 @@ RSpec.describe Git::Pr::Release::CLI do
         )
       end
     end
+  end
+
+  describe "#pull_request_files" do
+    subject { @cli.pull_request_files(@release_pr) }
+
+    before {
+      @cli = Git::Pr::Release::CLI.new
+      allow(@cli).to receive(:repository) { "motemen/git-pr-release" }
+      @release_pr = double(number: 1023)
+      @client = double(Octokit::Client)
+      @changed_files = [double(Sawyer::Resource)]
+      allow(@client).to receive(:pull_request_files) { @changed_files }
+      allow(@client).to receive(:auto_paginate=)
+      allow(@cli).to receive(:client) { @client }
+    }
+
+    it {
+      is_expected.to eq @changed_files
+
+      expect(@client).to have_received(:auto_paginate=).with(true)
+      expect(@client).to have_received(:pull_request_files).with("motemen/git-pr-release", 1023)
+      expect(@client).to have_received(:auto_paginate=).with(false)
+    }
   end
 end

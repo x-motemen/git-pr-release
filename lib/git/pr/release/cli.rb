@@ -109,7 +109,7 @@ module Git
           create_mode = found_release_pr.nil?
 
           # Fetch changed files of a release PR
-          changed_files = pull_request_files(client, found_release_pr)
+          changed_files = pull_request_files(found_release_pr)
 
           if @dry_run
             pr_title, new_body = build_pr_title_and_body found_release_pr, merged_prs, changed_files
@@ -162,7 +162,7 @@ module Git
         end
 
         def build_and_merge_pr_title_and_body(release_pr, merged_prs)
-          changed_files = pull_request_files(client, release_pr)
+          changed_files = pull_request_files(release_pr)
           old_body = release_pr.body
           pr_title, new_body = build_pr_title_and_body(release_pr, merged_prs, changed_files)
 
@@ -200,6 +200,17 @@ module Git
           end
 
           return 0
+        end
+
+        # Fetch PR files of specified pull_request
+        def pull_request_files(pull_request)
+          return [] if pull_request.nil?
+
+          # Fetch files as many as possible
+          client.auto_paginate = true
+          files = client.pull_request_files repository, pull_request.number
+          client.auto_paginate = false
+          return files
         end
       end
     end
