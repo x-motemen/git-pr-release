@@ -182,10 +182,8 @@ RSpec.describe Git::Pr::Release::CLI do
       allow(@cli).to receive(:production_branch) { "master" }
       allow(@cli).to receive(:staging_branch) { "staging" }
 
+      expect(@cli).to receive(:detect_existing_release_pr)
       client = double(Octokit::Client)
-      expect(client).to receive(:pull_requests).with("motemen/git-pr-release") {
-        []
-      }
       created_pr = double(
         number: 1023,
         rels: { html: double(href: "https://github.com/motemen/git-pr-release/pull/1023") }
@@ -221,6 +219,38 @@ RSpec.describe Git::Pr::Release::CLI do
     }
 
     it { is_expected.to eq 0 }
+  end
+
+  describe "#detect_existing_release_pr" do
+    subject { @cli.detect_existing_release_pr }
+
+    before {
+      @cli = Git::Pr::Release::CLI.new
+
+      allow(@cli).to receive(:production_branch) { "master" }
+      allow(@cli).to receive(:staging_branch) { "staging" }
+
+      @client = double(Octokit::Client)
+      allow(@cli).to receive(:client).with(no_args) { @client }
+    }
+
+    context "When exists" do
+      before {
+        @release_pr = double(head: double(ref: "staging"), base: double(ref: "master"))
+        non_release_pr = double(head: double(ref: "topic"), base: double(ref: "staging"))
+        allow(@client).to receive(:pull_requests) { [non_release_pr, @release_pr] }
+      }
+
+      it { is_expected.to eq @release_pr }
+    end
+
+    context "When not exists" do
+      before {
+        allow(@client).to receive(:pull_requests) { [] }
+      }
+
+      it { is_expected.to be_nil }
+    end
   end
 
   describe "#set_labels_to_release_pr" do
