@@ -122,16 +122,14 @@ module Git
             return 0
           end
 
-          release_pr = nil
-
-          if create_mode
-            release_pr = prepare_release_pr
-            unless release_pr
-              say 'Failed to create a new pull request', :error
-              return 2
-            end
-          else
-            release_pr = found_release_pr
+          release_pr = if create_mode
+                         prepare_release_pr
+                       else
+                         found_release_pr
+                       end
+          unless release_pr
+            say 'Failed to create a new pull request', :error
+            return 2
           end
 
           pr_title, pr_body = build_and_merge_pr_title_and_body(release_pr, merged_prs)
