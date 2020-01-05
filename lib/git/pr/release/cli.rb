@@ -105,10 +105,7 @@ module Git
         end
 
         def create_release_pr(merged_prs)
-          say 'Searching for existing release pull requests...', :info
-          found_release_pr = client.pull_requests(repository).find do |pr|
-            pr.head.ref == staging_branch && pr.base.ref == production_branch
-          end
+          found_release_pr = detect_existing_release_pr
           create_mode = found_release_pr.nil?
 
           # Fetch changed files of a release PR
@@ -164,6 +161,13 @@ module Git
           dump_result_as_json( release_pr, merged_prs, changed_files ) if @json
 
           return 0
+        end
+
+        def detect_existing_release_pr
+          say 'Searching for existing release pull requests...', :info
+          client.pull_requests(repository).find do |pr|
+            pr.head.ref == staging_branch && pr.base.ref == production_branch
+          end
         end
 
         def set_labels_to_release_pr(release_pr)
