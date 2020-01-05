@@ -126,16 +126,14 @@ module Git
           release_pr = nil
 
           if create_mode
-            created_pr = client.create_pull_request(
-              repository, production_branch, staging_branch, 'Preparing release pull request...', ''
-            )
-            unless created_pr
+            release_pr = prepare_release_pr
+            unless release_pr
               say 'Failed to create a new pull request', :error
               return 2
             end
-            changed_files = pull_request_files(client, created_pr) # Refetch changed files from created_pr
-            pr_title, pr_body = build_pr_title_and_body created_pr, merged_prs, changed_files
-            release_pr = created_pr
+
+            changed_files = pull_request_files(client, release_pr) # Refetch changed files from created_pr
+            pr_title, pr_body = build_pr_title_and_body release_pr, merged_prs, changed_files
           else
             pr_title, new_body = build_pr_title_and_body found_release_pr, merged_prs, changed_files
             pr_body = merge_pr_body(found_release_pr.body, new_body)
@@ -159,6 +157,12 @@ module Git
           client.pull_requests(repository).find do |pr|
             pr.head.ref == staging_branch && pr.base.ref == production_branch
           end
+        end
+
+        def prepare_release_pr
+          client.create_pull_request(
+            repository, production_branch, staging_branch, 'Preparing release pull request...', ''
+          )
         end
 
         def update_release_pr(release_pr, pr_title, pr_body)
