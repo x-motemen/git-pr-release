@@ -5,30 +5,38 @@ RSpec.describe Git::Pr::Release::CLI do
     before {
       @cli = Git::Pr::Release::CLI.new
 
-      Timecop.freeze(Time.parse("2020-01-04 16:51:09+09:00"))
-      @agent = Sawyer::Agent.new("http://example.com/") do |conn|
-        conn.builder.handlers.delete(Faraday::Adapter::NetHttp)
-        conn.adapter(:test, Faraday::Adapter::Test::Stubs.new)
-      end
-
-      ### Set up configuration
-      expect(@cli).to receive(:configure)
-      allow(@cli).to receive(:repository) { "motemen/git-pr-release" }
-      allow(@cli).to receive(:production_branch) { "master" }
-      allow(@cli).to receive(:staging_branch) { "staging" }
-
-      ### Fetch merged PRs
-      pr_3 = Sawyer::Resource.new(@agent, YAML.load_file(file_fixture("pr_3.yml")))
-      pr_4 = Sawyer::Resource.new(@agent, YAML.load_file(file_fixture("pr_4.yml")))
-      expect(@cli).to receive(:fetch_merged_prs) {
-        [pr_3, pr_4]
-      }
-
-      ### Create a release PR
-      expect(@cli).to receive(:create_release_pr).with([pr_3, pr_4])
+      allow(@cli).to receive(:configure)
+      allow(@cli).to receive(:fetch_merged_prs) { merged_prs }
+      allow(@cli).to receive(:create_release_pr)
     }
 
-    it { is_expected.to eq 0 }
+    context "When merged_prs is empty" do
+      let(:merged_prs) { [] }
+      it {
+        is_expected.to eq 1
+        expect(@cli).to have_received(:configure)
+        expect(@cli).to have_received(:fetch_merged_prs)
+        expect(@cli).not_to have_received(:create_release_pr)
+      }
+    end
+
+    context "When merged_prs exists" do
+      let(:merged_prs) {
+        agent = Sawyer::Agent.new("http://example.com/") do |conn|
+          conn.builder.handlers.delete(Faraday::Adapter::NetHttp)
+          conn.adapter(:test, Faraday::Adapter::Test::Stubs.new)
+        end
+        pr_3 = Sawyer::Resource.new(agent, YAML.load_file(file_fixture("pr_3.yml")))
+        pr_4 = Sawyer::Resource.new(agent, YAML.load_file(file_fixture("pr_4.yml")))
+        [pr_3, pr_4]
+      }
+      it {
+        is_expected.to eq 0
+        expect(@cli).to have_received(:configure)
+        expect(@cli).to have_received(:fetch_merged_prs)
+        expect(@cli).to have_received(:create_release_pr).with(merged_prs)
+      }
+    end
   end
 
   describe "#configure" do
