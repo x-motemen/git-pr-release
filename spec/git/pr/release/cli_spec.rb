@@ -25,9 +25,7 @@ RSpec.describe Git::Pr::Release::CLI do
       }
 
       ### Create a release PR
-      expect(@cli).to receive(:create_release_pr).with([pr_3, pr_4]) {
-        0
-      }
+      expect(@cli).to receive(:create_release_pr).with([pr_3, pr_4])
     }
 
     it { is_expected.to eq 0 }
@@ -178,28 +176,36 @@ RSpec.describe Git::Pr::Release::CLI do
         Sawyer::Resource.new(@agent, YAML.load_file(file_fixture("pr_4.yml"))),
       ]
 
-      expect(@cli).to receive(:detect_existing_release_pr)
-      created_pr = double(
+      allow(@cli).to receive(:detect_existing_release_pr) { nil }
+      @created_pr = double(
         number: 1023,
         rels: { html: double(href: "https://github.com/motemen/git-pr-release/pull/1023") },
         body: "",
       )
-      expect(@cli).to receive(:prepare_release_pr) { created_pr }
-      pr_title = "Release 2020-01-04 16:51:09 +0900"
-      pr_body = <<~BODY.chomp
+      allow(@cli).to receive(:prepare_release_pr) { @created_pr }
+      @pr_title = "Release 2020-01-04 16:51:09 +0900"
+      @pr_body = <<~BODY.chomp
         - [ ] #3 Provides a creating release pull-request object for template @hakobe
         - [ ] #4 use user who create PR if there is no assignee @motemen
       BODY
-      expect(@cli).to receive(:build_and_merge_pr_title_and_body) {
-        [pr_title, pr_body]
+      allow(@cli).to receive(:build_and_merge_pr_title_and_body) {
+        [@pr_title, @pr_body]
       }
-      expect(@cli).to receive(:update_release_pr).with(created_pr, pr_title, pr_body) { 0 }
-      expect(@cli).to receive(:pull_request_files).with(nil) { nil }
-
-      expect(@cli).to receive(:set_labels_to_release_pr).with(created_pr) { 0 }
+      allow(@cli).to receive(:update_release_pr)
+      allow(@cli).to receive(:pull_request_files)
+      allow(@cli).to receive(:set_labels_to_release_pr)
     }
 
-    it { is_expected.to eq 0 }
+    it {
+      subject
+
+      expect(@cli).to have_received(:detect_existing_release_pr)
+      expect(@cli).to have_received(:prepare_release_pr)
+      expect(@cli).to have_received(:build_and_merge_pr_title_and_body)
+      expect(@cli).to have_received(:update_release_pr).with(@created_pr, @pr_title, @pr_body)
+      expect(@cli).to have_received(:pull_request_files).with(nil)
+      expect(@cli).to have_received(:set_labels_to_release_pr).with(@created_pr)
+    }
   end
 
   describe "#prepare_release_pr" do
@@ -270,7 +276,7 @@ RSpec.describe Git::Pr::Release::CLI do
     }
 
     it {
-      is_expected.to eq 0
+      subject
 
       expect(@client).to have_received(:update_pull_request).with(
         "motemen/git-pr-release",
@@ -335,7 +341,7 @@ RSpec.describe Git::Pr::Release::CLI do
       }
 
       it "do nothing" do
-        is_expected.to eq 0
+        subject
         expect(@client).not_to have_received(:add_labels_to_an_issue)
       end
     end
@@ -354,7 +360,7 @@ RSpec.describe Git::Pr::Release::CLI do
       context "string" do
         let(:env_labels) { "release" }
         it "add lavel" do
-          is_expected.to eq 0
+          subject
           expect(@client).to have_received(:add_labels_to_an_issue).with(
             "motemen/git-pr-release", 1023, ["release"]
           )
@@ -364,7 +370,7 @@ RSpec.describe Git::Pr::Release::CLI do
       context "comma separated string" do
         let(:env_labels) { "release,release2" }
         it "add lavel" do
-          is_expected.to eq 0
+          subject
           expect(@client).to have_received(:add_labels_to_an_issue).with(
             "motemen/git-pr-release", 1023, ["release", "release2"]
           )
@@ -374,7 +380,7 @@ RSpec.describe Git::Pr::Release::CLI do
       context "empty string" do
         let(:env_labels) { "" }
         it "do nothing" do
-          is_expected.to eq 0
+          subject
           expect(@client).not_to have_received(:add_labels_to_an_issue)
         end
       end
@@ -386,7 +392,7 @@ RSpec.describe Git::Pr::Release::CLI do
       }
 
       it "add lavel" do
-        is_expected.to eq 0
+        subject
         expect(@client).to have_received(:add_labels_to_an_issue).with(
           "motemen/git-pr-release", 1023, ["release"]
         )

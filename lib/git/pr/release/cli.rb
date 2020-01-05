@@ -37,8 +37,8 @@ module Git
           end
 
           ### Create a release PR
-          exit_code = create_release_pr(merged_prs)
-          return exit_code
+          create_release_pr(merged_prs)
+          return 0
         end
 
         def client
@@ -119,7 +119,7 @@ module Git
             say pr_title, :notice
             say pr_body, :notice
             dump_result_as_json( found_release_pr, merged_prs, changed_files ) if @json
-            return 0
+            return
           end
 
           release_pr = if create_mode
@@ -127,23 +127,15 @@ module Git
                        else
                          found_release_pr
                        end
-          unless release_pr
-            say 'Failed to create a new pull request', :error
-            return 2
-          end
 
           pr_title, pr_body = build_and_merge_pr_title_and_body(release_pr, merged_prs)
 
-          exit_code = update_release_pr(release_pr, pr_title, pr_body)
-          return exit_code if exit_code != 0
+          update_release_pr(release_pr, pr_title, pr_body)
 
-          exit_code = set_labels_to_release_pr(release_pr)
-          return exit_code if exit_code != 0
+          set_labels_to_release_pr(release_pr)
 
           say "#{create_mode ? 'Created' : 'Updated'} pull request: #{release_pr.rels[:html].href}", :notice
           dump_result_as_json( release_pr, merged_prs, changed_files ) if @json
-
-          return 0
         end
 
         def detect_existing_release_pr
@@ -171,33 +163,19 @@ module Git
           say 'Pull request body:', :debug
           say pr_body, :debug
 
-          updated_pull_request = client.update_pull_request(
+          client.update_pull_request(
             repository, release_pr.number, :title => pr_title, :body => pr_body
           )
-
-          unless updated_pull_request
-            say 'Failed to update a pull request', :error
-            return 3
-          end
-
-          return 0
         end
 
         def set_labels_to_release_pr(release_pr)
           labels = ENV.fetch('GIT_PR_RELEASE_LABELS') { git_config('labels') }
-          return 0 if labels.nil? || labels.empty?
+          return if labels.nil? || labels.empty?
 
           labels = labels.split(/\s*,\s*/)
-          labeled_pull_request = client.add_labels_to_an_issue(
+          client.add_labels_to_an_issue(
             repository, release_pr.number, labels
           )
-
-          unless labeled_pull_request
-            say 'Failed to add labels to a pull request', :error
-            return 4
-          end
-
-          return 0
         end
 
         # Fetch PR files of specified pull_request
