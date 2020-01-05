@@ -157,6 +157,16 @@ module Git
             return 3
           end
 
+          exit_code = set_labels_to_release_pr(release_pr)
+          return exit_code if exit_code != 0
+
+          say "#{create_mode ? 'Created' : 'Updated'} pull request: #{updated_pull_request.rels[:html].href}", :notice
+          dump_result_as_json( release_pr, merged_prs, changed_files ) if @json
+
+          return 0
+        end
+
+        def set_labels_to_release_pr(release_pr)
           labels = ENV.fetch('GIT_PR_RELEASE_LABELS') { git_config('labels') }
           if not labels.nil? and not labels.empty?
             labels = labels.split(/\s*,\s*/)
@@ -169,9 +179,6 @@ module Git
               return 4
             end
           end
-
-          say "#{create_mode ? 'Created' : 'Updated'} pull request: #{updated_pull_request.rels[:html].href}", :notice
-          dump_result_as_json( release_pr, merged_prs, changed_files ) if @json
 
           return 0
         end
