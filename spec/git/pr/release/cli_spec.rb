@@ -1,4 +1,14 @@
 RSpec.describe Git::Pr::Release::CLI do
+  let(:configured_cli) {
+    cli = Git::Pr::Release::CLI.new
+    allow(cli).to receive(:host_and_repository_and_scheme) {
+      [nil, "motemen/git-pr-release", "https"]
+    }
+    allow(cli).to receive(:git_config).with(anything) { nil }
+    cli.configure
+    cli
+  }
+
   describe "#start" do
     subject { @cli.start }
 
@@ -128,16 +138,12 @@ RSpec.describe Git::Pr::Release::CLI do
     subject { @cli.fetch_merged_prs }
 
     before {
-      @cli = Git::Pr::Release::CLI.new
+      @cli = configured_cli
 
       agent = Sawyer::Agent.new("http://example.com/") do |conn|
         conn.builder.handlers.delete(Faraday::Adapter::NetHttp)
         conn.adapter(:test, Faraday::Adapter::Test::Stubs.new)
       end
-
-      allow(@cli).to receive(:repository) { "motemen/git-pr-release" }
-      allow(@cli).to receive(:production_branch) { "master" }
-      allow(@cli).to receive(:staging_branch) { "staging" }
 
       expect(@cli).to receive(:git).with(:remote, "update", "origin") {
         []
@@ -178,7 +184,7 @@ RSpec.describe Git::Pr::Release::CLI do
     subject { @cli.create_release_pr(@merged_prs) }
 
     before {
-      @cli = Git::Pr::Release::CLI.new
+      @cli = configured_cli
 
       @agent = Sawyer::Agent.new("http://example.com/") do |conn|
         conn.builder.handlers.delete(Faraday::Adapter::NetHttp)
@@ -274,11 +280,7 @@ RSpec.describe Git::Pr::Release::CLI do
     subject { @cli.prepare_release_pr }
 
     before {
-      @cli = Git::Pr::Release::CLI.new
-
-      allow(@cli).to receive(:repository) { "motemen/git-pr-release" }
-      allow(@cli).to receive(:production_branch) { "master" }
-      allow(@cli).to receive(:staging_branch) { "staging" }
+      @cli = configured_cli
 
       @client = double(Octokit::Client)
       allow(@client).to receive(:create_pull_request)
@@ -302,8 +304,7 @@ RSpec.describe Git::Pr::Release::CLI do
     subject { @cli.build_and_merge_pr_title_and_body(release_pr, @merged_prs, changed_files) }
 
     before {
-      @cli = Git::Pr::Release::CLI.new
-      allow(@cli).to receive(:template_path) { nil }
+      @cli = configured_cli
 
       @merged_prs = [double(Sawyer::Resource)]
       allow(@cli).to receive(:build_pr_title_and_body) { ["PR Title", "PR Body"] }
@@ -340,9 +341,7 @@ RSpec.describe Git::Pr::Release::CLI do
     subject { @cli.update_release_pr(@release_pr, "PR Title", "PR Body") }
 
     before {
-      @cli = Git::Pr::Release::CLI.new
-
-      allow(@cli).to receive(:repository) { "motemen/git-pr-release" }
+      @cli = configured_cli
 
       @release_pr = double(number: 1023)
 
@@ -369,10 +368,7 @@ RSpec.describe Git::Pr::Release::CLI do
     subject { @cli.detect_existing_release_pr }
 
     before {
-      @cli = Git::Pr::Release::CLI.new
-
-      allow(@cli).to receive(:production_branch) { "master" }
-      allow(@cli).to receive(:staging_branch) { "staging" }
+      @cli = configured_cli
 
       @client = double(Octokit::Client)
       allow(@cli).to receive(:client).with(no_args) { @client }
@@ -401,10 +397,8 @@ RSpec.describe Git::Pr::Release::CLI do
     subject { @cli.set_labels_to_release_pr(@release_pr) }
 
     before {
-      @cli = Git::Pr::Release::CLI.new
+      @cli = configured_cli
       @release_pr = double(number: 1023)
-
-      allow(@cli).to receive(:repository) { "motemen/git-pr-release" }
 
       @client = double(Octokit::Client)
       allow(@client).to receive(:add_labels_to_an_issue) { @release_pr }
@@ -480,8 +474,8 @@ RSpec.describe Git::Pr::Release::CLI do
     subject { @cli.pull_request_files(@release_pr) }
 
     before {
-      @cli = Git::Pr::Release::CLI.new
-      allow(@cli).to receive(:repository) { "motemen/git-pr-release" }
+      @cli = configured_cli
+
       @release_pr = double(number: 1023)
       @client = double(Octokit::Client)
       @changed_files = [double(Sawyer::Resource)]
