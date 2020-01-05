@@ -41,8 +41,6 @@ module Git
           say "Production branch: #{production_branch}", :debug
           say "Staging branch:    #{staging_branch}", :debug
 
-          client = Octokit::Client.new :access_token => obtain_token!
-
           git :remote, 'update', 'origin' unless @no_fetch
 
           ### Fetch merged PRs
@@ -153,6 +151,10 @@ module Git
 
           say "#{create_mode ? 'Created' : 'Updated'} pull request: #{updated_pull_request.rels[:html].href}", :notice
           dump_result_as_json( release_pr, merged_prs, changed_files ) if @json
+        end
+
+        def self.client
+          @client ||= Octokit::Client.new :access_token => obtain_token!
         end
       end
     end
