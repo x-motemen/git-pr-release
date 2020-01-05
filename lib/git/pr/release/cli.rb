@@ -6,6 +6,7 @@ module Git
     module Release
       class CLI
         include Git::Pr::Release::Util
+        attr_reader :repository, :production_branch, :staging_branch
 
         def self.start
           result = self.new.start
@@ -13,18 +14,6 @@ module Git
         end
 
         def start
-          host, repository, scheme = host_and_repository_and_scheme
-
-          if host
-            # GitHub:Enterprise
-            OpenSSL::SSL.const_set :VERIFY_PEER, OpenSSL::SSL::VERIFY_NONE # XXX
-
-            Octokit.configure do |c|
-              c.api_endpoint = "#{scheme}://#{host}/api/v3"
-              c.web_endpoint = "#{scheme}://#{host}/"
-            end
-          end
-
           OptionParser.new do |opts|
             opts.on('-n', '--dry-run', 'Do not create/update a PR. Just prints out') do |v|
               @dry_run = v
@@ -38,13 +27,7 @@ module Git
           end.parse!
 
           ### Set up configuration
-
-          production_branch = ENV.fetch('GIT_PR_RELEASE_BRANCH_PRODUCTION') { git_config('branch.production') } || 'master'
-          staging_branch    = ENV.fetch('GIT_PR_RELEASE_BRANCH_STAGING') { git_config('branch.staging') }       || 'staging'
-
-          say "Repository:        #{repository}", :debug
-          say "Production branch: #{production_branch}", :debug
-          say "Staging branch:    #{staging_branch}", :debug
+          configure
 
           git :remote, 'update', 'origin' unless @no_fetch
 
@@ -162,6 +145,27 @@ module Git
 
         def client
           @client ||= Octokit::Client.new :access_token => obtain_token!
+        end
+
+        def configure
+          host, @repository, scheme = host_and_repository_and_scheme
+
+          if host
+            # GitHub:Enterprise
+            OpenSSL::SSL.const_set :VERIFY_PEER, OpenSSL::SSL::VERIFY_NONE # XXX
+
+            Octokit.configure do |c|
+              c.api_endpoint = "#{scheme}://#{host}/api/v3"
+              c.web_endpoint = "#{scheme}://#{host}/"
+            end
+          end
+
+          @production_branch = ENV.fetch('GIT_PR_RELEASE_BRANCH_PRODUCTION') { git_config('branch.production') } || 'master'
+          @staging_branch    = ENV.fetch('GIT_PR_RELEASE_BRANCH_STAGING') { git_config('branch.staging') }       || 'staging'
+
+          say "Repository:        #{repository}", :debug
+          say "Production branch: #{production_branch}", :debug
+          say "Staging branch:    #{staging_branch}", :debug
         end
       end
     end
