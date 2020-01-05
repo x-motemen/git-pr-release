@@ -6,7 +6,7 @@ module Git
     module Release
       class CLI
         include Git::Pr::Release::Util
-        attr_reader :repository, :production_branch, :staging_branch
+        attr_reader :repository, :production_branch, :staging_branch, :template_path
 
         def self.start
           result = self.new.start
@@ -60,10 +60,12 @@ module Git
 
           @production_branch = ENV.fetch('GIT_PR_RELEASE_BRANCH_PRODUCTION') { git_config('branch.production') } || 'master'
           @staging_branch    = ENV.fetch('GIT_PR_RELEASE_BRANCH_STAGING') { git_config('branch.staging') }       || 'staging'
+          @template_path     = ENV.fetch('GIT_PR_RELEASE_TEMPLATE') { git_config('template') }
 
           say "Repository:        #{repository}", :debug
           say "Production branch: #{production_branch}", :debug
           say "Staging branch:    #{staging_branch}", :debug
+          say "Template path:     #{template_path}", :debug
         end
 
         def fetch_merged_prs
@@ -155,7 +157,7 @@ module Git
         def build_and_merge_pr_title_and_body(release_pr, merged_prs, changed_files)
           # release_pr is nil when dry_run && create_mode
           old_body = release_pr ? release_pr.body : ""
-          pr_title, new_body = build_pr_title_and_body(release_pr, merged_prs, changed_files)
+          pr_title, new_body = build_pr_title_and_body(release_pr, merged_prs, changed_files, template_path)
 
           [pr_title, merge_pr_body(old_body, new_body)]
         end

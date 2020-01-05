@@ -83,16 +83,16 @@ Release <%= Time.now %>
 <% end -%>
 ERB
 
-        def build_pr_title_and_body(release_pr, merged_prs, changed_files)
+        def build_pr_title_and_body(release_pr, merged_prs, changed_files, template_path)
           release_pull_request = target_pull_request = release_pr ? PullRequest.new(release_pr) : DummyPullRequest.new
           merged_pull_requests = pull_requests = merged_prs.map { |pr| PullRequest.new(pr) }
 
-          template = DEFAULT_PR_TEMPLATE
-
-          if path = ENV.fetch('GIT_PR_RELEASE_TEMPLATE') { git_config('template') }
-            template_path = File.join(git('rev-parse', '--show-toplevel').first.chomp, path)
-            template = File.read(template_path)
-          end
+          template = if template_path
+                       template_fullpath = File.join(git('rev-parse', '--show-toplevel').first.chomp, template_path)
+                       File.read(template_path)
+                     else
+                       DEFAULT_PR_TEMPLATE
+                     end
 
           erb = ERB.new template, nil, '-'
           content = erb.result binding

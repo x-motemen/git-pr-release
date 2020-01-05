@@ -42,7 +42,11 @@ RSpec.describe Git::Pr::Release::CLI do
   describe "#configure" do
     subject { @cli.configure }
 
-    before { @cli = Git::Pr::Release::CLI.new }
+    before {
+      @cli = Git::Pr::Release::CLI.new
+
+      allow(@cli).to receive(:git_config).with(anything) { nil }
+    }
 
     context "When default" do
       before {
@@ -51,6 +55,7 @@ RSpec.describe Git::Pr::Release::CLI do
         }
         allow(@cli).to receive(:git_config).with("branch.production") { nil }
         allow(@cli).to receive(:git_config).with("branch.staging") { nil }
+        allow(@cli).to receive(:git_config).with("template") { nil }
       }
 
       it "configured as default" do
@@ -62,6 +67,7 @@ RSpec.describe Git::Pr::Release::CLI do
         expect(@cli.instance_variable_get(:@repository)).to eq "motemen/git-pr-release"
         expect(@cli.instance_variable_get(:@production_branch)).to eq "master"
         expect(@cli.instance_variable_get(:@staging_branch)).to eq "staging"
+        expect(@cli.instance_variable_get(:@template_path)).to eq nil
       end
     end
 
@@ -297,6 +303,7 @@ RSpec.describe Git::Pr::Release::CLI do
 
     before {
       @cli = Git::Pr::Release::CLI.new
+      allow(@cli).to receive(:template_path) { nil }
 
       @merged_prs = [double(Sawyer::Resource)]
       allow(@cli).to receive(:build_pr_title_and_body) { ["PR Title", "PR Body"] }
@@ -310,7 +317,7 @@ RSpec.describe Git::Pr::Release::CLI do
       it {
         is_expected.to eq ["PR Title", "Merged Body"]
 
-        expect(@cli).to have_received(:build_pr_title_and_body).with(release_pr, @merged_prs, changed_files)
+        expect(@cli).to have_received(:build_pr_title_and_body).with(release_pr, @merged_prs, changed_files, nil)
         expect(@cli).to have_received(:merge_pr_body).with("Old Body", "PR Body")
       }
     end
@@ -323,7 +330,7 @@ RSpec.describe Git::Pr::Release::CLI do
       it {
         is_expected.to eq ["PR Title", "Merged Body"]
 
-        expect(@cli).to have_received(:build_pr_title_and_body).with(release_pr, @merged_prs, changed_files)
+        expect(@cli).to have_received(:build_pr_title_and_body).with(release_pr, @merged_prs, changed_files, nil)
         expect(@cli).to have_received(:merge_pr_body).with("", "PR Body")
       }
     end
