@@ -31,6 +31,10 @@ module Git
 
           ### Fetch merged PRs
           merged_prs = fetch_merged_prs
+          if merged_prs.empty?
+            say 'No pull requests to be released', :error
+            return 1
+          end
 
           ### Create a release PR
 
@@ -158,11 +162,6 @@ module Git
               end
             end
           end.compact
-
-          if merged_pull_request_numbers.empty?
-            say 'No pull requests to be released', :error
-            return 1
-          end
 
           merged_prs = merged_pull_request_numbers.map do |nr|
             pr = client.pull_request repository, nr
