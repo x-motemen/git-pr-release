@@ -187,19 +187,18 @@ RSpec.describe Git::Pr::Release::CLI do
       )
       expect(@cli).to receive(:prepare_release_pr) { created_pr }
       pr_title = "Release 2020-01-04 16:51:09 +0900"
-      pr_body = <<~BODY
+      pr_body = <<~BODY.chomp
         - [ ] #3 Provides a creating release pull-request object for template @hakobe
         - [ ] #4 use user who create PR if there is no assignee @motemen
       BODY
-      expect(@cli).to receive(:build_pr_title_and_body) {
+      expect(@cli).to receive(:build_and_merge_pr_title_and_body) {
         [pr_title, pr_body]
       }
-      expect(@cli).to receive(:update_release_pr).with(created_pr, pr_title, pr_body.chomp) { 0 }
+      expect(@cli).to receive(:update_release_pr).with(created_pr, pr_title, pr_body) { 0 }
       allow(@cli).to receive(:client).with(no_args) {
         client
       }
       expect(@cli).to receive(:pull_request_files).with(client, nil) { nil }
-      expect(@cli).to receive(:pull_request_files).with(client, created_pr) { nil }
 
       expect(@cli).to receive(:set_labels_to_release_pr).with(created_pr) { 0 }
     }
@@ -232,6 +231,30 @@ RSpec.describe Git::Pr::Release::CLI do
         "Preparing release pull request...",
         "", # empby body
       )
+    }
+  end
+
+  describe "#build_and_merge_pr_title_and_body" do
+    subject { @cli.build_and_merge_pr_title_and_body(@release_pr, @merged_prs) }
+
+    before {
+      @cli = Git::Pr::Release::CLI.new
+
+      @merged_prs = [double(Sawyer::Resource)]
+      @release_pr = double(number: 1023, body: "Old Body")
+
+      @changed_files = [double(Sawyer::Resource)]
+      allow(@cli).to receive(:pull_request_files) { @changed_files }
+      allow(@cli).to receive(:build_pr_title_and_body) { ["PR Title", "PR Body"] }
+      allow(@cli).to receive(:merge_pr_body) { "Merged Body" }
+    }
+
+    it {
+      is_expected.to eq ["PR Title", "Merged Body"]
+
+      expect(@cli).to have_received(:pull_request_files).with(@client, @release_pr)
+      expect(@cli).to have_received(:build_pr_title_and_body).with(@release_pr, @merged_prs, @changed_files)
+      expect(@cli).to have_received(:merge_pr_body).with("Old Body", "PR Body")
     }
   end
 
