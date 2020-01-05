@@ -184,7 +184,7 @@ RSpec.describe Git::Pr::Release::CLI do
         Sawyer::Resource.new(@agent, YAML.load_file(file_fixture("pr_4.yml"))),
       ]
 
-      allow(@cli).to receive(:detect_existing_release_pr) { nil }
+      allow(@cli).to receive(:detect_existing_release_pr) { existing_release_pr }
       @created_pr = double(
         number: 1023,
         rels: { html: double(href: "https://github.com/motemen/git-pr-release/pull/1023") },
@@ -204,15 +204,34 @@ RSpec.describe Git::Pr::Release::CLI do
       allow(@cli).to receive(:set_labels_to_release_pr)
     }
 
-    it {
-      subject
+    context "When create_mode" do
+      let(:existing_release_pr) { nil }
+      it {
+        subject
 
-      expect(@cli).to have_received(:detect_existing_release_pr)
-      expect(@cli).to have_received(:prepare_release_pr)
-      expect(@cli).to have_received(:build_and_merge_pr_title_and_body)
-      expect(@cli).to have_received(:update_release_pr).with(@created_pr, @pr_title, @pr_body)
-      expect(@cli).to have_received(:set_labels_to_release_pr).with(@created_pr)
-    }
+        expect(@cli).to have_received(:detect_existing_release_pr)
+        expect(@cli).not_to have_received(:pull_request_files)
+        expect(@cli).to have_received(:prepare_release_pr)
+        expect(@cli).to have_received(:build_and_merge_pr_title_and_body)
+        expect(@cli).to have_received(:update_release_pr).with(@created_pr, @pr_title, @pr_body)
+        expect(@cli).to have_received(:set_labels_to_release_pr).with(@created_pr)
+      }
+    end
+
+    context "When not create_mode" do
+      let(:existing_release_pr) { @created_pr }
+
+      it {
+        subject
+
+        expect(@cli).to have_received(:detect_existing_release_pr)
+        expect(@cli).to have_received(:pull_request_files).with(@created_pr)
+        expect(@cli).not_to have_received(:prepare_release_pr)
+        expect(@cli).to have_received(:build_and_merge_pr_title_and_body)
+        expect(@cli).to have_received(:update_release_pr).with(@created_pr, @pr_title, @pr_body)
+        expect(@cli).to have_received(:set_labels_to_release_pr).with(@created_pr)
+      }
+    end
   end
 
   describe "#prepare_release_pr" do
