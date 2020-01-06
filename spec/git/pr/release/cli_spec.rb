@@ -66,6 +66,7 @@ RSpec.describe Git::Pr::Release::CLI do
         allow(@cli).to receive(:git_config).with("branch.production") { nil }
         allow(@cli).to receive(:git_config).with("branch.staging") { nil }
         allow(@cli).to receive(:git_config).with("template") { nil }
+        allow(@cli).to receive(:git_config).with("labels") { nil }
       }
 
       it "configured as default" do
@@ -78,6 +79,7 @@ RSpec.describe Git::Pr::Release::CLI do
         expect(@cli.instance_variable_get(:@production_branch)).to eq "master"
         expect(@cli.instance_variable_get(:@staging_branch)).to eq "staging"
         expect(@cli.instance_variable_get(:@template_path)).to eq nil
+        expect(@cli.instance_variable_get(:@labels)).to eq []
       end
     end
 
@@ -99,37 +101,88 @@ RSpec.describe Git::Pr::Release::CLI do
       end
     end
 
-    context "When branches are set by ENV" do
-      around do |example|
-        original = ENV.to_hash
-        begin
-          ENV["GIT_PR_RELEASE_BRANCH_PRODUCTION"] = "prod"
-          ENV["GIT_PR_RELEASE_BRANCH_STAGING"]    = "dev"
-          example.run
-        ensure
-          ENV.replace(original)
+    describe "branches" do
+      context "When branches are set by ENV" do
+        around do |example|
+          original = ENV.to_hash
+          begin
+            ENV["GIT_PR_RELEASE_BRANCH_PRODUCTION"] = "prod"
+            ENV["GIT_PR_RELEASE_BRANCH_STAGING"]    = "dev"
+            example.run
+          ensure
+            ENV.replace(original)
+          end
+        end
+
+        it "branches are configured" do
+          subject
+
+          expect(@cli.instance_variable_get(:@production_branch)).to eq "prod"
+          expect(@cli.instance_variable_get(:@staging_branch)).to eq "dev"
         end
       end
 
-      it "branches are configured" do
-        subject
+      context "When branches are set by git_config" do
+        before {
+          allow(@cli).to receive(:git_config).with("branch.production") { "production" }
+          allow(@cli).to receive(:git_config).with("branch.staging") { "develop" }
+        }
 
-        expect(@cli.instance_variable_get(:@production_branch)).to eq "prod"
-        expect(@cli.instance_variable_get(:@staging_branch)).to eq "dev"
+        it "branches are configured" do
+          subject
+
+          expect(@cli.instance_variable_get(:@production_branch)).to eq "production"
+          expect(@cli.instance_variable_get(:@staging_branch)).to eq "develop"
+        end
       end
     end
 
-    context "When branches are set by git_config" do
-      before {
-        allow(@cli).to receive(:git_config).with("branch.production") { "production" }
-        allow(@cli).to receive(:git_config).with("branch.staging") { "develop" }
-      }
+    describe "labels" do
+      context "With ENV" do
+        around do |example|
+          original = ENV.to_hash
+          begin
+            ENV["GIT_PR_RELEASE_LABELS"] = env_labels
+            example.run
+          ensure
+            ENV.replace(original)
+          end
+        end
 
-      it "branches are configured" do
-        subject
+        context "string" do
+          let(:env_labels) { "release" }
+          it "set labels" do
+            subject
+            expect(@cli.labels).to eq ["release"]
+          end
+        end
 
-        expect(@cli.instance_variable_get(:@production_branch)).to eq "production"
-        expect(@cli.instance_variable_get(:@staging_branch)).to eq "develop"
+        context "comma separated string" do
+          let(:env_labels) { "release,release2" }
+          it "set labels" do
+            subject
+            expect(@cli.labels).to eq ["release", "release2"]
+          end
+        end
+
+        context "empty string" do
+          let(:env_labels) { "" }
+          it "set labels as default" do
+            subject
+            expect(@cli.labels).to eq []
+          end
+        end
+      end
+
+      context "With git_config" do
+        before {
+          allow(@cli).to receive(:git_config).with("labels") { "release" }
+        }
+
+        it "set labels" do
+          subject
+          expect(@cli.labels).to eq ["release"]
+        end
       end
     end
   end
@@ -406,62 +459,17 @@ RSpec.describe Git::Pr::Release::CLI do
     }
 
     context "Without config" do
-      before {
-        allow(@cli).to receive(:git_config).with("labels") { nil }
-      }
-
       it "do nothing" do
         subject
         expect(@client).not_to have_received(:add_labels_to_an_issue)
       end
     end
 
-    context "With ENV" do
-      around do |example|
-        original = ENV.to_hash
-        begin
-          ENV["GIT_PR_RELEASE_LABELS"] = env_labels
-          example.run
-        ensure
-          ENV.replace(original)
-        end
-      end
-
-      context "string" do
-        let(:env_labels) { "release" }
-        it "add lavel" do
-          subject
-          expect(@client).to have_received(:add_labels_to_an_issue).with(
-            "motemen/git-pr-release", 1023, ["release"]
-          )
-        end
-      end
-
-      context "comma separated string" do
-        let(:env_labels) { "release,release2" }
-        it "add lavel" do
-          subject
-          expect(@client).to have_received(:add_labels_to_an_issue).with(
-            "motemen/git-pr-release", 1023, ["release", "release2"]
-          )
-        end
-      end
-
-      context "empty string" do
-        let(:env_labels) { "" }
-        it "do nothing" do
-          subject
-          expect(@client).not_to have_received(:add_labels_to_an_issue)
-        end
-      end
-    end
-
-    context "With git_config" do
+    context "With config" do
       before {
-        allow(@cli).to receive(:git_config).with("labels") { "release" }
+        allow(@cli).to receive(:labels) { ["release"] }
       }
-
-      it "add lavel" do
+      it "add label" do
         subject
         expect(@client).to have_received(:add_labels_to_an_issue).with(
           "motemen/git-pr-release", 1023, ["release"]

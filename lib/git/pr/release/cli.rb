@@ -6,7 +6,7 @@ module Git
     module Release
       class CLI
         include Git::Pr::Release::Util
-        attr_reader :repository, :production_branch, :staging_branch, :template_path
+        attr_reader :repository, :production_branch, :staging_branch, :template_path, :labels
 
         def self.start
           result = self.new.start
@@ -62,10 +62,14 @@ module Git
           @staging_branch    = ENV.fetch('GIT_PR_RELEASE_BRANCH_STAGING') { git_config('branch.staging') }       || 'staging'
           @template_path     = ENV.fetch('GIT_PR_RELEASE_TEMPLATE') { git_config('template') }
 
+          _labels = ENV.fetch('GIT_PR_RELEASE_LABELS') { git_config('labels') }
+          @labels = _labels && _labels.split(/\s*,\s*/) || []
+
           say "Repository:        #{repository}", :debug
           say "Production branch: #{production_branch}", :debug
           say "Staging branch:    #{staging_branch}", :debug
           say "Template path:     #{template_path}", :debug
+          say "Labels             #{labels}", :debug
         end
 
         def fetch_merged_prs
@@ -172,10 +176,8 @@ module Git
         end
 
         def set_labels_to_release_pr(release_pr)
-          labels = ENV.fetch('GIT_PR_RELEASE_LABELS') { git_config('labels') }
-          return if labels.nil? || labels.empty?
+          return if labels.empty?
 
-          labels = labels.split(/\s*,\s*/)
           client.add_labels_to_an_issue(
             repository, release_pr.number, labels
           )
