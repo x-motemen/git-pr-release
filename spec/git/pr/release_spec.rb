@@ -19,9 +19,9 @@ RSpec.describe Git::Pr::Release do
   end
 
   describe "#build_pr_title_and_body" do
-    context "without any options" do
+    context "without template_path" do
       it {
-        pr_title, new_body = build_pr_title_and_body(@release_pr, @merged_prs, @changed_files)
+        pr_title, new_body = build_pr_title_and_body(@release_pr, @merged_prs, @changed_files, nil)
         expect(pr_title).to eq "Release 2019-02-20 22:58:35 +0900"
         expect(new_body).to eq <<~MARKDOWN
           - [ ] #3 Provides a creating release pull-request object for template @hakobe
@@ -30,34 +30,12 @@ RSpec.describe Git::Pr::Release do
       }
     end
 
-    context "with ENV" do
-      before {
-        ENV["GIT_PR_RELEASE_TEMPLATE"] = "spec/fixtures/file/template_1.erb"
-      }
-
-      after {
-        ENV["GIT_PR_RELEASE_TEMPLATE"] = nil
-      }
-
+    context "with template_path" do
       it {
-        pr_title, new_body = build_pr_title_and_body(@release_pr, @merged_prs, @changed_files)
+        pr_title, new_body = build_pr_title_and_body(@release_pr, @merged_prs, @changed_files, "spec/fixtures/file/template_1.erb")
         expect(pr_title).to eq "a"
         expect(new_body).to eq <<~MARKDOWN
           b
-        MARKDOWN
-      }
-    end
-
-    context "with git_config template" do
-      before {
-        expect(self).to receive(:git_config).with("template") { "spec/fixtures/file/template_2.erb" }
-      }
-
-      it {
-        pr_title, new_body = build_pr_title_and_body(@release_pr, @merged_prs, @changed_files)
-        expect(pr_title).to eq "c"
-        expect(new_body).to eq <<~MARKDOWN
-          d
         MARKDOWN
       }
     end

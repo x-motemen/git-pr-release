@@ -6,20 +6,14 @@ module Git
     module Release
       class CLI
         include Git::Pr::Release::Util
-        extend Git::Pr::Release::Util
+        attr_reader :repository, :production_branch, :staging_branch, :template_path, :labels
+
         def self.start
-          host, repository, scheme = host_and_repository_and_scheme
+          result = self.new.start
+          exit result
+        end
 
-          if host
-            # GitHub:Enterprise
-            OpenSSL::SSL.const_set :VERIFY_PEER, OpenSSL::SSL::VERIFY_NONE # XXX
-
-            Octokit.configure do |c|
-              c.api_endpoint = "#{scheme}://#{host}/api/v3"
-              c.web_endpoint = "#{scheme}://#{host}/"
-            end
-          end
-
+        def start
           OptionParser.new do |opts|
             opts.on('-n', '--dry-run', 'Do not create/update a PR. Just prints out') do |v|
               @dry_run = v
@@ -33,17 +27,53 @@ module Git
           end.parse!
 
           ### Set up configuration
+          configure
 
-          production_branch = ENV.fetch('GIT_PR_RELEASE_BRANCH_PRODUCTION') { git_config('branch.production') } || 'master'
-          staging_branch    = ENV.fetch('GIT_PR_RELEASE_BRANCH_STAGING') { git_config('branch.staging') }       || 'staging'
+          ### Fetch merged PRs
+          merged_prs = fetch_merged_prs
+          if merged_prs.empty?
+            say 'No pull requests to be released', :error
+            return 1
+          end
+
+          ### Create a release PR
+          create_release_pr(merged_prs)
+          return 0
+        end
+
+        def client
+          @client ||= Octokit::Client.new :access_token => obtain_token!
+        end
+
+        def configure
+          host, @repository, scheme = host_and_repository_and_scheme
+
+          if host
+            # GitHub:Enterprise
+            OpenSSL::SSL.const_set :VERIFY_PEER, OpenSSL::SSL::VERIFY_NONE # XXX
+
+            Octokit.configure do |c|
+              c.api_endpoint = "#{scheme}://#{host}/api/v3"
+              c.web_endpoint = "#{scheme}://#{host}/"
+            end
+          end
+
+          @production_branch = ENV.fetch('GIT_PR_RELEASE_BRANCH_PRODUCTION') { git_config('branch.production') } || 'master'
+          @staging_branch    = ENV.fetch('GIT_PR_RELEASE_BRANCH_STAGING') { git_config('branch.staging') }       || 'staging'
+          @template_path     = ENV.fetch('GIT_PR_RELEASE_TEMPLATE') { git_config('template') }
+
+          _labels = ENV.fetch('GIT_PR_RELEASE_LABELS') { git_config('labels') }
+          @labels = _labels && _labels.split(/\s*,\s*/) || []
 
           say "Repository:        #{repository}", :debug
           say "Production branch: #{production_branch}", :debug
           say "Staging branch:    #{staging_branch}", :debug
+          say "Template path:     #{template_path}", :debug
+          say "Labels             #{labels}", :debug
+        end
 
+        def fetch_merged_prs
           git :remote, 'update', 'origin' unless @no_fetch
-
-          ### Fetch merged PRs
 
           merged_feature_head_sha1s = git(
             :log, '--merges', '--pretty=format:%P', "origin/#{production_branch}..origin/#{staging_branch}"
@@ -71,90 +101,93 @@ module Git
             end
           end.compact
 
-          if merged_pull_request_numbers.empty?
-            say 'No pull requests to be released', :error
-            exit 1
-          end
-
           merged_prs = merged_pull_request_numbers.map do |nr|
             pr = client.pull_request repository, nr
             say "To be released: ##{pr.number} #{pr.title}", :notice
             pr
           end
 
-          ### Create a release PR
+          merged_prs
+        end
 
-          say 'Searching for existing release pull requests...', :info
-          found_release_pr = client.pull_requests(repository).find do |pr|
-            pr.head.ref == staging_branch && pr.base.ref == production_branch
-          end
+        def create_release_pr(merged_prs)
+          found_release_pr = detect_existing_release_pr
           create_mode = found_release_pr.nil?
 
-          # Fetch changed files of a release PR
-          changed_files = pull_request_files(client, found_release_pr)
+          if create_mode
+            if @dry_run
+              release_pr = nil
+              changed_files = []
+            else
+              release_pr = prepare_release_pr
+              changed_files = pull_request_files(release_pr)
+            end
+          else
+            release_pr = found_release_pr
+            changed_files = pull_request_files(release_pr)
+          end
+
+          pr_title, pr_body = build_and_merge_pr_title_and_body(release_pr, merged_prs, changed_files)
 
           if @dry_run
-            pr_title, new_body = build_pr_title_and_body found_release_pr, merged_prs, changed_files
-            pr_body = create_mode ? new_body : merge_pr_body(found_release_pr.body, new_body)
-
             say 'Dry-run. Not updating PR', :info
             say pr_title, :notice
             say pr_body, :notice
-            dump_result_as_json( found_release_pr, merged_prs, changed_files ) if @json
-            exit 0
+            dump_result_as_json( release_pr, merged_prs, changed_files ) if @json
+            return
           end
 
-          pr_title, pr_body = nil, nil
-          release_pr = nil
+          update_release_pr(release_pr, pr_title, pr_body)
 
-          if create_mode
-            created_pr = client.create_pull_request(
-              repository, production_branch, staging_branch, 'Preparing release pull request...', ''
-            )
-            unless created_pr
-              say 'Failed to create a new pull request', :error
-              exit 2
-            end
-            changed_files = pull_request_files(client, created_pr) # Refetch changed files from created_pr
-            pr_title, pr_body = build_pr_title_and_body created_pr, merged_prs, changed_files
-            release_pr = created_pr
-          else
-            pr_title, new_body = build_pr_title_and_body found_release_pr, merged_prs, changed_files
-            pr_body = merge_pr_body(found_release_pr.body, new_body)
-            release_pr = found_release_pr
-          end
-
-          say 'Pull request body:', :debug
-          say pr_body, :debug
-
-          updated_pull_request = client.update_pull_request(
-            repository, release_pr.number, :title => pr_title, :body => pr_body
-          )
-
-          unless updated_pull_request
-            say 'Failed to update a pull request', :error
-            exit 3
-          end
-
-          labels = ENV.fetch('GIT_PR_RELEASE_LABELS') { git_config('labels') }
-          if not labels.nil? and not labels.empty?
-            labels = labels.split(/\s*,\s*/)
-            labeled_pull_request = client.add_labels_to_an_issue(
-              repository, release_pr.number, labels
-            )
-
-            unless labeled_pull_request
-              say 'Failed to add labels to a pull request', :error
-              exit 4
-            end
-          end
-
-          say "#{create_mode ? 'Created' : 'Updated'} pull request: #{updated_pull_request.rels[:html].href}", :notice
+          say "#{create_mode ? 'Created' : 'Updated'} pull request: #{release_pr.rels[:html].href}", :notice
           dump_result_as_json( release_pr, merged_prs, changed_files ) if @json
         end
 
-        def self.client
-          @client ||= Octokit::Client.new :access_token => obtain_token!
+        def detect_existing_release_pr
+          say 'Searching for existing release pull requests...', :info
+          client.pull_requests(repository).find do |pr|
+            pr.head.ref == staging_branch && pr.base.ref == production_branch
+          end
+        end
+
+        def prepare_release_pr
+          client.create_pull_request(
+            repository, production_branch, staging_branch, 'Preparing release pull request...', ''
+          )
+        end
+
+        def build_and_merge_pr_title_and_body(release_pr, merged_prs, changed_files)
+          # release_pr is nil when dry_run && create_mode
+          old_body = release_pr ? release_pr.body : ""
+          pr_title, new_body = build_pr_title_and_body(release_pr, merged_prs, changed_files, template_path)
+
+          [pr_title, merge_pr_body(old_body, new_body)]
+        end
+
+        def update_release_pr(release_pr, pr_title, pr_body)
+          say 'Pull request body:', :debug
+          say pr_body, :debug
+
+          client.update_pull_request(
+            repository, release_pr.number, :title => pr_title, :body => pr_body
+          )
+
+          unless labels.empty?
+            client.add_labels_to_an_issue(
+              repository, release_pr.number, labels
+            )
+          end
+        end
+
+        # Fetch PR files of specified pull_request
+        def pull_request_files(pull_request)
+          return [] if pull_request.nil?
+
+          # Fetch files as many as possible
+          client.auto_paginate = true
+          files = client.pull_request_files repository, pull_request.number
+          client.auto_paginate = false
+          return files
         end
       end
     end
