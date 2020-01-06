@@ -63,10 +63,6 @@ RSpec.describe Git::Pr::Release::CLI do
         allow(@cli).to receive(:host_and_repository_and_scheme) {
           [nil, "motemen/git-pr-release", "https"]
         }
-        allow(@cli).to receive(:git_config).with("branch.production") { nil }
-        allow(@cli).to receive(:git_config).with("branch.staging") { nil }
-        allow(@cli).to receive(:git_config).with("template") { nil }
-        allow(@cli).to receive(:git_config).with("labels") { nil }
       }
 
       it "configured as default" do
@@ -75,11 +71,11 @@ RSpec.describe Git::Pr::Release::CLI do
         expect(Octokit.api_endpoint).to eq "https://api.github.com/"
         expect(Octokit.web_endpoint).to eq "https://github.com/"
 
-        expect(@cli.instance_variable_get(:@repository)).to eq "motemen/git-pr-release"
-        expect(@cli.instance_variable_get(:@production_branch)).to eq "master"
-        expect(@cli.instance_variable_get(:@staging_branch)).to eq "staging"
-        expect(@cli.instance_variable_get(:@template_path)).to eq nil
-        expect(@cli.instance_variable_get(:@labels)).to eq []
+        expect(@cli.repository).to eq "motemen/git-pr-release"
+        expect(@cli.production_branch).to eq "master"
+        expect(@cli.staging_branch).to eq "staging"
+        expect(@cli.template_path).to eq nil
+        expect(@cli.labels).to eq []
       end
     end
 
@@ -117,8 +113,8 @@ RSpec.describe Git::Pr::Release::CLI do
         it "branches are configured" do
           subject
 
-          expect(@cli.instance_variable_get(:@production_branch)).to eq "prod"
-          expect(@cli.instance_variable_get(:@staging_branch)).to eq "dev"
+          expect(@cli.production_branch).to eq "prod"
+          expect(@cli.staging_branch).to eq "dev"
         end
       end
 
@@ -131,8 +127,8 @@ RSpec.describe Git::Pr::Release::CLI do
         it "branches are configured" do
           subject
 
-          expect(@cli.instance_variable_get(:@production_branch)).to eq "production"
-          expect(@cli.instance_variable_get(:@staging_branch)).to eq "develop"
+          expect(@cli.production_branch).to eq "production"
+          expect(@cli.staging_branch).to eq "develop"
         end
       end
     end
