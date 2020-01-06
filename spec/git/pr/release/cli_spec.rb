@@ -257,7 +257,6 @@ RSpec.describe Git::Pr::Release::CLI do
       allow(@cli).to receive(:update_release_pr)
       @changed_files = [double(Sawyer::Resource)]
       allow(@cli).to receive(:pull_request_files) { @changed_files }
-      allow(@cli).to receive(:set_labels_to_release_pr)
     }
 
     context "When create_mode" do
@@ -276,7 +275,6 @@ RSpec.describe Git::Pr::Release::CLI do
         expect(@cli).to have_received(:pull_request_files)
         expect(@cli).to have_received(:build_and_merge_pr_title_and_body).with(@created_pr, @merged_prs, @changed_files)
         expect(@cli).to have_received(:update_release_pr).with(@created_pr, @pr_title, @pr_body)
-        expect(@cli).to have_received(:set_labels_to_release_pr).with(@created_pr)
       }
     end
 
@@ -298,7 +296,6 @@ RSpec.describe Git::Pr::Release::CLI do
         expect(@cli).not_to have_received(:prepare_release_pr)
         expect(@cli).to have_received(:build_and_merge_pr_title_and_body).with(existing_release_pr, @merged_prs, @changed_files)
         expect(@cli).to have_received(:update_release_pr).with(existing_release_pr, @pr_title, @pr_body)
-        expect(@cli).to have_received(:set_labels_to_release_pr).with(existing_release_pr)
       }
     end
 
@@ -320,7 +317,6 @@ RSpec.describe Git::Pr::Release::CLI do
         expect(@cli).not_to have_received(:pull_request_files)
         expect(@cli).to have_received(:build_and_merge_pr_title_and_body).with(nil, @merged_prs, [])
         expect(@cli).not_to have_received(:update_release_pr).with(@created_pr, @pr_title, @pr_body)
-        expect(@cli).not_to have_received(:set_labels_to_release_pr).with(@created_pr)
       }
     end
   end
@@ -396,21 +392,46 @@ RSpec.describe Git::Pr::Release::CLI do
 
       @client = double(Octokit::Client)
       allow(@client).to receive(:update_pull_request) { @release_pr }
+      allow(@client).to receive(:add_labels_to_an_issue)
       allow(@cli).to receive(:client) { @client }
     }
 
-    it {
-      subject
+    context "Without labels" do
+      it {
+        subject
 
-      expect(@client).to have_received(:update_pull_request).with(
-        "motemen/git-pr-release",
-        1023,
-        {
-          title: "PR Title",
-          body: "PR Body",
-        }
-      )
-    }
+        expect(@client).to have_received(:update_pull_request).with(
+          "motemen/git-pr-release",
+          1023,
+          {
+            title: "PR Title",
+            body: "PR Body",
+          }
+        )
+        expect(@client).not_to have_received(:add_labels_to_an_issue)
+      }
+    end
+
+    context "With labels" do
+      before {
+        allow(@cli).to receive(:labels) { ["release"] }
+      }
+      it {
+        subject
+
+        expect(@client).to have_received(:update_pull_request).with(
+          "motemen/git-pr-release",
+          1023,
+          {
+            title: "PR Title",
+            body: "PR Body",
+          }
+        )
+        expect(@client).to have_received(:add_labels_to_an_issue).with(
+          "motemen/git-pr-release", 1023, ["release"]
+        )
+      }
+    end
   end
 
   describe "#detect_existing_release_pr" do
@@ -439,38 +460,6 @@ RSpec.describe Git::Pr::Release::CLI do
       }
 
       it { is_expected.to be_nil }
-    end
-  end
-
-  describe "#set_labels_to_release_pr" do
-    subject { @cli.set_labels_to_release_pr(@release_pr) }
-
-    before {
-      @cli = configured_cli
-      @release_pr = double(number: 1023)
-
-      @client = double(Octokit::Client)
-      allow(@client).to receive(:add_labels_to_an_issue) { @release_pr }
-      allow(@cli).to receive(:client).with(no_args) { @client }
-    }
-
-    context "Without config" do
-      it "do nothing" do
-        subject
-        expect(@client).not_to have_received(:add_labels_to_an_issue)
-      end
-    end
-
-    context "With config" do
-      before {
-        allow(@cli).to receive(:labels) { ["release"] }
-      }
-      it "add label" do
-        subject
-        expect(@client).to have_received(:add_labels_to_an_issue).with(
-          "motemen/git-pr-release", 1023, ["release"]
-        )
-      end
     end
   end
 

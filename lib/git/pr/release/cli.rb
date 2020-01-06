@@ -139,8 +139,6 @@ module Git
 
           update_release_pr(release_pr, pr_title, pr_body)
 
-          set_labels_to_release_pr(release_pr)
-
           say "#{create_mode ? 'Created' : 'Updated'} pull request: #{release_pr.rels[:html].href}", :notice
           dump_result_as_json( release_pr, merged_prs, changed_files ) if @json
         end
@@ -173,14 +171,12 @@ module Git
           client.update_pull_request(
             repository, release_pr.number, :title => pr_title, :body => pr_body
           )
-        end
 
-        def set_labels_to_release_pr(release_pr)
-          return if labels.empty?
-
-          client.add_labels_to_an_issue(
-            repository, release_pr.number, labels
-          )
+          unless labels.empty?
+            client.add_labels_to_an_issue(
+              repository, release_pr.number, labels
+            )
+          end
         end
 
         # Fetch PR files of specified pull_request
