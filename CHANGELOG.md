@@ -1,5 +1,13 @@
 # git-pr-release
 
+## v1.2.0 (2020-02-07)
+
+[full changelog](https://github.com/motemen/git-pr-release/compare/v1.1.0...v1.2.0)
+
+* (#44) Use API option when detecting existing release PR (@onk)
+* (#41, #42) Refactor (@onk)
+  - Some local variables are removed. This will break if you have customized the template ERB.
+
 ## v1.1.0 (2020-01-02)
 
 [full changelog](https://github.com/motemen/git-pr-release/compare/v1.0.1...v1.1.0)
