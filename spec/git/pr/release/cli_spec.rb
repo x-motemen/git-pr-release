@@ -447,8 +447,7 @@ RSpec.describe Git::Pr::Release::CLI do
     context "When exists" do
       before {
         @release_pr = double(head: double(ref: "staging"), base: double(ref: "master"))
-        non_release_pr = double(head: double(ref: "topic"), base: double(ref: "staging"))
-        allow(@client).to receive(:pull_requests) { [non_release_pr, @release_pr] }
+        allow(@client).to receive(:pull_requests) { [@release_pr] }
       }
 
       it { is_expected.to eq @release_pr }

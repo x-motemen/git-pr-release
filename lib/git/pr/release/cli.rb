@@ -145,9 +145,7 @@ module Git
 
         def detect_existing_release_pr
           say 'Searching for existing release pull requests...', :info
-          client.pull_requests(repository).find do |pr|
-            pr.head.ref == staging_branch && pr.base.ref == production_branch
-          end
+          client.pull_requests(repository, head: staging_branch, base: production_branch).first
         end
 
         def prepare_release_pr
