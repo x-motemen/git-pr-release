@@ -442,6 +442,7 @@ RSpec.describe Git::Pr::Release::CLI do
 
       @client = double(Octokit::Client)
       allow(@cli).to receive(:client).with(no_args) { @client }
+      allow(@client).to receive(:auto_paginate=)
     }
 
     context "When exists" do
