@@ -13,6 +13,12 @@ module Git
           exit result
         end
 
+        def initialize
+          @dry_run  = false
+          @json     = false
+          @no_fetch = false
+        end
+
         def start
           OptionParser.new do |opts|
             opts.on('-n', '--dry-run', 'Do not create/update a PR. Just prints out') do |v|
