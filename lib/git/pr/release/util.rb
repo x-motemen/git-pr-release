@@ -89,7 +89,7 @@ ERB
 
           template = if template_path
                        template_fullpath = File.join(git('rev-parse', '--show-toplevel').first.chomp, template_path)
-                       File.read(template_path)
+                       File.read(template_fullpath)
                      else
                        DEFAULT_PR_TEMPLATE
                      end
