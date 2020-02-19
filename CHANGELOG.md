@@ -1,5 +1,12 @@
 # git-pr-release
 
+## v1.3.0 (2020-02-19)
+
+[full changelog](https://github.com/motemen/git-pr-release/compare/v1.2.0...v1.3.0)
+
+* (#47) Fix Errno::ENOENT when finding the specified template (@onk)
+* (#45) Fix "warning: instance variable @xxx not initialized" (@onk)
+
 ## v1.2.0 (2020-02-07)
 
 [full changelog](https://github.com/motemen/git-pr-release/compare/v1.1.0...v1.2.0)
