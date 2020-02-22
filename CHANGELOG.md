@@ -1,5 +1,11 @@
 # git-pr-release
 
+## v1.4.0 (2020-02-22)
+
+[full changelog](https://github.com/motemen/git-pr-release/compare/v1.3.0...v1.4.0)
+
+* (#48) List PR API needs head user or head organization and branch name (@sasasin)
+
 ## v1.3.0 (2020-02-19)
 
 [full changelog](https://github.com/motemen/git-pr-release/compare/v1.2.0...v1.3.0)
