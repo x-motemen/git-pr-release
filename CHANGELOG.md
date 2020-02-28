@@ -2,20 +2,20 @@
 
 ## v1.4.0 (2020-02-22)
 
-[full changelog](https://github.com/motemen/git-pr-release/compare/v1.3.0...v1.4.0)
+[full changelog](https://github.com/x-motemen/git-pr-release/compare/v1.3.0...v1.4.0)
 
 * (#48) List PR API needs head user or head organization and branch name (@sasasin)
 
 ## v1.3.0 (2020-02-19)
 
-[full changelog](https://github.com/motemen/git-pr-release/compare/v1.2.0...v1.3.0)
+[full changelog](https://github.com/x-motemen/git-pr-release/compare/v1.2.0...v1.3.0)
 
 * (#47) Fix Errno::ENOENT when finding the specified template (@onk)
 * (#45) Fix "warning: instance variable @xxx not initialized" (@onk)
 
 ## v1.2.0 (2020-02-07)
 
-[full changelog](https://github.com/motemen/git-pr-release/compare/v1.1.0...v1.2.0)
+[full changelog](https://github.com/x-motemen/git-pr-release/compare/v1.1.0...v1.2.0)
 
 * (#44) Use API option when detecting existing release PR (@onk)
 * (#41, #42) Refactor (@onk)
@@ -23,13 +23,13 @@
 
 ## v1.1.0 (2020-01-02)
 
-[full changelog](https://github.com/motemen/git-pr-release/compare/v1.0.1...v1.1.0)
+[full changelog](https://github.com/x-motemen/git-pr-release/compare/v1.0.1...v1.1.0)
 
 * (#38) Fetch changed files as many as possible (@shibayu36)
 
 ## v1.0.1 (2019-12-17)
 
-[full changelog](https://github.com/motemen/git-pr-release/compare/v1.0.0...v1.0.1)
+[full changelog](https://github.com/x-motemen/git-pr-release/compare/v1.0.0...v1.0.1)
 
 * (#37) Fix NameError (@onk)
 
