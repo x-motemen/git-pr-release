@@ -75,6 +75,15 @@ You can specify this value by `GIT_PR_RELEASE_LABELS` environment variable.
 
 If not specified, any labels will not be added for PRs.
 
+### `pr-release.mention`
+
+The name that is listed next to each PR title.
+Accepted values: `author`
+
+You can specify this value by `GIT_PR_RELEASE_MENTION` environment variable.
+
+If not specified, the mention will be the PR assignee
+
 
 Errors and exit statuses
 ------------------------

@@ -34,7 +34,7 @@ module Git
         end
 
         def self.mention_type
-          @mention_type ||= (git_config('mention') || 'default')
+          @mention_type ||= (ENV.fetch('GIT_PR_RELEASE_MENTION') { git_config('mention') } || 'default')
         end
       end
     end
