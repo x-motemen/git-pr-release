@@ -94,7 +94,11 @@ ERB
                        DEFAULT_PR_TEMPLATE
                      end
 
-          erb = ERB.new template, nil, '-'
+          erb = if RUBY_VERSION >= '2.6'
+                  ERB.new template, trim_mode: '-'
+                else
+                  ERB.new template, nil, '-'
+                end
           content = erb.result binding
           content.split(/\n/, 2)
         end
