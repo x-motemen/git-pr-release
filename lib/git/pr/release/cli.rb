@@ -67,7 +67,7 @@ module Git
           @production_branch = ENV.fetch('GIT_PR_RELEASE_BRANCH_PRODUCTION') { git_config('branch.production') } || 'master'
           @staging_branch    = ENV.fetch('GIT_PR_RELEASE_BRANCH_STAGING') { git_config('branch.staging') }       || 'staging'
           @template_path     = ENV.fetch('GIT_PR_RELEASE_TEMPLATE') { git_config('template') }
-          @aggregate_labels  = ENV.fetch('GIT_PR_RELEASE_AGGREGATE_LABELS') { git_config('aggregate_labels') } == 'true'
+          @aggregate_labels  = ENV.fetch('GIT_PR_RELEASE_AGGREGATE_LABELS') { git_config('aggregate-labels') } == 'true'
 
           _labels = ENV.fetch('GIT_PR_RELEASE_LABELS') { git_config('labels') }
           @labels = _labels && _labels.split(/\s*,\s*/) || []

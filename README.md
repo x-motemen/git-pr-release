@@ -75,7 +75,7 @@ You can specify this value by `GIT_PR_RELEASE_LABELS` environment variable.
 
 If not specified, any labels will not be added for PRs.
 
-### `pr-release.aggregate_labels`
+### `pr-release.aggregate-labels`
 
 If it is `true`, `git-pr-release` aggregates labels from merged pull requests and add them to a created pull request.
 

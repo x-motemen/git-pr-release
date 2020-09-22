@@ -213,7 +213,7 @@ RSpec.describe Git::Pr::Release::CLI do
 
       context "With git_config" do
         before {
-          allow(@cli).to receive(:git_config).with("aggregate_labels") { "true" }
+          allow(@cli).to receive(:git_config).with("aggregate-labels") { "true" }
         }
 
         it "set aggregate_labels" do
