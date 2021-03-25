@@ -84,7 +84,7 @@ module Git
           merged_feature_head_sha1s = git(
             :log, '--merges', '--pretty=format:%P', "origin/#{production_branch}..origin/#{staging_branch}"
           ).map do |line|
-            main_sha1, feature_sha1 = line.chomp.split /\s+/
+            _main_sha1, feature_sha1 = line.chomp.split /\s+/
             feature_sha1
           end
 

@@ -84,8 +84,8 @@ Release <%= Time.now %>
 ERB
 
         def build_pr_title_and_body(release_pr, merged_prs, changed_files, template_path)
-          release_pull_request = target_pull_request = release_pr ? PullRequest.new(release_pr) : DummyPullRequest.new
-          merged_pull_requests = pull_requests = merged_prs.map { |pr| PullRequest.new(pr) }
+          _release_pull_request = target_pull_request = release_pr ? PullRequest.new(release_pr) : DummyPullRequest.new
+          _merged_pull_requests = pull_requests = merged_prs.map { |pr| PullRequest.new(pr) }
 
           template = if template_path
                        template_fullpath = File.join(git('rev-parse', '--show-toplevel').first.chomp, template_path)
@@ -127,8 +127,8 @@ ERB
           Diff::LCS.traverse_balanced(old_body_unchecked.split(/\r?\n/), new_body.split(/\r?\n/)) do |event|
             say "diff: #{event.inspect}", :trace
             action, old, new = *event
-            old_nr, old_line = *old
-            new_nr, new_line = *new
+            _old_nr, old_line = *old
+            _new_nr, new_line = *new
 
             case action
             when '=', '+'
