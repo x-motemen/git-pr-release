@@ -84,8 +84,8 @@ Release <%= Time.now %>
 ERB
 
         def build_pr_title_and_body(release_pr, merged_prs, changed_files, template_path)
-          _release_pull_request = target_pull_request = release_pr ? PullRequest.new(release_pr) : DummyPullRequest.new
-          _merged_pull_requests = pull_requests = merged_prs.map { |pr| PullRequest.new(pr) }
+          release_pull_request = target_pull_request = release_pr ? PullRequest.new(release_pr) : DummyPullRequest.new
+          merged_pull_requests = pull_requests = merged_prs.map { |pr| PullRequest.new(pr) }
 
           template = if template_path
                        template_fullpath = File.join(git('rev-parse', '--show-toplevel').first.chomp, template_path)
@@ -94,12 +94,13 @@ ERB
                        DEFAULT_PR_TEMPLATE
                      end
 
-          erb = if RUBY_VERSION >= '2.6'
-                  ERB.new template, trim_mode: '-'
-                else
-                  ERB.new template, nil, '-'
-                end
-          content = erb.result binding
+          erb = ERB.new template, trim_mode: '-'
+          content = erb.result_with_hash(
+            release_pull_request: release_pull_request,
+            target_pull_request: target_pull_request,
+            merged_pull_requests: merged_pull_requests,
+            pull_requests: pull_requests
+          )
           content.split(/\n/, 2)
         end
 
