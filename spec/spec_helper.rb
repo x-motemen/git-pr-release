@@ -19,6 +19,15 @@ RSpec.configure do |config|
   config.order = :random
   Kernel.srand config.seed
 
+  config.around(:each) do |example|
+    begin
+      ENV['TZ'], old = 'Asia/Tokyo', ENV['TZ']
+      example.run
+    ensure
+      ENV['TZ'] = old
+    end
+  end
+
   config.after do
     Timecop.return
   end
