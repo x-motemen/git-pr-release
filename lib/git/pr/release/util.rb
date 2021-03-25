@@ -122,7 +122,7 @@ ERB
               check_status[m[:issue_number]] = m[:check_value]
             }
           }
-          old_body_unchecked = old_body.gsub /^- \[[ x]\] \#(\d+)/, '- [ ] #\1'
+          old_body_unchecked = old_body.gsub(/^- \[[ x]\] \#(\d+)/, '- [ ] #\1')
 
           Diff::LCS.traverse_balanced(old_body_unchecked.split(/\r?\n/), new_body.split(/\r?\n/)) do |event|
             say "diff: #{event.inspect}", :trace
@@ -157,7 +157,7 @@ ERB
           merged_body = pr_body_lines.join("\n")
           check_status.each { |issue_number, check_value|
             say "Update pull-request checkbox \##{issue_number} to #{check_value}.", :trace
-            merged_body.gsub! /^- \[ \] \##{issue_number}/, "- [#{check_value}] \##{issue_number}"
+            merged_body.gsub!(/^- \[ \] \##{issue_number}/, "- [#{check_value}] \##{issue_number}")
           }
 
           merged_body

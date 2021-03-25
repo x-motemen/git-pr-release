@@ -84,12 +84,12 @@ module Git
           merged_feature_head_sha1s = git(
             :log, '--merges', '--pretty=format:%P', "origin/#{production_branch}..origin/#{staging_branch}"
           ).map do |line|
-            _main_sha1, feature_sha1 = line.chomp.split /\s+/
+            _main_sha1, feature_sha1 = line.chomp.split(/\s+/)
             feature_sha1
           end
 
           merged_pull_request_numbers = git('ls-remote', 'origin', 'refs/pull/*/head').map do |line|
-            sha1, ref = line.chomp.split /\s+/
+            sha1, ref = line.chomp.split(/\s+/)
 
             if merged_feature_head_sha1s.include? sha1
               if %r<^refs/pull/(\d+)/head$>.match ref
