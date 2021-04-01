@@ -1,5 +1,15 @@
 # git-pr-release
 
+## v1.5.0 (2021-04-02)
+
+[full changelog](https://github.com/x-motemen/git-pr-release/compare/v1.4.0...v1.5.0)
+
+* (#60, #61) Get issue number from GitHub API for squashed PR (@yuuan)
+* (#58) Make stable test (@kachick)
+* (#55) Suppress warning for ERB (@ohbarye)
+* (#50) support `GIT_PR_RELEASE_MENTION` environment variable (@dabutvin)
+* (#49) Transfer repository to x-motemen organization (@onk)
+
 ## v1.4.0 (2020-02-22)
 
 [full changelog](https://github.com/x-motemen/git-pr-release/compare/v1.3.0...v1.4.0)
