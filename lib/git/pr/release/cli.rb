@@ -17,6 +17,7 @@ module Git
           @dry_run  = false
           @json     = false
           @no_fetch = false
+          @squashed = false
         end
 
         def start
@@ -29,6 +30,9 @@ module Git
             end
             opts.on('--no-fetch', 'Do not fetch from remote repo before determining target PRs (CI friendly)') do |v|
               @no_fetch = v
+            end
+            opts.on('--squashed', 'Handle squash merged PRs') do |v|
+              @squashed = v
             end
           end.parse!
 
@@ -81,14 +85,24 @@ module Git
         def fetch_merged_prs
           git :remote, 'update', 'origin' unless @no_fetch
 
-          merged_feature_head_sha1s = git(
-            :log, '--merges', '--pretty=format:%P', "origin/#{production_branch}..origin/#{staging_branch}"
-          ).map do |line|
+          merged_pull_request_numbers = @squashed ? fetch_merged_pr_numbers_from_github : fetch_merged_pr_numbers_from_git_remote
+
+          merged_prs = merged_pull_request_numbers.map do |nr|
+            pr = client.pull_request repository, nr
+            say "To be released: ##{pr.number} #{pr.title}", :notice
+            pr
+          end
+
+          merged_prs
+        end
+
+        def fetch_merged_pr_numbers_from_git_remote
+          merged_feature_head_sha1s = git(:log, '--merges', '--pretty=format:%P', "origin/#{production_branch}..origin/#{staging_branch}").map do |line|
             main_sha1, feature_sha1 = line.chomp.split /\s+/
             feature_sha1
           end
 
-          merged_pull_request_numbers = git('ls-remote', 'origin', 'refs/pull/*/head').map do |line|
+          git('ls-remote', 'origin', 'refs/pull/*/head').map do |line|
             sha1, ref = line.chomp.split /\s+/
 
             if merged_feature_head_sha1s.include? sha1
@@ -106,14 +120,12 @@ module Git
               end
             end
           end.compact
+        end
 
-          merged_prs = merged_pull_request_numbers.map do |nr|
-            pr = client.pull_request repository, nr
-            say "To be released: ##{pr.number} #{pr.title}", :notice
-            pr
-          end
-
-          merged_prs
+        def fetch_merged_pr_numbers_from_github
+          git(:log, '--pretty=format:%H', "origin/#{production_branch}..origin/#{staging_branch}").map(&:chomp).map do |sha1|
+            client.search_issues("repo:#{repository} is:pr is:closed #{sha1}")[:items].map(&:number)
+          end.flatten
         end
 
         def create_release_pr(merged_prs)
