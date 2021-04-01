@@ -125,6 +125,7 @@ module Git
         def fetch_merged_pr_numbers_from_github
           git(:log, '--pretty=format:%H', "origin/#{production_branch}..origin/#{staging_branch}").map(&:chomp).map do |sha1|
             client.search_issues("repo:#{repository} is:pr is:closed #{sha1}")[:items].map(&:number)
+            sleep 1
           end.flatten
         end
 
