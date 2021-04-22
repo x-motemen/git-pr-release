@@ -14,6 +14,10 @@ module Git
           "- [ ] ##{pr.number} #{pr.title}" + mention
         end
 
+        def to_list_item
+          "- ##{pr.number} #{pr.title}" + mention
+        end
+
         def html_link
           pr.rels[:html].href
         end
