@@ -1,5 +1,11 @@
 # git-pr-release
 
+## v1.6.0 (2021-05-15)
+
+[full changelog](https://github.com/x-motemen/git-pr-release/compare/v1.5.0...v1.6.0)
+
+* (#63) Sort merged_pull_request_numbers numerically by default (@yutailang0119)
+
 ## v1.5.0 (2021-04-02)
 
 [full changelog](https://github.com/x-motemen/git-pr-release/compare/v1.4.0...v1.5.0)
