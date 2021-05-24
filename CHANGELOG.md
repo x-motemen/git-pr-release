@@ -1,5 +1,11 @@
 # git-pr-release
 
+## v1.7.0 (2021-05-24)
+
+[full changelog](https://github.com/x-motemen/git-pr-release/compare/v1.6.0...v1.7.0)
+
+* (#64) fix wrong pr number due to sleep (@mpon)
+
 ## v1.6.0 (2021-05-15)
 
 [full changelog](https://github.com/x-motemen/git-pr-release/compare/v1.5.0...v1.6.0)
