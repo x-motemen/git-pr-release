@@ -1,5 +1,11 @@
 # git-pr-release
 
+## v1.8.0 (2021-06-24)
+
+[full changelog](https://github.com/x-motemen/git-pr-release/compare/v1.7.0...v1.8.0)
+
+* (#66) Exclude titles from checklist items (@nhosoya)
+
 ## v1.7.0 (2021-05-24)
 
 [full changelog](https://github.com/x-motemen/git-pr-release/compare/v1.6.0...v1.7.0)
