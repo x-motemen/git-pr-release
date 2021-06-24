@@ -11,7 +11,7 @@ module Git
         end
 
         def to_checklist_item
-          "- [ ] ##{pr.number} #{pr.title}" + mention
+          "- [ ] ##{pr.number}" + mention
         end
 
         def html_link
