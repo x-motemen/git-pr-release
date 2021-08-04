@@ -1,5 +1,11 @@
 # git-pr-release
 
+## v1.9.0 (2021-08-04)
+
+[full changelog](https://github.com/x-motemen/git-pr-release/compare/v1.8.0...v1.9.0)
+
+* (#68) Add nil check for release\_pr.body (@w1mvy)
+
 ## v1.8.0 (2021-06-24)
 
 [full changelog](https://github.com/x-motemen/git-pr-release/compare/v1.7.0...v1.8.0)
