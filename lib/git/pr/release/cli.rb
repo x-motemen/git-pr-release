@@ -176,7 +176,7 @@ module Git
 
         def build_and_merge_pr_title_and_body(release_pr, merged_prs, changed_files)
           # release_pr is nil when dry_run && create_mode
-          old_body = release_pr ? release_pr.body : ""
+          old_body = (release_pr && release_pr.body != nil) ? release_pr.body : ""
           pr_title, new_body = build_pr_title_and_body(release_pr, merged_prs, changed_files, template_path)
 
           [pr_title, merge_pr_body(old_body, new_body)]
