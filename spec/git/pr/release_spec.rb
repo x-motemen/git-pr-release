@@ -24,8 +24,8 @@ RSpec.describe Git::Pr::Release do
         pr_title, new_body = build_pr_title_and_body(@release_pr, @merged_prs, @changed_files, nil)
         expect(pr_title).to eq "Release 2019-02-20 22:58:35 +0900"
         expect(new_body).to eq <<~MARKDOWN
-          - [ ] #3 Provides a creating release pull-request object for template @hakobe
-          - [ ] #6 Support two factor auth @ninjinkun
+          - [ ] #3 @hakobe
+          - [ ] #6 @ninjinkun
         MARKDOWN
       }
     end
