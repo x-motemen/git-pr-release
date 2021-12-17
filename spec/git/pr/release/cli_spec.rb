@@ -36,8 +36,8 @@ RSpec.describe Git::Pr::Release::CLI do
           conn.builder.handlers.delete(Faraday::Adapter::NetHttp)
           conn.adapter(:test, Faraday::Adapter::Test::Stubs.new)
         end
-        pr_3 = Sawyer::Resource.new(agent, YAML.load_file(file_fixture("pr_3.yml")))
-        pr_4 = Sawyer::Resource.new(agent, YAML.load_file(file_fixture("pr_4.yml")))
+        pr_3 = Sawyer::Resource.new(agent, load_yaml("pr_3.yml"))
+        pr_4 = Sawyer::Resource.new(agent, load_yaml("pr_4.yml"))
         [pr_3, pr_4]
       }
       it {
@@ -219,8 +219,8 @@ RSpec.describe Git::Pr::Release::CLI do
       }
 
       client = double(Octokit::Client)
-      @pr_3 = Sawyer::Resource.new(agent, YAML.load_file(file_fixture("pr_3.yml")))
-      @pr_4 = Sawyer::Resource.new(agent, YAML.load_file(file_fixture("pr_4.yml")))
+      @pr_3 = Sawyer::Resource.new(agent, load_yaml("pr_3.yml"))
+      @pr_4 = Sawyer::Resource.new(agent, load_yaml("pr_4.yml"))
       expect(client).to receive(:pull_request).with("motemen/git-pr-release", 3) { @pr_3 }
       expect(client).to receive(:pull_request).with("motemen/git-pr-release", 4) { @pr_4 }
       allow(@cli).to receive(:client).with(no_args) { client }
@@ -241,8 +241,8 @@ RSpec.describe Git::Pr::Release::CLI do
       end
 
       @merged_prs = [
-        Sawyer::Resource.new(@agent, YAML.load_file(file_fixture("pr_3.yml"))),
-        Sawyer::Resource.new(@agent, YAML.load_file(file_fixture("pr_4.yml"))),
+        Sawyer::Resource.new(@agent, load_yaml("pr_3.yml")),
+        Sawyer::Resource.new(@agent, load_yaml("pr_4.yml")),
       ]
 
       allow(@cli).to receive(:detect_existing_release_pr) { existing_release_pr }
@@ -261,7 +261,7 @@ RSpec.describe Git::Pr::Release::CLI do
 
     context "When create_mode" do
       before {
-        @created_pr = Sawyer::Resource.new(@agent, YAML.load_file(file_fixture("pr_1.yml")))
+        @created_pr = Sawyer::Resource.new(@agent, load_yaml("pr_1.yml"))
         allow(@cli).to receive(:prepare_release_pr) { @created_pr }
       }
 
@@ -301,7 +301,7 @@ RSpec.describe Git::Pr::Release::CLI do
 
     context "When dry_run with create_mode" do
       before {
-        @created_pr = Sawyer::Resource.new(@agent, YAML.load_file(file_fixture("pr_1.yml")))
+        @created_pr = Sawyer::Resource.new(@agent, load_yaml("pr_1.yml"))
         allow(@cli).to receive(:prepare_release_pr) { @created_pr }
 
         @cli.instance_variable_set(:@dry_run, true)
