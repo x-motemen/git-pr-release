@@ -8,13 +8,13 @@ RSpec.describe Git::Pr::Release do
       conn.builder.handlers.delete(Faraday::Adapter::NetHttp)
       conn.adapter :test, @stubs
     end
-    @release_pr = Sawyer::Resource.new(@agent, YAML.load_file(file_fixture("pr_1.yml")))
+    @release_pr = Sawyer::Resource.new(@agent, load_yaml("pr_1.yml"))
     @merged_prs = [
-      Sawyer::Resource.new(@agent, YAML.load_file(file_fixture("pr_3.yml"))),
-      Sawyer::Resource.new(@agent, YAML.load_file(file_fixture("pr_6.yml"))),
+      Sawyer::Resource.new(@agent, load_yaml("pr_3.yml")),
+      Sawyer::Resource.new(@agent, load_yaml("pr_6.yml")),
     ]
     @changed_files = [
-      Sawyer::Resource.new(@agent, YAML.load_file(file_fixture("pr_1_files.yml"))),
+      Sawyer::Resource.new(@agent, load_yaml("pr_1_files.yml")),
     ]
   end
 
