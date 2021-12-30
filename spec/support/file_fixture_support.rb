@@ -1,6 +1,6 @@
 module FileFixtureSupport
   def load_yaml(fixture_name)
-    if RUBY_VERSION >= '3.0'
+    if YAML.respond_to?(:unsafe_load_file)
       YAML.unsafe_load_file(file_fixture(fixture_name))
     else
       YAML.load_file(file_fixture(fixture_name))
