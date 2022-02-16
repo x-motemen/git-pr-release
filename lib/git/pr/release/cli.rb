@@ -87,7 +87,7 @@ module Git
 
           merged_pull_request_numbers = @squashed ? fetch_merged_pr_numbers_from_github : fetch_merged_pr_numbers_from_git_remote
 
-          merged_prs = merged_pull_request_numbers.sort.map do |nr|
+          merged_prs = merged_pull_request_numbers.uniq.sort.map do |nr|
             pr = client.pull_request repository, nr
             say "To be released: ##{pr.number} #{pr.title}", :notice
             pr
