@@ -1,5 +1,14 @@
 # git-pr-release
 
+## v2.0.0 (2022-02-17)
+
+[full changelog](https://github.com/x-motemen/git-pr-release/compare/v1.9.0...v2.0.0)
+
+* (#69) remove duplicated PR entries at squash (@Yuki-Inoue)
+* (#70) [Spec] Fix spec for build_pr_title_and_body (@yutailang0119)
+* (#71) Introduce CI (@ohbarye)
+* (#73) (#74) Use `YAML.unsafe_load_file` instead of `YAML.load_file` (@ohbarye)
+
 ## v1.9.0 (2021-08-04)
 
 [full changelog](https://github.com/x-motemen/git-pr-release/compare/v1.8.0...v1.9.0)
