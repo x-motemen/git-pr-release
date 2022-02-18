@@ -126,10 +126,43 @@ module Git
         end
 
         def fetch_squash_merged_pr_numbers_from_github
-          git(:log, '--pretty=format:%H', "origin/#{production_branch}..origin/#{staging_branch}", "--no-merges", "--first-parent").map(&:chomp).map do |sha1|
-            sleep 1
-            client.search_issues("repo:#{repository} is:pr is:closed #{sha1}")[:items].map(&:number)
-          end.flatten
+          # When "--abbrev" is specified, the length of the each line of the stdout isn't fixed.
+          # It is just a minimum length, and if the commit cannot be uniquely identified with
+          # that length, a longer commit hash will be displayed.
+          # We specify this option to minimize the length of the query string, but we use
+          # "--abbrev=7" because the SHA syntax of the search API requires a string of at
+          # least 7 characters.
+          # ref. https://docs.github.com/en/search-github/searching-on-github/searching-issues-and-pull-requests#search-by-commit-sha
+          # This is done because there is a length limit on the API query string, and we want
+          # to create a string with the minimum possible length.
+          shas = git(:log, '--pretty=format:%h', "--abbrev=7", "--no-merges", "--first-parent",
+            "origin/#{production_branch}..origin/#{staging_branch}").map(&:chomp)
+
+          pr_nums = []
+          query_base = "repo:#{repository} is:pr is:closed"
+          query = query_base
+          # Make bulk requests with multiple SHAs of the maximum possible length.
+          # If multiple SHAs are specified, the issue search API will treat it like an OR search,
+          # and all the pull requests will be searched.
+          # This is difficult to read from the current documentation, but that is the current
+          # behavior and GitHub support has responded that this is the spec.
+          shas.each do |sha|
+            # Longer than 256 characters are not supported in the query.
+            # ref. https://docs.github.com/en/rest/reference/search#limitations-on-query-length
+            if query.length + 1 + sha.length >= 256
+              sleep 1
+              say "search issues with query:#{query}", :debug
+              pr_nums.concat(client.search_issues("#{query}")[:items].map(&:number))
+              query = query_base
+            end
+            query += " " + sha
+          end
+          if query != query_base
+              sleep 1
+              say "search issues with query:#{query}", :debug
+              pr_nums.concat(client.search_issues("#{query}")[:items].map(&:number))
+          end
+          pr_nums
         end
 
         def create_release_pr(merged_prs)
