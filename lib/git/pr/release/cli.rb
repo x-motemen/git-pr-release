@@ -125,6 +125,15 @@ module Git
           end.compact
         end
 
+        def search_issue_numbers(query)
+          sleep 1
+          say "search issues with query:#{query}", :debug
+          # Fortunately, we don't need to take care of the page count in response, because
+          # the default value of per_page is 30 and we can't specify more than 30 commits due to
+          # the length limit specification of the query string.
+          client.search_issues("#{query}")[:items].map(&:number)
+        end
+
         def fetch_squash_merged_pr_numbers_from_github
           # When "--abbrev" is specified, the length of the each line of the stdout isn't fixed.
           # It is just a minimum length, and if the commit cannot be uniquely identified with
@@ -150,17 +159,13 @@ module Git
             # Longer than 256 characters are not supported in the query.
             # ref. https://docs.github.com/en/rest/reference/search#limitations-on-query-length
             if query.length + 1 + sha.length >= 256
-              sleep 1
-              say "search issues with query:#{query}", :debug
-              pr_nums.concat(client.search_issues("#{query}")[:items].map(&:number))
+              pr_nums.concat(search_issue_numbers(query))
               query = query_base
             end
             query += " " + sha
           end
           if query != query_base
-              sleep 1
-              say "search issues with query:#{query}", :debug
-              pr_nums.concat(client.search_issues("#{query}")[:items].map(&:number))
+              pr_nums.concat(search_issue_numbers(query))
           end
           pr_nums
         end
