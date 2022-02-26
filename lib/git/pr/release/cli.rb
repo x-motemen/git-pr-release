@@ -85,7 +85,10 @@ module Git
         def fetch_merged_prs
           git :remote, 'update', 'origin' unless @no_fetch
 
-          merged_pull_request_numbers = @squashed ? fetch_merged_pr_numbers_from_github : fetch_merged_pr_numbers_from_git_remote
+          merged_pull_request_numbers = fetch_merged_pr_numbers_from_git_remote
+          if @squashed
+            merged_pull_request_numbers.concat(fetch_squash_merged_pr_numbers_from_github)
+          end
 
           merged_prs = merged_pull_request_numbers.uniq.sort.map do |nr|
             pr = client.pull_request repository, nr
@@ -122,8 +125,8 @@ module Git
           end.compact
         end
 
-        def fetch_merged_pr_numbers_from_github
-          git(:log, '--pretty=format:%H', "origin/#{production_branch}..origin/#{staging_branch}").map(&:chomp).map do |sha1|
+        def fetch_squash_merged_pr_numbers_from_github
+          git(:log, '--pretty=format:%H', "origin/#{production_branch}..origin/#{staging_branch}", "--no-merges", "--first-parent").map(&:chomp).map do |sha1|
             sleep 1
             client.search_issues("repo:#{repository} is:pr is:closed #{sha1}")[:items].map(&:number)
           end.flatten
