@@ -84,6 +84,16 @@ You can specify this value by `GIT_PR_RELEASE_MENTION` environment variable.
 
 If not specified, the mention will be the PR assignee
 
+## `pr-release.ssl_no_verify`
+
+Whether to verify SSL certificate or not.
+Accepted values: `true` | `false`
+
+This option might be useful when self-hosted GitHub enterprise server is using self-signed certificate.
+
+You can specify this value by `GIT_PR_RELEASE_SSL_NO_VERIFY` to `1`.
+
+If not specified, verify SSL certificate always.
 
 Errors and exit statuses
 ------------------------
