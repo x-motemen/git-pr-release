@@ -58,9 +58,13 @@ module Git
         def configure
           host, @repository, scheme = host_and_repository_and_scheme
 
-          if host && scheme == 'https'
-            ssl_no_verify = %w[true 1].include? ENV.fetch('GIT_PR_RELEASE_SSL_NO_VERIFY') { git_config('ssl_no_verify') }
-            OpenSSL::SSL.const_set :VERIFY_PEER, OpenSSL::SSL::VERIFY_NONE if ssl_no_verify
+          if host
+            if host != 'github.com' && scheme == 'https' # GitHub Enterprise
+              ssl_no_verify = %w[true 1].include? ENV.fetch('GIT_PR_RELEASE_SSL_NO_VERIFY') { git_config('ssl_no_verify') }
+              if ssl_no_verify
+                OpenSSL::SSL.const_set :VERIFY_PEER, OpenSSL::SSL::VERIFY_NONE
+              end
+            end
 
             Octokit.configure do |c|
               c.api_endpoint = "#{scheme}://#{host}/api/v3"
