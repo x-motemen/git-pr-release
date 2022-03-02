@@ -10,8 +10,12 @@ module Git
           @pr = pr
         end
 
-        def to_checklist_item
-          "- [ ] ##{pr.number}" + mention
+        def to_checklist_item(print_title = false)
+          if print_title
+            "- [ ] ##{pr.number} #{pr.title}" + mention
+          else
+            "- [ ] ##{pr.number}" + mention
+          end
         end
 
         def html_link
