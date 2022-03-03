@@ -1,5 +1,14 @@
 # git-pr-release
 
+## v2.1.0 (2022-03-03)
+
+[full changelog](https://github.com/x-motemen/git-pr-release/compare/v2.0.0...v2.1.0)
+
+* (#75) reduce GitHub search API calls when the squashed option is specified (@Songmu)
+* (#76) use bulk issue search to reduce API calls (@Songmu)
+* (#77) Add option "ssl_no_verify" to skip verifying ssl certificate (@mtgto)
+* (#78) add an argument to to_checklist_item to print pr title (@mtgto)
+
 ## v2.0.0 (2022-02-17)
 
 [full changelog](https://github.com/x-motemen/git-pr-release/compare/v1.9.0...v2.0.0)
