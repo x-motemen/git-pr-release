@@ -84,7 +84,7 @@ You can specify this value by `GIT_PR_RELEASE_MENTION` environment variable.
 
 If not specified, the mention will be the PR assignee
 
-## `pr-release.ssl_no_verify`
+### `pr-release.ssl-no-verify`
 
 Whether to verify SSL certificate or not.
 Accepted values: `true` | `false`
