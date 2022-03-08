@@ -1,5 +1,11 @@
 # git-pr-release
 
+## v2.1.1 (2022-03-09)
+
+[full changelog](https://github.com/x-motemen/git-pr-release/compare/v2.1.0...v2.1.1)
+
+* (#81) fix forbidden git config name (#80) (@mtgto)
+
 ## v2.1.0 (2022-03-03)
 
 [full changelog](https://github.com/x-motemen/git-pr-release/compare/v2.0.0...v2.1.0)
