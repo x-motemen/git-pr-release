@@ -31,6 +31,9 @@ RSpec.configure do |config|
   config.after do
     Timecop.return
   end
+
+  # Trigger Autoload
+  Octokit::Client
 end
 
 Dir[File.expand_path("support/**/*.rb", __dir__)].each {|f| require f }
