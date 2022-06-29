@@ -9,6 +9,7 @@ module Git
   module Pr
     module Release
       module Util
+        # リモートリポジトリの情報を取得
         def host_and_repository_and_scheme
           @host_and_repository_and_scheme ||= begin
             remote = git(:config, 'remote.origin.url').first.chomp

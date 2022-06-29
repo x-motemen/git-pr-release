@@ -37,9 +37,11 @@ module Git
           end.parse!
 
           ### Set up configuration
+          # git関係の初期設定
           configure
 
           ### Fetch merged PRs
+          # masterにマージするPRを取得する
           merged_prs = fetch_merged_prs
           if merged_prs.empty?
             say 'No pull requests to be released', :error
@@ -55,7 +57,9 @@ module Git
           @client ||= Octokit::Client.new :access_token => obtain_token!
         end
 
+        # git関係の初期設定
         def configure
+          # リモートリポジトリの情報を取得
           host, @repository, scheme = host_and_repository_and_scheme
 
           if host
@@ -72,6 +76,7 @@ module Git
             end
           end
 
+          # リモートリポジトリの情報を設定
           @production_branch = ENV.fetch('GIT_PR_RELEASE_BRANCH_PRODUCTION') { git_config('branch.production') } || 'master'
           @staging_branch    = ENV.fetch('GIT_PR_RELEASE_BRANCH_STAGING') { git_config('branch.staging') }       || 'staging'
           @template_path     = ENV.fetch('GIT_PR_RELEASE_TEMPLATE') { git_config('template') }
@@ -87,13 +92,17 @@ module Git
         end
 
         def fetch_merged_prs
+          # リモートリポジトリの更新
           git :remote, 'update', 'origin' unless @no_fetch
 
+          # git log の中からstagingからmasterまでの間のコミットを取得
           merged_pull_request_numbers = fetch_merged_pr_numbers_from_git_remote
           if @squashed
+            # git logのcommit hash値でgithub検索してissue番号を取得して追加
             merged_pull_request_numbers.concat(fetch_squash_merged_pr_numbers_from_github)
           end
 
+          # masterにマージするコミットIDからgithubのPRを取得する
           merged_prs = merged_pull_request_numbers.uniq.sort.map do |nr|
             pr = client.pull_request repository, nr
             say "To be released: ##{pr.number} #{pr.title}", :notice
@@ -103,12 +112,15 @@ module Git
           merged_prs
         end
 
+        # git log の中からstagingからmasterまでの間のコミットを取得
         def fetch_merged_pr_numbers_from_git_remote
+          # git logを取得 commitidの一覧
           merged_feature_head_sha1s = git(:log, '--merges', '--pretty=format:%P', "origin/#{production_branch}..origin/#{staging_branch}").map do |line|
             main_sha1, feature_sha1 = line.chomp.split /\s+/
             feature_sha1
           end
 
+          # リモートリポジトリのコミットIDを取得
           git('ls-remote', 'origin', 'refs/pull/*/head').map do |line|
             sha1, ref = line.chomp.split /\s+/
 
@@ -129,6 +141,7 @@ module Git
           end.compact
         end
 
+        # github clientでissueを検索
         def search_issue_numbers(query)
           sleep 1
           say "search issues with query:#{query}", :debug
@@ -138,6 +151,7 @@ module Git
           client.search_issues("#{query}")[:items].map(&:number)
         end
 
+        # git logのcommit hash値でgithub検索してissue番号を取得
         def fetch_squash_merged_pr_numbers_from_github
           # When "--abbrev" is specified, the length of the each line of the stdout isn't fixed.
           # It is just a minimum length, and if the commit cannot be uniquely identified with
@@ -174,8 +188,11 @@ module Git
           pr_nums
         end
 
+        #
         def create_release_pr(merged_prs)
+          # 既にmasterへmergeするPRがあるか
           found_release_pr = detect_existing_release_pr
+          # 既にmasterへmergeするPRがあるならcreate_modeはfalse
           create_mode = found_release_pr.nil?
 
           if create_mode
@@ -183,7 +200,10 @@ module Git
               release_pr = nil
               changed_files = []
             else
+              # stagingからmasterへのPRを作る
               release_pr = prepare_release_pr
+
+              # PRの変更ファイル一覧を取得
               changed_files = pull_request_files(release_pr)
             end
           else
@@ -207,6 +227,7 @@ module Git
           dump_result_as_json( release_pr, merged_prs, changed_files ) if @json
         end
 
+        # 既にmasterへmergeするPRがあるか
         def detect_existing_release_pr
           say 'Searching for existing release pull requests...', :info
           user=repository.split("/")[0]
@@ -219,6 +240,7 @@ module Git
           )
         end
 
+        #
         def build_and_merge_pr_title_and_body(release_pr, merged_prs, changed_files)
           # release_pr is nil when dry_run && create_mode
           old_body = (release_pr && release_pr.body != nil) ? release_pr.body : ""
@@ -243,6 +265,7 @@ module Git
         end
 
         # Fetch PR files of specified pull_request
+        # PRの変更ファイル一覧を取得
         def pull_request_files(pull_request)
           return [] if pull_request.nil?
 
