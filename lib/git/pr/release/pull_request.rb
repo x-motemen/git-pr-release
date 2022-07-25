@@ -40,6 +40,10 @@ module Git
         def self.mention_type
           @mention_type ||= (ENV.fetch('GIT_PR_RELEASE_MENTION') { git_config('mention') } || 'default')
         end
+
+        def method_missing(name, *args)
+          @pr.send name, *args
+        end
       end
     end
   end
