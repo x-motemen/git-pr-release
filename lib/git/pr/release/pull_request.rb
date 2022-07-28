@@ -41,8 +41,8 @@ module Git
           @mention_type ||= (ENV.fetch('GIT_PR_RELEASE_MENTION') { git_config('mention') } || 'default')
         end
 
-        def method_missing(name, *args)
-          @pr.public_send name, *args
+        def method_missing(name, *args, &block)
+          @pr.public_send name, *args, &block
         end
 
         def respond_to_missing?(name, include_private = false)
