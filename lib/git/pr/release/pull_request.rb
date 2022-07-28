@@ -42,7 +42,7 @@ module Git
         end
 
         def method_missing(name, *args)
-          @pr.send name, *args
+          @pr.public_send name, *args
         end
 
         def respond_to_missing?(name, include_private = false)
