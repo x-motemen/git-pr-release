@@ -44,6 +44,10 @@ module Git
         def method_missing(name, *args)
           @pr.send name, *args
         end
+
+        def respond_to_missing?(name, include_private = false)
+          @pr.respond_to?(name, include_private)
+        end
       end
     end
   end
