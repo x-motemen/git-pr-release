@@ -1,5 +1,11 @@
 # git-pr-release
 
+## v2.1.2 (2022-07-29)
+
+[full changelog](https://github.com/x-motemen/git-pr-release/compare/v2.1.1...v2.1.2)
+
+* (#87) delegate to `@pr` when `method_missing` in PullRequest (@Songmu)
+
 ## v2.1.1 (2022-03-09)
 
 [full changelog](https://github.com/x-motemen/git-pr-release/compare/v2.1.0...v2.1.1)
