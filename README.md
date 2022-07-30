@@ -102,18 +102,6 @@ Errors and exit statuses
 
 exit status is 1.
 
-### Failed to create a new pull request
-
-exit status is 2.
-
-### Failed to update a pull request
-
-exit status is 3.
-
-### Failed to add labels
-
-exit status is 4.
-
 Author
 ------
 
