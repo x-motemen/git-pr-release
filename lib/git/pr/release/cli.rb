@@ -87,6 +87,10 @@ module Git
         end
 
         def fetch_merged_prs
+          bool = git(:'rev-parse', '--is-shallow-repository').first.chomp
+          if bool == 'true'
+            git(:fetch, '--unshallow')
+          end
           git :remote, 'update', 'origin' unless @no_fetch
 
           merged_pull_request_numbers = fetch_merged_pr_numbers_from_git_remote
