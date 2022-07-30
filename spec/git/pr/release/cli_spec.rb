@@ -194,6 +194,7 @@ RSpec.describe Git::Pr::Release::CLI do
         conn.adapter(:test, Faraday::Adapter::Test::Stubs.new)
       end
 
+      expect(@cli).to receive(:git).with(:'rev-parse', "--is-shallow-repository") { ["false\n"] }
       expect(@cli).to receive(:git).with(:remote, "update", "origin") {
         []
       }
