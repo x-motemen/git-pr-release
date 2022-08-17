@@ -320,6 +320,32 @@ RSpec.describe Git::Pr::Release::CLI do
         expect(@cli).not_to have_received(:update_release_pr).with(@created_pr, @pr_title, @pr_body)
       }
     end
+
+    context "When overwrite_description" do
+      before {
+        @cli.instance_variable_set(:@overwrite_description, true)
+        @new_pr_title = "2022-08-17 12:34:58 +0900"
+        @new_pr_body = <<~BODY.chomp
+          - [ ] #3 @hakobe
+          - [ ] #4 @hakobe
+        BODY
+        allow(@cli).to receive(:build_pr_title_and_body) {
+          [@new_pr_title, @new_pr_body]
+        }
+      }
+
+      let(:existing_release_pr) { double(
+        number: 1023,
+        rels: { html: double(href: "https://github.com/motemen/git-pr-release/pull/1023") },
+      )}
+
+      it {
+        subject
+
+        expect(@cli).not_to have_received(:build_and_merge_pr_title_and_body)
+        expect(@cli).to have_received(:update_release_pr).with(existing_release_pr, @new_pr_title, @new_pr_body)
+      }
+    end
   end
 
   describe "#prepare_release_pr" do
