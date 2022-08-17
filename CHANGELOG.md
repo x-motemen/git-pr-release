@@ -1,5 +1,12 @@
 # git-pr-release
 
+## v2.2.0 (2022-08-17)
+
+[full changelog](https://github.com/x-motemen/git-pr-release/compare/v2.1.2...v2.2.0)
+
+* (#88) unshallow if a shallow repository (@Songmu)
+* (#89) Add overwrite-description option (@onk)
+
 ## v2.1.2 (2022-07-29)
 
 [full changelog](https://github.com/x-motemen/git-pr-release/compare/v2.1.1...v2.1.2)
