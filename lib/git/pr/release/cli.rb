@@ -34,6 +34,9 @@ module Git
             opts.on('--squashed', 'Handle squash merged PRs') do |v|
               @squashed = v
             end
+            opts.on('--overwrite-description', 'Force overwrite PR description') do |v|
+              @overwrite_description = v
+            end
           end.parse!
 
           ### Set up configuration
@@ -195,7 +198,11 @@ module Git
             changed_files = pull_request_files(release_pr)
           end
 
-          pr_title, pr_body = build_and_merge_pr_title_and_body(release_pr, merged_prs, changed_files)
+          pr_title, pr_body = if @overwrite_description
+                                build_pr_title_and_body(release_pr, merged_prs, changed_files, template_path)
+                              else
+                                build_and_merge_pr_title_and_body(release_pr, merged_prs, changed_files)
+                              end
 
           if @dry_run
             say 'Dry-run. Not updating PR', :info
