@@ -21,13 +21,21 @@ Suitable for branching strategy like below (similar to git-flow):
 
 `git-pr-release --squashed`: include PRs containing squashed commits.
 
+`git-pr-release --overwrite-description`: generate a fresh PR description.
+
+`git-pr-release -n` | `git-pr-release --dry-run`: perform a dry run; does not update PR.
+
+`git-pr-release --no-fetch`: Do not fetch from remote repo before determining target PRs (CI friendly).
+
+`git-pr-release --json`: Show data of target PRs in JSON format.
+
 ## Configuration
 
 All configuration are taken using `git config`. You can write these variables
 in file `.git-pr-release` (instead of `.git/config` or `~/.gitconfig`) to share project-wise configuration to other
 collaborators.
 
-#### `pr-release.token`
+### `pr-release.token`
 
 Token for GitHub API.
 
@@ -36,7 +44,7 @@ and this configuration variable will be stored.
 
 You can specify this value by `GIT_PR_RELEASE_TOKEN` environment variable.
 
-#### `pr-release.branch.production`
+### `pr-release.branch.production`
 
 The branch name that is deployed in production environment.
 
@@ -44,7 +52,7 @@ You can specify this value by `GIT_PR_RELEASE_BRANCH_PRODUCTION` environment var
 
 Default value: `master`.
 
-#### `pr-release.branch.staging`
+### `pr-release.branch.staging`
 
 The branch name that the feature branches are merged into and is going to be
 merged into the "production" branch.
@@ -53,7 +61,7 @@ You can specify this value by `GIT_PR_RELEASE_BRANCH_STAGING` environment variab
 
 Default value: `staging`.
 
-#### `pr-release.template`
+### `pr-release.template`
 
 The template file path (relative to the workidir top) for pull requests
 created. Its first line is used for the PR title, the rest for the body. This
@@ -70,7 +78,7 @@ Release <%= Time.now %>
 <% end -%>
 ```
 
-#### `pr-release.labels`
+### `pr-release.labels`
 
 The labels list for adding to pull requests created.
 This value should be comma-separated strings.
@@ -79,7 +87,7 @@ You can specify this value by `GIT_PR_RELEASE_LABELS` environment variable.
 
 If not specified, any labels will not be added for PRs.
 
-#### `pr-release.mention`
+### `pr-release.mention`
 
 The name that is listed next to each PR title.
 Accepted values: `author`
@@ -88,7 +96,7 @@ You can specify this value by `GIT_PR_RELEASE_MENTION` environment variable.
 
 If not specified, the mention will be the PR assignee
 
-#### `pr-release.ssl-no-verify`
+### `pr-release.ssl-no-verify`
 
 Whether to verify SSL certificate or not.
 Accepted values: `true` | `false`
@@ -101,7 +109,7 @@ If not specified, verify SSL certificate always.
 
 ## Errors and exit statuses
 
-#### No pull requests to be released
+### No pull requests to be released
 
 exit status is 1.
 
