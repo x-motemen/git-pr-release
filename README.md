@@ -1,5 +1,4 @@
-git-pr-release <a href="http://badge.fury.io/rb/git-pr-release"><img src="https://badge.fury.io/rb/git-pr-release@2x.png" alt="Gem Version" height="18"></a>
-==============
+# git-pr-release <a href="http://badge.fury.io/rb/git-pr-release"><img src="https://badge.fury.io/rb/git-pr-release@2x.png" alt="Gem Version" height="18"></a>
 
 Creates a "release pull request", whose body consists of features list or
 pull requests that are to be released into production. It's especially useful for QA and
@@ -11,13 +10,26 @@ pull request.
 
 Suitable for branching strategy like below (similar to git-flow):
 
- * Feature branches are first merged into "staging" (or release, development)
-   branch.
- * Then the staging branch is merged into "production" branch, which is for
-   production release.
+- Feature branches are first merged into "staging" (or release, development)
+  branch.
+- Then the staging branch is merged into "production" branch, which is for
+  production release.
 
-Configuration
--------------
+## Usage
+
+`git-pr-release`: default
+
+`git-pr-release --squashed`: include PRs containing squashed commits.
+
+`git-pr-release --overwrite-description`: generate a fresh PR description.
+
+`git-pr-release -n` | `git-pr-release --dry-run`: perform a dry run; does not update PR.
+
+`git-pr-release --no-fetch`: Do not fetch from remote repo before determining target PRs (CI friendly).
+
+`git-pr-release --json`: Show data of target PRs in JSON format.
+
+## Configuration
 
 All configuration are taken using `git config`. You can write these variables
 in file `.git-pr-release` (instead of `.git/config` or `~/.gitconfig`) to share project-wise configuration to other
@@ -95,14 +107,12 @@ You can specify this value by `GIT_PR_RELEASE_SSL_NO_VERIFY` to `1`.
 
 If not specified, verify SSL certificate always.
 
-Errors and exit statuses
-------------------------
+## Errors and exit statuses
 
 ### No pull requests to be released
 
 exit status is 1.
 
-Author
-------
+## Author
 
 motemen <motemen@gmail.com>, original in-house version written by @hitode909.
