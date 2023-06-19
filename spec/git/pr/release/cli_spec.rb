@@ -228,6 +228,38 @@ RSpec.describe Git::Pr::Release::CLI do
     }
 
     it { is_expected.to eq [@pr_3, @pr_4] }
+
+    context 'when squashed' do
+      before {
+        @cli.instance_variable_set(:@squashed, true)
+        expect(@cli).to receive(:git).with(
+          :log,
+          "--pretty=format:%h",
+          "--abbrev=7",
+          "--no-merges",
+          "--first-parent",
+          "origin/master..origin/staging"
+        ) { ''.each_line }
+      }
+
+      it { is_expected.to eq [@pr_3, @pr_4] }
+    end
+
+    context 'when squashed and recursive' do
+      before {
+        @cli.instance_variable_set(:@squashed, true)
+        @cli.instance_variable_set(:@recursive, true)
+        expect(@cli).to receive(:git).with(
+          :log,
+          "--pretty=format:%h",
+          "--abbrev=7",
+          "--no-merges",
+          "origin/master..origin/staging"
+        ) { ''.each_line }
+      }
+
+      it { is_expected.to eq [@pr_3, @pr_4] }
+    end
   end
 
   describe "#create_release_pr" do
