@@ -1,5 +1,11 @@
 # git-pr-release
 
+## v2.2.0.1 (2023-06-20)
+
+[full changelog](https://github.com/shimx/git-pr-release/compare/v2.2.0...v2.2.0.1)
+
+- (https://github.com/shimx/git-pr-release/pull/2) (@shimx)
+
 ## v2.2.0 (2022-08-17)
 
 [full changelog](https://github.com/x-motemen/git-pr-release/compare/v2.1.2...v2.2.0)

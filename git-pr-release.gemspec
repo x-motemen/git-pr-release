@@ -4,12 +4,12 @@ $LOAD_PATH.unshift(lib) unless $LOAD_PATH.include?(lib)
 
 Gem::Specification.new do |spec|
   spec.name          = "git-pr-release"
-  spec.version       = '2.2.0'
-  spec.authors       = ["motemen"]
-  spec.email         = ["motemen@gmail.com"]
+  spec.version       = '2.2.0.1'
+  spec.authors       = ["shimx"]
+  spec.email         = ["info@shimx.net"]
   spec.summary       = 'Creates a release pull request'
   spec.description   = 'git-pr-release creates a pull request which summarizes feature branches that are to be released into production'
-  spec.homepage      = 'https://github.com/x-motemen/git-pr-release'
+  spec.homepage      = 'https://github.com/shimx/git-pr-release'
 
   spec.files         = `git ls-files`.split($/)
   spec.bindir        = "exe"
