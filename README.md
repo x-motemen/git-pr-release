@@ -21,6 +21,8 @@ Suitable for branching strategy like below (similar to git-flow):
 
 `git-pr-release --squashed`: include PRs containing squashed commits.
 
+`git-pr-release --squashed -r` | `git-pr-release --squashed --recursive`: include PRs containing squashed commits with squashed commits into the merged branch.
+
 `git-pr-release --overwrite-description`: generate a fresh PR description.
 
 `git-pr-release -n` | `git-pr-release --dry-run`: perform a dry run; does not update PR.
