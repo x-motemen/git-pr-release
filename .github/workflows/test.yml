@@ -29,7 +29,7 @@ jobs:
     steps:
       - uses: actions/checkout@v2
       - name: Cache vendor/bundle
-        uses: actions/cache@v2
+        uses: actions/cache@v4
         with:
           path: vendor/bundle
           key: v1-gem-${{ runner.os }}-${{ matrix.ruby }}-${{ github.sha }}
