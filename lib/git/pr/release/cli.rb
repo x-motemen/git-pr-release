@@ -6,7 +6,7 @@ module Git
     module Release
       class CLI
         include Git::Pr::Release::Util
-        attr_reader :repository, :production_branch, :staging_branch, :template_path, :labels
+        attr_reader :repository, :production_branch, :staging_branch, :template_path, :labels, :aggregate_labels
 
         def self.start
           result = self.new.start
@@ -78,6 +78,7 @@ module Git
           @production_branch = ENV.fetch('GIT_PR_RELEASE_BRANCH_PRODUCTION') { git_config('branch.production') } || 'master'
           @staging_branch    = ENV.fetch('GIT_PR_RELEASE_BRANCH_STAGING') { git_config('branch.staging') }       || 'staging'
           @template_path     = ENV.fetch('GIT_PR_RELEASE_TEMPLATE') { git_config('template') }
+          @aggregate_labels   = ENV.fetch('GIT_PR_RELEASE_AGGREGATE_LABELS') { git_config('aggregate-labels') } == 'true'
 
           _labels = ENV.fetch('GIT_PR_RELEASE_LABELS') { git_config('labels') }
           @labels = _labels && _labels.split(/\s*,\s*/) || []
@@ -86,7 +87,8 @@ module Git
           say "Production branch: #{production_branch}", :debug
           say "Staging branch:    #{staging_branch}", :debug
           say "Template path:     #{template_path}", :debug
-          say "Labels             #{labels}", :debug
+          say "Labels:            #{labels}#{aggregate_labels ? ' + labels on merged PRs' : ''}", :debug
+          say "Aggregate Labels:  #{aggregate_labels}", :debug
         end
 
         def fetch_merged_prs
@@ -105,6 +107,13 @@ module Git
             pr = client.pull_request repository, nr
             say "To be released: ##{pr.number} #{pr.title}", :notice
             pr
+          end
+
+          if @aggregate_labels
+            merged_prs_labels = merged_prs.flat_map do |pr|
+              pr.labels.map(&:name)
+            end
+            @labels = (labels + merged_prs_labels).uniq
           end
 
           merged_prs
