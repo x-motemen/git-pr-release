@@ -63,14 +63,12 @@ RSpec.describe Git::Pr::Release do
           - [ ] #3 Provides a creating release pull-request object for template @hakobe
           - [ ] #4 use user who create PR if there is no assignee @hakobe
           - [ ] #6 Support two factor auth @ninjinkun
-          - [ ] #30 Extract logic from bin/git-pr-release @banyan
         NEW_BODY
 
         expect(actual).to eq <<~MARKDOWN.chomp
           - [x] #3 Provides a creating release pull-request object for template @hakobe
           - [ ] #4 use user who create PR if there is no assignee @hakobe
           - [ ] #6 Support two factor auth @ninjinkun
-          - [ ] #30 Extract logic from bin/git-pr-release @banyan
         MARKDOWN
       }
     end
@@ -89,6 +87,26 @@ RSpec.describe Git::Pr::Release do
           - [ ] #3 Provides a creating release pull-request object for template @hakobe
           - [x] #4 use user who create PR if there is no assignee @hakobe
           - [x] #6 Support two factor auth @ninjinkun
+        MARKDOWN
+      }
+    end
+    context "new pr added when the same numbers are included in a forward match" do
+      it {
+        actual = merge_pr_body(<<~OLD_BODY, <<~NEW_BODY)
+          - [x] #3 Provides a creating release pull-request object for template @hakobe
+          - [ ] #6 Support two factor auth @ninjinkun
+        OLD_BODY
+          - [ ] #3 Provides a creating release pull-request object for template @hakobe
+          - [ ] #4 use user who create PR if there is no assignee @hakobe
+          - [ ] #6 Support two factor auth @ninjinkun
+          - [ ] #30 Extract logic from bin/git-pr-release @banyan
+        NEW_BODY
+
+        expect(actual).to eq <<~MARKDOWN.chomp
+          - [x] #3 Provides a creating release pull-request object for template @hakobe
+          - [ ] #4 use user who create PR if there is no assignee @hakobe
+          - [ ] #6 Support two factor auth @ninjinkun
+          - [ ] #30 Extract logic from bin/git-pr-release @banyan
         MARKDOWN
       }
     end
