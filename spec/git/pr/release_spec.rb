@@ -63,12 +63,14 @@ RSpec.describe Git::Pr::Release do
           - [ ] #3 Provides a creating release pull-request object for template @hakobe
           - [ ] #4 use user who create PR if there is no assignee @hakobe
           - [ ] #6 Support two factor auth @ninjinkun
+          - [ ] #30 Extract logic from bin/git-pr-release @banyan
         NEW_BODY
 
         expect(actual).to eq <<~MARKDOWN.chomp
           - [x] #3 Provides a creating release pull-request object for template @hakobe
           - [ ] #4 use user who create PR if there is no assignee @hakobe
           - [ ] #6 Support two factor auth @ninjinkun
+          - [ ] #30 Extract logic from bin/git-pr-release @banyan
         MARKDOWN
       }
     end
