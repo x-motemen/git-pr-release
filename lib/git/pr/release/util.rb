@@ -157,7 +157,7 @@ ERB
           merged_body = pr_body_lines.join("\n")
           check_status.each { |issue_number, check_value|
             say "Update pull-request checkbox \##{issue_number} to #{check_value}.", :trace
-            merged_body.gsub! /^- \[ \] \##{issue_number}/, "- [#{check_value}] \##{issue_number}"
+            merged_body.gsub! /^- \[ \] \##{issue_number}\b/, "- [#{check_value}] \##{issue_number}"
           }
 
           merged_body
