@@ -181,6 +181,47 @@ RSpec.describe Git::Pr::Release::CLI do
         end
       end
     end
+
+    describe "aggregate_labels" do
+      context "With ENV" do
+        around do |example|
+          original = ENV.to_hash
+          begin
+            ENV["GIT_PR_RELEASE_AGGREGATE_LABELS"] = env_labels
+            example.run
+          ensure
+            ENV.replace(original)
+          end
+        end
+
+        context "string" do
+          let(:env_labels) { "true" }
+          it "set aggregate_labels" do
+            subject
+            expect(@cli.aggregate_labels).to eq true
+          end
+        end
+
+        context "empty string" do
+          let(:env_labels) { "" }
+          it "set aggregate_labels as default" do
+            subject
+            expect(@cli.aggregate_labels).to eq false
+          end
+        end
+      end
+
+      context "With git_config" do
+        before {
+          allow(@cli).to receive(:git_config).with("aggregate_labels") { "true" }
+        }
+
+        it "set aggregate_labels" do
+          subject
+          expect(@cli.aggregate_labels).to eq true
+        end
+      end
+    end
   end
 
   describe "#fetch_merged_prs" do
@@ -228,6 +269,23 @@ RSpec.describe Git::Pr::Release::CLI do
     }
 
     it { is_expected.to eq [@pr_3, @pr_4] }
+
+    context "aggregate_labels option is true" do
+      around do |example|
+        original = ENV.to_hash
+        begin
+          ENV["GIT_PR_RELEASE_LABELS"] = 'release'
+          ENV["GIT_PR_RELEASE_AGGREGATE_LABELS"] = 'true'
+          example.run
+        ensure
+          ENV.replace(original)
+        end
+      end
+
+      it "merges labels given as GIT_PR_RELEASE_LABELS and labels on merged PRs" do
+        expect { subject }.to change { @cli.labels }.from(['release']).to(['release', 'bug', 'enhancement'])
+      end
+    end
   end
 
   describe "#create_release_pr" do
