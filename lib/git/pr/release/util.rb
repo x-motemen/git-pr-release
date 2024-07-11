@@ -199,6 +199,24 @@ ERB
 
           auth
         end
+
+        def to_boolean(flag)
+          case flag
+          when TrueClass, FalseClass
+            flag
+          when String
+            flag = flag.downcase
+            if flag == 'true'
+              true
+            elsif flag == 'false'
+              false
+            else
+              nil
+            end
+          else
+            nil
+          end
+        end
       end
     end
   end

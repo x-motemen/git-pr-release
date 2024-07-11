@@ -6,7 +6,7 @@ module Git
     module Release
       class CLI
         include Git::Pr::Release::Util
-        attr_reader :repository, :production_branch, :staging_branch, :template_path, :labels
+        attr_reader :repository, :production_branch, :staging_branch, :template_path, :labels, :draft
 
         def self.start
           result = self.new.start
@@ -82,11 +82,18 @@ module Git
           _labels = ENV.fetch('GIT_PR_RELEASE_LABELS') { git_config('labels') }
           @labels = _labels && _labels.split(/\s*,\s*/) || []
 
+          _draft = ENV.fetch('GIT_PR_RELEASE_DRAFT') { git_config('draft') } || false
+          @draft = to_boolean(_draft)
+          if draft.nil?
+            raise "#{_draft} is not boolean. set true or false."
+          end
+
           say "Repository:        #{repository}", :debug
           say "Production branch: #{production_branch}", :debug
           say "Staging branch:    #{staging_branch}", :debug
           say "Template path:     #{template_path}", :debug
           say "Labels             #{labels}", :debug
+          say "Draft              #{draft}", :debug
         end
 
         def fetch_merged_prs
@@ -226,7 +233,8 @@ module Git
 
         def prepare_release_pr
           client.create_pull_request(
-            repository, production_branch, staging_branch, 'Preparing release pull request...', ''
+            repository, production_branch, staging_branch, 'Preparing release pull request...', '',
+            { draft: draft }
           )
         end
 

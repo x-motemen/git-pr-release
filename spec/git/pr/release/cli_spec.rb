@@ -76,6 +76,7 @@ RSpec.describe Git::Pr::Release::CLI do
         expect(@cli.staging_branch).to eq "staging"
         expect(@cli.template_path).to eq nil
         expect(@cli.labels).to eq []
+        expect(@cli.draft).to eq false
       end
     end
 
@@ -178,6 +179,58 @@ RSpec.describe Git::Pr::Release::CLI do
         it "set labels" do
           subject
           expect(@cli.labels).to eq ["release"]
+        end
+      end
+    end
+
+    describe "draft" do
+      context "When draft is not set" do
+        it "draft is false" do
+          subject
+
+          expect(@cli.draft).to eq false
+        end
+      end
+
+      context "When draft is set by ENV" do
+        around do |example|
+          original = ENV.to_hash
+          begin
+            ENV["GIT_PR_RELEASE_DRAFT"] = 'true'
+            example.run
+          ensure
+            ENV.replace(original)
+          end
+        end
+
+        it "draft is configured" do
+          subject
+
+          expect(@cli.draft).to eq true
+        end
+      end
+
+      context "When draft is set by git_config" do
+        before {
+          allow(@cli).to receive(:git_config).with("draft") { true }
+        }
+
+        it "draft is configured" do
+          subject
+
+          expect(@cli.draft).to eq true
+        end
+      end
+
+      context "When draft is not set true | false" do
+        let(:draft) { 'not_true' }
+
+        before {
+          allow(@cli).to receive(:git_config).with("draft") { draft }
+        }
+
+        it "draft is configured" do
+          expect { subject }.to raise_error("#{draft} is not boolean. set true or false.")
         end
       end
     end
@@ -368,6 +421,7 @@ RSpec.describe Git::Pr::Release::CLI do
         "staging",
         "Preparing release pull request...",
         "", # empby body
+        { draft: @cli.draft }
       )
     }
   end
