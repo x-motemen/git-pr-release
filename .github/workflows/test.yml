@@ -11,23 +11,23 @@ on:
 jobs:
   test:
     runs-on: ubuntu-latest
-    container: ${{ matrix.ruby }}
     strategy:
       fail-fast: false
       matrix:
         ruby:
-          - ruby:2.6
-          - ruby:2.7
-          - ruby:3.0
-          - ruby:3.1
-          - ruby:3.2
-          - rubylang/ruby:master-nightly-bionic
-        include:
-          - ruby: rubylang/ruby:master-nightly-bionic
-            allow_failures: "true"
+          - "2.6"
+          - "2.7"
+          - "3.0"
+          - "3.1"
+          - "3.2"
+          - head
 
     steps:
       - uses: actions/checkout@v2
+      - uses: ruby/setup-ruby@v1
+        with:
+          ruby-version: ${{ matrix.ruby }}
+          bundler-cache: true
       - name: Cache vendor/bundle
         uses: actions/cache@v4
         with:
