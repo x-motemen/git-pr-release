@@ -159,7 +159,7 @@ module Git
             "origin/#{production_branch}..origin/#{staging_branch}").map(&:chomp)
 
           pr_nums = []
-          query_base = "repo:#{repository} is:pr is:closed"
+          query_base = "repo:#{repository} is:pr is:merged"
           query = query_base
           # Make bulk requests with multiple SHAs of the maximum possible length.
           # If multiple SHAs are specified, the issue search API will treat it like an OR search,
