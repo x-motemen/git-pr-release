@@ -35,12 +35,19 @@
 :closed_at: 2014-03-26 10:49:03.000000000 Z
 :merged_at: 2014-03-26 10:49:03.000000000 Z
 :merge_commit_sha: 19dd4309bfac0b0358e7e87f48a007ef54634140
-:assignee: 
+:assignee:
 :assignees: []
 :requested_reviewers: []
 :requested_teams: []
-:labels: []
-:milestone: 
+:labels:
+  - :id: 208045946,
+    :node_id: "MDU6TGFiZWwyMDgwNDU5NDY="
+    :url: "https://api.github.com/repos/octocat/Hello-World/labels/bug"
+    :name: "enhancement"
+    :description: "Something isn't working"
+    :color: "f29513"
+    :default: true
+:milestone:
 :commits_url: https://api.github.com/repos/motemen/git-pr-release/pulls/4/commits
 :review_comments_url: https://api.github.com/repos/motemen/git-pr-release/pulls/4/comments
 :review_comment_url: https://api.github.com/repos/motemen/git-pr-release/pulls/comments{/number}
@@ -152,7 +159,7 @@
     :has_wiki: true
     :has_pages: false
     :forks_count: 28
-    :mirror_url: 
+    :mirror_url:
     :archived: false
     :open_issues_count: 6
     :license:
@@ -271,7 +278,7 @@
     :has_wiki: true
     :has_pages: false
     :forks_count: 28
-    :mirror_url: 
+    :mirror_url:
     :archived: false
     :open_issues_count: 6
     :license:
@@ -303,8 +310,8 @@
     :href: https://api.github.com/repos/motemen/git-pr-release/statuses/42bd43b80c973c8f348df3521745201be05bf194
 :author_association: COLLABORATOR
 :merged: true
-:mergeable: 
-:rebaseable: 
+:mergeable:
+:rebaseable:
 :mergeable_state: unknown
 :merged_by:
   :login: motemen
