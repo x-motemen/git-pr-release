@@ -31,7 +31,7 @@ module Git
                     when 'author'
                       pr.user ? "@#{pr.user.login}" : nil
                     else
-                      if pr.assignees && pr.assignees.any?
+                      if pr.assignees&.any? && pr.assignees.length > 1
                         pr.assignees.map { |assignee| "@#{assignee.login}" }.join(" ")
                       elsif pr.assignee
                         "@#{pr.assignee.login}"
