@@ -75,41 +75,41 @@
   :received_events_url: https://api.github.com/users/hakobe/received_events
   :type: User
   :site_admin: false
-- :login: ninjinkun
-  :id: 113420
-  :node_id: MDQ6VXNlcjExMzQyMA==
-  :avatar_url: https://avatars1.githubusercontent.com/u/113420?v=4
+- :login: toshimaru
+  :id: 803398
+  :node_id: MDQ6VXNlcjgwMzM5OA==
+  :avatar_url: https://avatars.githubusercontent.com/u/803398?v=4
   :gravatar_id: ''
-  :url: https://api.github.com/users/ninjinkun
-  :html_url: https://github.com/ninjinkun
-  :followers_url: https://api.github.com/users/ninjinkun/followers
-  :following_url: https://api.github.com/users/ninjinkun/following{/other_user}
-  :gists_url: https://api.github.com/users/ninjinkun/gists{/gist_id}
-  :starred_url: https://api.github.com/users/ninjinkun/starred{/owner}{/repo}
-  :subscriptions_url: https://api.github.com/users/ninjinkun/subscriptions
-  :organizations_url: https://api.github.com/users/ninjinkun/orgs
-  :repos_url: https://api.github.com/users/ninjinkun/repos
-  :events_url: https://api.github.com/users/ninjinkun/events{/privacy}
-  :received_events_url: https://api.github.com/users/ninjinkun/received_events
+  :url: https://api.github.com/users/toshimaru
+  :html_url: https://github.com/toshimaru
+  :followers_url: https://api.github.com/users/toshimaru/followers
+  :following_url: https://api.github.com/users/toshimaru/following{/other_user}
+  :gists_url: https://api.github.com/users/toshimaru/gists{/gist_id}
+  :starred_url: https://api.github.com/users/toshimaru/starred{/owner}{/repo}
+  :subscriptions_url: https://api.github.com/users/toshimaru/subscriptions
+  :organizations_url: https://api.github.com/users/toshimaru/orgs
+  :repos_url: https://api.github.com/users/toshimaru/repos
+  :events_url: https://api.github.com/users/toshimaru/events{/privacy}
+  :received_events_url: https://api.github.com/users/toshimaru/received_events
   :type: User
   :site_admin: false
-- :login: motemen
-  :id: 8465
-  :node_id: MDQ6VXNlcjg0NjU=
-  :avatar_url: https://avatars2.githubusercontent.com/u/8465?v=4
+- :login: Copilot
+  :id: 198982749
+  :node_id: BOT_kgDOC9w8XQ
+  :avatar_url: https://avatars.githubusercontent.com/in/1143301?v=4
   :gravatar_id: ''
-  :url: https://api.github.com/users/motemen
-  :html_url: https://github.com/motemen
-  :followers_url: https://api.github.com/users/motemen/followers
-  :following_url: https://api.github.com/users/motemen/following{/other_user}
-  :gists_url: https://api.github.com/users/motemen/gists{/gist_id}
-  :starred_url: https://api.github.com/users/motemen/starred{/owner}{/repo}
-  :subscriptions_url: https://api.github.com/users/motemen/subscriptions
-  :organizations_url: https://api.github.com/users/motemen/orgs
-  :repos_url: https://api.github.com/users/motemen/repos
-  :events_url: https://api.github.com/users/motemen/events{/privacy}
-  :received_events_url: https://api.github.com/users/motemen/received_events
-  :type: User
+  :url: https://api.github.com/users/Copilot
+  :html_url: https://github.com/apps/copilot-swe-agent
+  :followers_url: https://api.github.com/users/Copilot/followers
+  :following_url: https://api.github.com/users/Copilot/following{/other_user}
+  :gists_url: https://api.github.com/users/Copilot/gists{/gist_id}
+  :starred_url: https://api.github.com/users/Copilot/starred{/owner}{/repo}
+  :subscriptions_url: https://api.github.com/users/Copilot/subscriptions
+  :organizations_url: https://api.github.com/users/Copilot/orgs
+  :repos_url: https://api.github.com/users/Copilot/repos
+  :events_url: https://api.github.com/users/Copilot/events{/privacy}
+  :received_events_url: https://api.github.com/users/Copilot/received_events
+  :type: Bot
   :site_admin: false
 :requested_reviewers: []
 :requested_teams: []
