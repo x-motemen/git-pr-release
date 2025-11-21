@@ -4,7 +4,7 @@ $LOAD_PATH.unshift(lib) unless $LOAD_PATH.include?(lib)
 
 Gem::Specification.new do |spec|
   spec.name          = "git-pr-release"
-  spec.version       = '2.2.0.1'
+  spec.version       = '2.2.0.2'
   spec.authors       = ["shimx"]
   spec.email         = ["info@shimx.net"]
   spec.summary       = 'Creates a release pull request'
