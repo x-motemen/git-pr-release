@@ -112,19 +112,21 @@ ERB
         end
 
         def merge_pr_body(old_body, new_body)
+          normalized_old_body = normalize_to_utf8(old_body)
+          normalized_new_body = normalize_to_utf8(new_body)
           # Try to take over checklist statuses
           pr_body_lines = []
 
           check_status = {}
-          old_body.split(/\r?\n/).each { |line|
+          normalized_old_body.split(/\r?\n/).each { |line|
             line.match(/^- \[(?<check_value>[ x])\] #(?<issue_number>\d+)/) { |m|
               say "Found pull-request checkbox \##{m[:issue_number]} is #{m[:check_value]}.", :trace
               check_status[m[:issue_number]] = m[:check_value]
             }
           }
-          old_body_unchecked = old_body.gsub /^- \[[ x]\] \#(\d+)/, '- [ ] #\1'
+          old_body_unchecked = normalized_old_body.gsub /^- \[[ x]\] \#(\d+)/, '- [ ] #\1'
 
-          Diff::LCS.traverse_balanced(old_body_unchecked.split(/\r?\n/), new_body.split(/\r?\n/)) do |event|
+          Diff::LCS.traverse_balanced(old_body_unchecked.split(/\r?\n/), normalized_new_body.split(/\r?\n/)) do |event|
             say "diff: #{event.inspect}", :trace
             action, old, new = *event
             old_nr, old_line = *old
@@ -198,6 +200,12 @@ ERB
           end
 
           auth
+        end
+
+        private
+
+        def normalize_to_utf8(value)
+          value.to_s.encode('UTF-8', invalid: :replace, undef: :replace)
         end
       end
     end

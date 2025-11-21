@@ -439,6 +439,24 @@ RSpec.describe Git::Pr::Release::CLI do
         expect(@cli).to have_received(:merge_pr_body).with("", "PR Body")
       }
     end
+
+    context "When release_pr body contains string encoded as ASCII-8BIT" do
+      let(:release_pr) { double(body: "Old 🌸 Body".dup.force_encoding(Encoding::ASCII_8BIT)) }
+      let(:changed_files) { [double(Sawyer::Resource)] }
+
+      before {
+        allow(@cli).to receive(:merge_pr_body).and_call_original
+        allow(@cli).to receive(:build_pr_title_and_body) { ["PR Title", "New 🌸 Body"] }
+      }
+
+      it {
+        expect { subject }.not_to raise_error
+
+        expect(@cli).to have_received(:merge_pr_body).with(release_pr.body, "New 🌸 Body")
+        expect(subject[1]).to include("New 🌸 Body")
+        expect(subject[1].encoding).to eq Encoding::UTF_8
+      }
+    end
   end
 
   describe "#update_release_pr" do
