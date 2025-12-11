@@ -77,6 +77,7 @@ RSpec.describe Git::Pr::Release::CLI do
         expect(@cli.template_path).to eq nil
         expect(@cli.labels).to eq []
         expect(@cli.assign_pr_author).to eq false
+        expect(@cli.request_pr_author_review).to eq false
       end
     end
 
@@ -243,6 +244,70 @@ RSpec.describe Git::Pr::Release::CLI do
         it "enables assign_pr_author" do
           subject
           expect(@cli.assign_pr_author).to eq true
+        end
+      end
+    end
+
+    describe "request_pr_author_review" do
+      context "With ENV set to true" do
+        around do |example|
+          original = ENV.to_hash
+          begin
+            ENV["GIT_PR_RELEASE_REQUEST_PR_AUTHOR_REVIEW"] = "true"
+            example.run
+          ensure
+            ENV.replace(original)
+          end
+        end
+
+        it "enables request_pr_author_review" do
+          subject
+          expect(@cli.request_pr_author_review).to eq true
+        end
+      end
+
+      context "With ENV set to 1" do
+        around do |example|
+          original = ENV.to_hash
+          begin
+            ENV["GIT_PR_RELEASE_REQUEST_PR_AUTHOR_REVIEW"] = "1"
+            example.run
+          ensure
+            ENV.replace(original)
+          end
+        end
+
+        it "enables request_pr_author_review" do
+          subject
+          expect(@cli.request_pr_author_review).to eq true
+        end
+      end
+
+      context "With ENV set to false" do
+        around do |example|
+          original = ENV.to_hash
+          begin
+            ENV["GIT_PR_RELEASE_REQUEST_PR_AUTHOR_REVIEW"] = "false"
+            example.run
+          ensure
+            ENV.replace(original)
+          end
+        end
+
+        it "disables request_pr_author_review" do
+          subject
+          expect(@cli.request_pr_author_review).to eq false
+        end
+      end
+
+      context "With git_config" do
+        before {
+          allow(@cli).to receive(:git_config).with("request-pr-author-review") { "true" }
+        }
+
+        it "enables request_pr_author_review" do
+          subject
+          expect(@cli.request_pr_author_review).to eq true
         end
       end
     end
@@ -496,6 +561,7 @@ RSpec.describe Git::Pr::Release::CLI do
       allow(@client).to receive(:update_pull_request) { @release_pr }
       allow(@client).to receive(:add_labels_to_an_issue)
       allow(@client).to receive(:add_assignees)
+      allow(@client).to receive(:request_pull_request_review)
       allow(@cli).to receive(:client) { @client }
     }
 
@@ -513,6 +579,7 @@ RSpec.describe Git::Pr::Release::CLI do
         )
         expect(@client).not_to have_received(:add_labels_to_an_issue)
         expect(@client).not_to have_received(:add_assignees)
+        expect(@client).not_to have_received(:request_pull_request_review)
       }
     end
 
@@ -535,6 +602,7 @@ RSpec.describe Git::Pr::Release::CLI do
           "motemen/git-pr-release", 1023, ["release"]
         )
         expect(@client).not_to have_received(:add_assignees)
+        expect(@client).not_to have_received(:request_pull_request_review)
       }
     end
 
@@ -558,6 +626,32 @@ RSpec.describe Git::Pr::Release::CLI do
         # And the author of pr_6.yml is ninjinkun.
         expect(@client).to have_received(:add_assignees).with(
           "motemen/git-pr-release", 1023, ["hakobe", "ninjinkun"]
+        )
+        expect(@client).not_to have_received(:request_pull_request_review)
+      }
+    end
+
+    context "With request_pr_author_review enabled" do
+      before {
+        allow(@cli).to receive(:request_pr_author_review) { true }
+      }
+
+      it {
+        subject
+
+        expect(@client).to have_received(:update_pull_request).with(
+          "motemen/git-pr-release",
+          1023,
+          {
+            title: "PR Title",
+            body: "PR Body",
+          }
+        )
+        expect(@client).not_to have_received(:add_assignees)
+        # Both pr_3.yml and pr_4.yml have hakobe as the author
+        # And the author of pr_6.yml is ninjinkun.
+        expect(@client).to have_received(:request_pull_request_review).with(
+          "motemen/git-pr-release", 1023, reviewers: ["hakobe", "ninjinkun"]
         )
       }
     end

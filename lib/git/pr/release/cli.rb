@@ -6,7 +6,7 @@ module Git
     module Release
       class CLI
         include Git::Pr::Release::Util
-        attr_reader :repository, :production_branch, :staging_branch, :template_path, :labels, :assign_pr_author
+        attr_reader :repository, :production_branch, :staging_branch, :template_path, :labels, :assign_pr_author, :request_pr_author_review
 
         def self.start
           result = self.new.start
@@ -85,12 +85,16 @@ module Git
           _assign_pr_author = ENV.fetch('GIT_PR_RELEASE_ASSIGN_PR_AUTHOR') { git_config('assign-pr-author') }
           @assign_pr_author = %w[true 1].include?(_assign_pr_author)
 
+          _request_pr_author_review = ENV.fetch('GIT_PR_RELEASE_REQUEST_PR_AUTHOR_REVIEW') { git_config('request-pr-author-review') }
+          @request_pr_author_review = %w[true 1].include?(_request_pr_author_review)
+
           say "Repository:        #{repository}", :debug
           say "Production branch: #{production_branch}", :debug
           say "Staging branch:    #{staging_branch}", :debug
           say "Template path:     #{template_path}", :debug
           say "Labels             #{labels}", :debug
           say "Assign PR author:  #{assign_pr_author}", :debug
+          say "Request PR author review: #{request_pr_author_review}", :debug
         end
 
         def fetch_merged_prs
@@ -261,6 +265,15 @@ module Git
             unless assignees.empty?
               client.add_assignees(
                 repository, release_pr.number, assignees
+              )
+            end
+          end
+
+          if request_pr_author_review
+            reviewers = merged_prs.map { |pr| PullRequest.new(pr).target_user_login_names }.flatten.compact.uniq
+            unless reviewers.empty?
+              client.request_pull_request_review(
+                repository, release_pr.number, reviewers:
               )
             end
           end

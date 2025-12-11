@@ -27,7 +27,8 @@ module Git
         end
 
         def mention
-          " " + target_user_login_names.map { |login_name| "@#{login_name}" }.join(" ")
+          mention = target_user_login_names.map { |login_name| "@#{login_name}" }.join(" ")
+          mention.empty? ? "" : " #{mention}"
         end
 
         def target_user_login_names
