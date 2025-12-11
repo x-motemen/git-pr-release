@@ -6,7 +6,7 @@ module Git
     module Release
       class CLI
         include Git::Pr::Release::Util
-        attr_reader :repository, :production_branch, :staging_branch, :template_path, :labels
+        attr_reader :repository, :production_branch, :staging_branch, :template_path, :labels, :assign_pr_author
 
         def self.start
           result = self.new.start
@@ -82,11 +82,15 @@ module Git
           _labels = ENV.fetch('GIT_PR_RELEASE_LABELS') { git_config('labels') }
           @labels = _labels && _labels.split(/\s*,\s*/) || []
 
+          _assign_pr_author = ENV.fetch('GIT_PR_RELEASE_ASSIGN_PR_AUTHOR') { git_config('assign-pr-author') }
+          @assign_pr_author = %w[true 1].include?(_assign_pr_author)
+
           say "Repository:        #{repository}", :debug
           say "Production branch: #{production_branch}", :debug
           say "Staging branch:    #{staging_branch}", :debug
           say "Template path:     #{template_path}", :debug
           say "Labels             #{labels}", :debug
+          say "Assign PR author:  #{assign_pr_author}", :debug
         end
 
         def fetch_merged_prs
@@ -212,7 +216,7 @@ module Git
             return
           end
 
-          update_release_pr(release_pr, pr_title, pr_body)
+          update_release_pr(release_pr, pr_title, pr_body, merged_prs)
 
           say "#{create_mode ? 'Created' : 'Updated'} pull request: #{release_pr.rels[:html].href}", :notice
           dump_result_as_json( release_pr, merged_prs, changed_files ) if @json
@@ -238,7 +242,7 @@ module Git
           [pr_title, merge_pr_body(old_body, new_body)]
         end
 
-        def update_release_pr(release_pr, pr_title, pr_body)
+        def update_release_pr(release_pr, pr_title, pr_body, merged_prs)
           say 'Pull request body:', :debug
           say pr_body, :debug
 
@@ -250,6 +254,15 @@ module Git
             client.add_labels_to_an_issue(
               repository, release_pr.number, labels
             )
+          end
+
+          if assign_pr_author
+            assignees = merged_prs.map { |pr| PullRequest.new(pr).target_user_login_names }.flatten.compact.uniq
+            unless assignees.empty?
+              client.add_assignees(
+                repository, release_pr.number, assignees
+              )
+            end
           end
         end
 
