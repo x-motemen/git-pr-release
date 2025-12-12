@@ -31,7 +31,15 @@ module Git
                     when 'author'
                       pr.user ? "@#{pr.user.login}" : nil
                     else
-                      pr.assignee ? "@#{pr.assignee.login}" : pr.user ? "@#{pr.user.login}" : nil
+                      if pr.assignees&.any? && pr.assignees.length > 1
+                        pr.assignees.map { |assignee| "@#{assignee.login}" }.join(" ")
+                      elsif pr.assignee
+                        "@#{pr.assignee.login}"
+                      elsif pr.user
+                        "@#{pr.user.login}"
+                      else
+                        nil
+                      end
                     end
 
           mention ? " #{mention}" : ""
