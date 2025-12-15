@@ -107,6 +107,15 @@ You can specify this value by `GIT_PR_RELEASE_SSL_NO_VERIFY` to `1`.
 
 If not specified, verify SSL certificate always.
 
+### `pr-release.draft`
+
+The pull request is draft no not.
+Accepted values: `true` | `false`
+
+You can specify this value by `GIT_PR_RELEASE_DRAFT` environment variable.
+
+Default value: `false`.
+
 ## Errors and exit statuses
 
 ### No pull requests to be released
