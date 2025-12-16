@@ -273,7 +273,7 @@ module Git
             reviewers = merged_prs.map { |pr| PullRequest.new(pr).target_user_login_names }.flatten.compact.uniq
             unless reviewers.empty?
               client.request_pull_request_review(
-                repository, release_pr.number, reviewers:
+                repository, release_pr.number, reviewers: reviewers
               )
             end
           end
