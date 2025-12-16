@@ -27,22 +27,25 @@ module Git
         end
 
         def mention
-          mention = case PullRequest.mention_type
-                    when 'author'
-                      pr.user ? "@#{pr.user.login}" : nil
-                    else
-                      if pr.assignees&.any? && pr.assignees.length > 1
-                        pr.assignees.map { |assignee| "@#{assignee.login}" }.join(" ")
-                      elsif pr.assignee
-                        "@#{pr.assignee.login}"
-                      elsif pr.user
-                        "@#{pr.user.login}"
-                      else
-                        nil
-                      end
-                    end
+          mention = target_user_login_names.map { |login_name| "@#{login_name}" }.join(" ")
+          mention.empty? ? "" : " #{mention}"
+        end
 
-          mention ? " #{mention}" : ""
+        def target_user_login_names
+          case PullRequest.mention_type
+          when 'author'
+            pr.user ? [pr.user.login] : []
+          else
+            if pr.assignees&.any? && pr.assignees.length > 1
+              pr.assignees.map(&:login)
+            elsif pr.assignee
+              [pr.assignee.login]
+            elsif pr.user
+              [pr.user.login]
+            else
+              []
+            end
+          end
         end
 
         def self.mention_type

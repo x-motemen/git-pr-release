@@ -96,6 +96,28 @@ You can specify this value by `GIT_PR_RELEASE_MENTION` environment variable.
 
 If not specified, the mention will be the PR assignee
 
+### `pr-release.assign-pr-author`
+
+Whether to assign the related users of the merged pull requests to the release pull request.
+Accepted values: `true` | `false`
+
+You can specify this value by `GIT_PR_RELEASE_ASSIGN_PR_AUTHOR` environment variable.
+
+If not specified, no assignees will be added.
+
+Note: The user selection follows the same logic as `pr-release.mention`. If `mention` is set to `author`, the PR author will be assigned. Otherwise, the PR assignee will be used (falling back to the author if no assignee exists).
+
+### `pr-release.request-pr-author-review`
+
+Whether to request review from the related users of the merged pull requests on the release pull request.
+Accepted values: `true` | `false`
+
+You can specify this value by `GIT_PR_RELEASE_REQUEST_PR_AUTHOR_REVIEW` environment variable.
+
+If not specified, no review requests will be made.
+
+Note: The user selection follows the same logic as `pr-release.mention`. If `mention` is set to `author`, the PR author will be requested for review. Otherwise, the PR assignee will be used (falling back to the author if no assignee exists).
+
 ### `pr-release.ssl-no-verify`
 
 Whether to verify SSL certificate or not.

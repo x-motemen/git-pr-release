@@ -76,6 +76,8 @@ RSpec.describe Git::Pr::Release::CLI do
         expect(@cli.staging_branch).to eq "staging"
         expect(@cli.template_path).to eq nil
         expect(@cli.labels).to eq []
+        expect(@cli.assign_pr_author).to eq false
+        expect(@cli.request_pr_author_review).to eq false
       end
     end
 
@@ -181,6 +183,134 @@ RSpec.describe Git::Pr::Release::CLI do
         end
       end
     end
+
+    describe "assign_pr_author" do
+      context "With ENV set to true" do
+        around do |example|
+          original = ENV.to_hash
+          begin
+            ENV["GIT_PR_RELEASE_ASSIGN_PR_AUTHOR"] = "true"
+            example.run
+          ensure
+            ENV.replace(original)
+          end
+        end
+
+        it "enables assign_pr_author" do
+          subject
+          expect(@cli.assign_pr_author).to eq true
+        end
+      end
+
+      context "With ENV set to 1" do
+        around do |example|
+          original = ENV.to_hash
+          begin
+            ENV["GIT_PR_RELEASE_ASSIGN_PR_AUTHOR"] = "1"
+            example.run
+          ensure
+            ENV.replace(original)
+          end
+        end
+
+        it "enables assign_pr_author" do
+          subject
+          expect(@cli.assign_pr_author).to eq true
+        end
+      end
+
+      context "With ENV set to false" do
+        around do |example|
+          original = ENV.to_hash
+          begin
+            ENV["GIT_PR_RELEASE_ASSIGN_PR_AUTHOR"] = "false"
+            example.run
+          ensure
+            ENV.replace(original)
+          end
+        end
+
+        it "disables assign_pr_author" do
+          subject
+          expect(@cli.assign_pr_author).to eq false
+        end
+      end
+
+      context "With git_config" do
+        before {
+          allow(@cli).to receive(:git_config).with("assign-pr-author") { "true" }
+        }
+
+        it "enables assign_pr_author" do
+          subject
+          expect(@cli.assign_pr_author).to eq true
+        end
+      end
+    end
+
+    describe "request_pr_author_review" do
+      context "With ENV set to true" do
+        around do |example|
+          original = ENV.to_hash
+          begin
+            ENV["GIT_PR_RELEASE_REQUEST_PR_AUTHOR_REVIEW"] = "true"
+            example.run
+          ensure
+            ENV.replace(original)
+          end
+        end
+
+        it "enables request_pr_author_review" do
+          subject
+          expect(@cli.request_pr_author_review).to eq true
+        end
+      end
+
+      context "With ENV set to 1" do
+        around do |example|
+          original = ENV.to_hash
+          begin
+            ENV["GIT_PR_RELEASE_REQUEST_PR_AUTHOR_REVIEW"] = "1"
+            example.run
+          ensure
+            ENV.replace(original)
+          end
+        end
+
+        it "enables request_pr_author_review" do
+          subject
+          expect(@cli.request_pr_author_review).to eq true
+        end
+      end
+
+      context "With ENV set to false" do
+        around do |example|
+          original = ENV.to_hash
+          begin
+            ENV["GIT_PR_RELEASE_REQUEST_PR_AUTHOR_REVIEW"] = "false"
+            example.run
+          ensure
+            ENV.replace(original)
+          end
+        end
+
+        it "disables request_pr_author_review" do
+          subject
+          expect(@cli.request_pr_author_review).to eq false
+        end
+      end
+
+      context "With git_config" do
+        before {
+          allow(@cli).to receive(:git_config).with("request-pr-author-review") { "true" }
+        }
+
+        it "enables request_pr_author_review" do
+          subject
+          expect(@cli.request_pr_author_review).to eq true
+        end
+      end
+    end
   end
 
   describe "#fetch_merged_prs" do
@@ -275,7 +405,7 @@ RSpec.describe Git::Pr::Release::CLI do
         expect(@cli).to have_received(:prepare_release_pr)
         expect(@cli).to have_received(:pull_request_files)
         expect(@cli).to have_received(:build_and_merge_pr_title_and_body).with(@created_pr, @merged_prs, @changed_files)
-        expect(@cli).to have_received(:update_release_pr).with(@created_pr, @pr_title, @pr_body)
+        expect(@cli).to have_received(:update_release_pr).with(@created_pr, @pr_title, @pr_body, @merged_prs)
       }
     end
 
@@ -296,7 +426,7 @@ RSpec.describe Git::Pr::Release::CLI do
         expect(@cli).to have_received(:pull_request_files).with(existing_release_pr)
         expect(@cli).not_to have_received(:prepare_release_pr)
         expect(@cli).to have_received(:build_and_merge_pr_title_and_body).with(existing_release_pr, @merged_prs, @changed_files)
-        expect(@cli).to have_received(:update_release_pr).with(existing_release_pr, @pr_title, @pr_body)
+        expect(@cli).to have_received(:update_release_pr).with(existing_release_pr, @pr_title, @pr_body, @merged_prs)
       }
     end
 
@@ -317,7 +447,7 @@ RSpec.describe Git::Pr::Release::CLI do
         expect(@cli).not_to have_received(:prepare_release_pr)
         expect(@cli).not_to have_received(:pull_request_files)
         expect(@cli).to have_received(:build_and_merge_pr_title_and_body).with(nil, @merged_prs, [])
-        expect(@cli).not_to have_received(:update_release_pr).with(@created_pr, @pr_title, @pr_body)
+        expect(@cli).not_to have_received(:update_release_pr).with(@created_pr, @pr_title, @pr_body, @merged_prs)
       }
     end
 
@@ -343,7 +473,7 @@ RSpec.describe Git::Pr::Release::CLI do
         subject
 
         expect(@cli).not_to have_received(:build_and_merge_pr_title_and_body)
-        expect(@cli).to have_received(:update_release_pr).with(existing_release_pr, @new_pr_title, @new_pr_body)
+        expect(@cli).to have_received(:update_release_pr).with(existing_release_pr, @new_pr_title, @new_pr_body, @merged_prs)
       }
     end
   end
@@ -410,20 +540,32 @@ RSpec.describe Git::Pr::Release::CLI do
   end
 
   describe "#update_release_pr" do
-    subject { @cli.update_release_pr(@release_pr, "PR Title", "PR Body") }
+    subject { @cli.update_release_pr(@release_pr, "PR Title", "PR Body", @merged_prs) }
 
     before {
       @cli = configured_cli
 
       @release_pr = double(number: 1023)
 
+      @agent = Sawyer::Agent.new("http://example.com/") do |conn|
+        conn.builder.handlers.delete(Faraday::Adapter::NetHttp)
+        conn.adapter(:test, Faraday::Adapter::Test::Stubs.new)
+      end
+      @merged_prs = [
+        Sawyer::Resource.new(@agent, load_yaml("pr_3.yml")),
+        Sawyer::Resource.new(@agent, load_yaml("pr_4.yml")),
+        Sawyer::Resource.new(@agent, load_yaml("pr_6.yml")),
+      ]
+
       @client = double(Octokit::Client)
       allow(@client).to receive(:update_pull_request) { @release_pr }
       allow(@client).to receive(:add_labels_to_an_issue)
+      allow(@client).to receive(:add_assignees)
+      allow(@client).to receive(:request_pull_request_review)
       allow(@cli).to receive(:client) { @client }
     }
 
-    context "Without labels" do
+    context "Without labels and without assign_pr_author" do
       it {
         subject
 
@@ -436,6 +578,8 @@ RSpec.describe Git::Pr::Release::CLI do
           }
         )
         expect(@client).not_to have_received(:add_labels_to_an_issue)
+        expect(@client).not_to have_received(:add_assignees)
+        expect(@client).not_to have_received(:request_pull_request_review)
       }
     end
 
@@ -456,6 +600,58 @@ RSpec.describe Git::Pr::Release::CLI do
         )
         expect(@client).to have_received(:add_labels_to_an_issue).with(
           "motemen/git-pr-release", 1023, ["release"]
+        )
+        expect(@client).not_to have_received(:add_assignees)
+        expect(@client).not_to have_received(:request_pull_request_review)
+      }
+    end
+
+    context "With assign_pr_author enabled" do
+      before {
+        allow(@cli).to receive(:assign_pr_author) { true }
+      }
+
+      it {
+        subject
+
+        expect(@client).to have_received(:update_pull_request).with(
+          "motemen/git-pr-release",
+          1023,
+          {
+            title: "PR Title",
+            body: "PR Body",
+          }
+        )
+        # Both pr_3.yml and pr_4.yml have hakobe as the author, so only one unique assignee
+        # And the author of pr_6.yml is ninjinkun.
+        expect(@client).to have_received(:add_assignees).with(
+          "motemen/git-pr-release", 1023, ["hakobe", "ninjinkun"]
+        )
+        expect(@client).not_to have_received(:request_pull_request_review)
+      }
+    end
+
+    context "With request_pr_author_review enabled" do
+      before {
+        allow(@cli).to receive(:request_pr_author_review) { true }
+      }
+
+      it {
+        subject
+
+        expect(@client).to have_received(:update_pull_request).with(
+          "motemen/git-pr-release",
+          1023,
+          {
+            title: "PR Title",
+            body: "PR Body",
+          }
+        )
+        expect(@client).not_to have_received(:add_assignees)
+        # Both pr_3.yml and pr_4.yml have hakobe as the author
+        # And the author of pr_6.yml is ninjinkun.
+        expect(@client).to have_received(:request_pull_request_review).with(
+          "motemen/git-pr-release", 1023, reviewers: ["hakobe", "ninjinkun"]
         )
       }
     end
