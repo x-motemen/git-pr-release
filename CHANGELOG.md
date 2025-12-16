@@ -1,5 +1,12 @@
 # git-pr-release
 
+## v2.4.0 (2025-12-16)
+
+[full changelog](https://github.com/x-motemen/git-pr-release/compare/v2.3.0...v2.4.0)
+
+* (#112) Add release workflow using trusted publishing (@ohbarye)
+* (#110) Support `pr-release.assign-pr-author` and `pr-release.request-pr-author-review` options (@moznion)
+
 ## v2.3.0 (2025-12-15)
 
 [full changelog](https://github.com/x-motemen/git-pr-release/compare/v2.2.0...v2.3.0)
