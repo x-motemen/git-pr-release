@@ -8,6 +8,16 @@ module Git
         include Git::Pr::Release::Util
         attr_reader :repository, :production_branch, :staging_branch, :template_path, :labels, :assign_pr_author, :request_pr_author_review
 
+        # ref:
+        # https://docs.github.com/en/issues/tracking-your-work-with-issues/using-issues/assigning-issues-and-pull-requests-to-other-github-users
+        MAX_ASSIGNEES_NUM = 10
+        # As of 2025-12-16, the pull request UI shows an “up to 15 reviewers” label, but there is no clearly stated documentation
+        # supporting this.
+        # Some people say the maximum is 100 for GitHub Enterprise plans, but there is no official documentation confirming this,
+        # so this is not supported yet.
+        MAX_REVIEWERS_NUM = 15
+        private_constant :MAX_ASSIGNEES_NUM, :MAX_REVIEWERS_NUM
+
         def self.start
           result = self.new.start
           exit result
@@ -261,7 +271,7 @@ module Git
           end
 
           if assign_pr_author
-            assignees = merged_prs.map { |pr| PullRequest.new(pr).target_user_login_names }.flatten.compact.uniq
+            assignees = merged_prs.map { |pr| PullRequest.new(pr).target_user_login_names }.flatten.compact.uniq.take(MAX_ASSIGNEES_NUM)
             unless assignees.empty?
               client.add_assignees(
                 repository, release_pr.number, assignees
@@ -270,7 +280,7 @@ module Git
           end
 
           if request_pr_author_review
-            reviewers = merged_prs.map { |pr| PullRequest.new(pr).target_user_login_names }.flatten.compact.uniq
+            reviewers = merged_prs.map { |pr| PullRequest.new(pr).target_user_login_names }.flatten.compact.uniq.take(MAX_REVIEWERS_NUM)
             unless reviewers.empty?
               client.request_pull_request_review(
                 repository, release_pr.number, reviewers:
