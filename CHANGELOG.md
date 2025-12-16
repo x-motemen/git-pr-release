@@ -1,5 +1,11 @@
 # git-pr-release
 
+## v2.5.0 (2025-12-16)
+
+[full changelog](https://github.com/x-motemen/git-pr-release/compare/v2.4.0...v2.5.0)
+
+* (#116) Make it backward compatible for Ruby 3.0 (@moznion)
+
 ## v2.4.0 (2025-12-16)
 
 [full changelog](https://github.com/x-motemen/git-pr-release/compare/v2.3.0...v2.4.0)
