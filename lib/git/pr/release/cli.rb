@@ -187,7 +187,6 @@ module Git
             # Qualifiers like "repo:", "is:" are not counted toward this limit.
             # The limit applies to the URL-encoded length of keywords.
             # ref. https://docs.github.com/en/rest/reference/search#limitations-on-query-length
-            # ref. https://github.com/x-motemen/git-pr-release/issues/103
 
             # Build the current keywords string with spaces
             current_keywords_str = query_keywords.join(" ")
