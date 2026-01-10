@@ -153,6 +153,13 @@ module Git
           client.search_issues("#{query}")[:items].map(&:number)
         end
 
+        # Calculate URL-encoded length for GitHub search query keywords
+        # GitHub's Issue Search API limits the keyword section to 256 characters AFTER URL encoding
+        def url_encoded_length(str)
+          require 'uri'
+          URI.encode_www_form_component(str).length
+        end
+
         def fetch_squash_merged_pr_numbers_from_github
           # When "--abbrev" is specified, the length of the each line of the stdout isn't fixed.
           # It is just a minimum length, and if the commit cannot be uniquely identified with
@@ -168,24 +175,41 @@ module Git
 
           pr_nums = []
           query_base = "repo:#{repository} is:pr is:closed"
-          query = query_base
+          query_keywords = []
+
           # Make bulk requests with multiple SHAs of the maximum possible length.
           # If multiple SHAs are specified, the issue search API will treat it like an OR search,
           # and all the pull requests will be searched.
           # This is difficult to read from the current documentation, but that is the current
           # behavior and GitHub support has responded that this is the spec.
           shas.each do |sha|
-            # Longer than 256 characters are not supported in the query.
+            # GitHub's Issue Search API has a 256 character limit for the KEYWORD section only.
+            # Qualifiers like "repo:", "is:" are not counted toward this limit.
+            # The limit applies to the URL-encoded length of keywords.
             # ref. https://docs.github.com/en/rest/reference/search#limitations-on-query-length
-            if query.length + 1 + sha.length >= 256
+            # ref. https://github.com/x-motemen/git-pr-release/issues/103
+
+            # Build the current keywords string with spaces
+            current_keywords_str = query_keywords.join(" ")
+            next_keywords_str = current_keywords_str.empty? ? sha : "#{current_keywords_str} #{sha}"
+
+            # Check if adding this SHA would exceed the 256 character limit (after URL encoding)
+            if url_encoded_length(next_keywords_str) >= 256
+              # Batch is full, execute search and start a new batch
+              query = query_base + " " + current_keywords_str
               pr_nums.concat(search_issue_numbers(query))
-              query = query_base
+              query_keywords = []
             end
-            query += " " + sha
+
+            query_keywords << sha
           end
-          if query != query_base
-              pr_nums.concat(search_issue_numbers(query))
+
+          # Process remaining keywords
+          if query_keywords.any?
+            query = query_base + " " + query_keywords.join(" ")
+            pr_nums.concat(search_issue_numbers(query))
           end
+
           pr_nums
         end
 

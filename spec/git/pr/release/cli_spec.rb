@@ -707,4 +707,107 @@ RSpec.describe Git::Pr::Release::CLI do
       expect(@client).to have_received(:auto_paginate=).with(false)
     }
   end
+
+  describe "#url_encoded_length" do
+    subject { configured_cli.url_encoded_length(str) }
+
+    context "with simple ASCII string" do
+      let(:str) { "abc123" }
+      it { is_expected.to eq 6 }
+    end
+
+    context "with spaces" do
+      let(:str) { "abc 123" }
+      it { is_expected.to eq 7 }  # space is encoded as '+'
+    end
+
+    context "with special characters" do
+      let(:str) { "repo:owner/name" }
+      # ':' -> %3A, '/' -> %2F
+      # "repo%3Aowner%2Fname" = 19 chars
+      it { is_expected.to eq 19 }
+    end
+  end
+
+  describe "#fetch_squash_merged_pr_numbers_from_github" do
+    before {
+      @cli = configured_cli
+      allow(@cli).to receive(:git) {
+        shas.map { |sha| "#{sha}\n" }
+      }
+      allow(@cli).to receive(:search_issue_numbers) { |query|
+        # Mock response: extract SHAs from query and return fake PR numbers
+        query.scan(/[0-9a-f]{7}/).map { |sha| sha.hex % 1000 }
+      }
+    }
+
+    context "with few SHAs that fit in one query" do
+      let(:shas) { ["abc1234", "def5678", "012abcd"] }
+
+      it "makes single search query" do
+        result = @cli.fetch_squash_merged_pr_numbers_from_github
+
+        expect(@cli).to have_received(:search_issue_numbers).once
+        expect(result.length).to eq 3
+      end
+    end
+
+    context "with many SHAs requiring batching" do
+      # Generate enough SHAs to exceed 256 char limit
+      # Each SHA is 7 chars, with space encoded as '+' (1 char)
+      # To exceed 256 chars: need about 256 / 8 = 32 SHAs
+      let(:shas) { 35.times.map { |i| sprintf("%07x", i) } }
+
+      it "splits into multiple search queries" do
+        result = @cli.fetch_squash_merged_pr_numbers_from_github
+
+        # Should make multiple calls due to 256 char limit
+        expect(@cli).to have_received(:search_issue_numbers).at_least(2).times
+        expect(result.length).to eq 35
+      end
+
+      it "never exceeds 256 character limit per query" do
+        queries_received = []
+        allow(@cli).to receive(:search_issue_numbers) { |query|
+          queries_received << query
+          []
+        }
+
+        @cli.fetch_squash_merged_pr_numbers_from_github
+
+        queries_received.each do |query|
+          # Extract keyword section (everything after "is:closed ")
+          keyword_section = query.match(/is:closed (.+)$/)[1]
+          encoded_length = @cli.url_encoded_length(keyword_section)
+
+          expect(encoded_length).to be < 256,
+            "Query exceeded limit: #{encoded_length} chars (query: #{query})"
+        end
+      end
+    end
+
+    context "with very long repository name" do
+      before {
+        allow(@cli).to receive(:repository) { "very-long-organization-name/very-long-repository-name-that-takes-many-chars" }
+      }
+      let(:shas) { 30.times.map { |i| sprintf("%07x", i) } }
+
+      it "correctly batches with long repo names" do
+        queries_received = []
+        allow(@cli).to receive(:search_issue_numbers) { |query|
+          queries_received << query
+          []
+        }
+
+        @cli.fetch_squash_merged_pr_numbers_from_github
+
+        queries_received.each do |query|
+          keyword_section = query.match(/is:closed (.+)$/)[1]
+          encoded_length = @cli.url_encoded_length(keyword_section)
+
+          expect(encoded_length).to be < 256
+        end
+      end
+    end
+  end
 end
