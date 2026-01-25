@@ -707,4 +707,67 @@ RSpec.describe Git::Pr::Release::CLI do
       expect(@client).to have_received(:auto_paginate=).with(false)
     }
   end
+
+  describe "#fetch_squash_merged_pr_numbers_from_github" do
+    subject { @cli.send(:fetch_squash_merged_pr_numbers_from_github) }
+
+    before {
+      @cli = configured_cli
+
+      allow(@cli).to receive(:git).with(:log, '--pretty=format:%h', "--abbrev=7", "--no-merges", "--first-parent",
+        "origin/master..origin/staging") { shas.map { |sha| "#{sha}\n" } }
+      allow(@cli).to receive(:search_issue_numbers) { |query| [123] }
+    }
+
+    context "When SHAs fit within query length limit" do
+      let(:shas) { ["abc1234", "def5678"] }
+
+      it "makes a single search request" do
+        subject
+
+        expect(@cli).to have_received(:search_issue_numbers).once
+      end
+    end
+
+    context "When SHAs exceed query length limit" do
+      # Create enough SHAs to exceed the 256 character limit for the dynamic portion
+      # query_base = "repo:motemen/git-pr-release is:pr is:closed" (about 47 characters)
+      # Each SHA is 7 characters + 1 space = 8 characters
+      # To exceed 256 characters in dynamic part: 256 / 8 = 32 SHAs
+      let(:shas) { (1..35).map { |i| sprintf("%07d", i) } }
+
+      it "splits into multiple search requests" do
+        subject
+
+        expect(@cli).to have_received(:search_issue_numbers).at_least(2).times
+      end
+
+      it "correctly calculates query length by subtracting query_base length" do
+        query_base = "repo:motemen/git-pr-release is:pr is:closed"
+        call_count = 0
+
+        allow(@cli).to receive(:search_issue_numbers) do |query|
+          call_count += 1
+          # Verify that each query's dynamic portion (excluding query_base) doesn't exceed 256 characters
+          dynamic_portion_length = query.length - query_base.length
+          expect(dynamic_portion_length).to be <= 256
+          [123]
+        end
+
+        subject
+
+        expect(call_count).to be > 1
+      end
+    end
+
+    context "When query_base is empty after processing all SHAs" do
+      let(:shas) { ["abc1234"] }
+
+      it "makes exactly one search request" do
+        subject
+
+        expect(@cli).to have_received(:search_issue_numbers).once
+      end
+    end
+  end
 end
