@@ -177,7 +177,7 @@ module Git
           shas.each do |sha|
             # Longer than 256 characters are not supported in the query.
             # ref. https://docs.github.com/en/rest/reference/search#limitations-on-query-length
-            if query.length + 1 + sha.length >= 256
+            if (query.length + 1 + sha.length) - query_base.length >= 256
               pr_nums.concat(search_issue_numbers(query))
               query = query_base
             end
