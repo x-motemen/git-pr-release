@@ -30,6 +30,29 @@ RSpec.describe Git::Pr::Release::CLI do
       }
     end
 
+    context "When --recursive without --squashed" do
+      let(:merged_prs) {
+        agent = Sawyer::Agent.new("http://example.com/") do |conn|
+          conn.builder.handlers.delete(Faraday::Adapter::NetHttp)
+          conn.adapter(:test, Faraday::Adapter::Test::Stubs.new)
+        end
+        pr_3 = Sawyer::Resource.new(agent, load_yaml("pr_3.yml"))
+        [pr_3]
+      }
+
+      before {
+        @cli.instance_variable_set(:@recursive, true)
+        @cli.instance_variable_set(:@squashed, false)
+        allow(@cli).to receive(:say).and_call_original
+      }
+
+      it "warns and ignores --recursive" do
+        subject
+        expect(@cli).to have_received(:say).with('--recursive requires --squashed, ignoring --recursive', :warn)
+        expect(@cli.instance_variable_get(:@recursive)).to eq false
+      end
+    end
+
     context "When merged_prs exists" do
       let(:merged_prs) {
         agent = Sawyer::Agent.new("http://example.com/") do |conn|
@@ -308,6 +331,81 @@ RSpec.describe Git::Pr::Release::CLI do
         it "enables request_pr_author_review" do
           subject
           expect(@cli.request_pr_author_review).to eq true
+        end
+      end
+    end
+
+    describe "recursive" do
+      context "With ENV set to true" do
+        around do |example|
+          original = ENV.to_hash
+          begin
+            ENV["GIT_PR_RELEASE_RECURSIVE"] = "true"
+            example.run
+          ensure
+            ENV.replace(original)
+          end
+        end
+
+        it "enables recursive" do
+          subject
+          expect(@cli.instance_variable_get(:@recursive)).to eq true
+        end
+      end
+
+      context "With ENV set to 1" do
+        around do |example|
+          original = ENV.to_hash
+          begin
+            ENV["GIT_PR_RELEASE_RECURSIVE"] = "1"
+            example.run
+          ensure
+            ENV.replace(original)
+          end
+        end
+
+        it "enables recursive" do
+          subject
+          expect(@cli.instance_variable_get(:@recursive)).to eq true
+        end
+      end
+
+      context "With ENV set to false" do
+        around do |example|
+          original = ENV.to_hash
+          begin
+            ENV["GIT_PR_RELEASE_RECURSIVE"] = "false"
+            example.run
+          ensure
+            ENV.replace(original)
+          end
+        end
+
+        it "disables recursive" do
+          subject
+          expect(@cli.instance_variable_get(:@recursive)).to eq false
+        end
+      end
+
+      context "With git_config" do
+        before {
+          allow(@cli).to receive(:git_config).with("recursive") { "true" }
+        }
+
+        it "enables recursive" do
+          subject
+          expect(@cli.instance_variable_get(:@recursive)).to eq true
+        end
+      end
+
+      context "When already set via CLI flag" do
+        before {
+          @cli.instance_variable_set(:@recursive, true)
+        }
+
+        it "does not override CLI flag with ENV/git_config" do
+          subject
+          expect(@cli.instance_variable_get(:@recursive)).to eq true
         end
       end
     end
@@ -766,5 +864,22 @@ RSpec.describe Git::Pr::Release::CLI do
         expect(@cli).to have_received(:search_issue_numbers).once
       end
     end
+
+    context "When @recursive is true" do
+      before {
+        @cli.instance_variable_set(:@recursive, true)
+        allow(@cli).to receive(:git).with(:log, '--pretty=format:%h', "--abbrev=7", "--no-merges",
+          "origin/master..origin/staging") { shas.map { |sha| "#{sha}\n" } }
+      }
+
+      let(:shas) { ["abc1234", "def5678"] }
+
+      it "does not use --first-parent" do
+        subject
+        expect(@cli).to have_received(:git).with(:log, '--pretty=format:%h', "--abbrev=7", "--no-merges",
+          "origin/master..origin/staging")
+      end
+    end
   end
+
 end

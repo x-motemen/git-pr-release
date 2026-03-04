@@ -14,10 +14,11 @@ module Git
         end
 
         def initialize
-          @dry_run  = false
-          @json     = false
-          @no_fetch = false
-          @squashed = false
+          @dry_run   = false
+          @json      = false
+          @no_fetch  = false
+          @squashed  = false
+          @recursive = false
         end
 
         def start
@@ -34,6 +35,9 @@ module Git
             opts.on('--squashed', 'Handle squash merged PRs') do |v|
               @squashed = v
             end
+            opts.on('--recursive', 'Include PRs merged into feature branches (use with --squashed)') do |v|
+              @recursive = v
+            end
             opts.on('--overwrite-description', 'Force overwrite PR description') do |v|
               @overwrite_description = v
             end
@@ -41,6 +45,11 @@ module Git
 
           ### Set up configuration
           configure
+
+          if @recursive && !@squashed
+            say '--recursive requires --squashed, ignoring --recursive', :warn
+            @recursive = false
+          end
 
           ### Fetch merged PRs
           merged_prs = fetch_merged_prs
@@ -87,6 +96,11 @@ module Git
 
           _request_pr_author_review = ENV.fetch('GIT_PR_RELEASE_REQUEST_PR_AUTHOR_REVIEW') { git_config('request-pr-author-review') }
           @request_pr_author_review = %w[true 1].include?(_request_pr_author_review)
+
+          unless @recursive
+            _recursive = ENV.fetch('GIT_PR_RELEASE_RECURSIVE') { git_config('recursive') }
+            @recursive = %w[true 1].include?(_recursive)
+          end
 
           say "Repository:        #{repository}", :debug
           say "Production branch: #{production_branch}", :debug
@@ -163,8 +177,10 @@ module Git
           # ref. https://docs.github.com/en/search-github/searching-on-github/searching-issues-and-pull-requests#search-by-commit-sha
           # This is done because there is a length limit on the API query string, and we want
           # to create a string with the minimum possible length.
-          shas = git(:log, '--pretty=format:%h', "--abbrev=7", "--no-merges", "--first-parent",
-            "origin/#{production_branch}..origin/#{staging_branch}").map(&:chomp)
+          git_log_options = %w[--pretty=format:%h --abbrev=7 --no-merges]
+          git_log_options << '--first-parent' unless @recursive
+          git_log_options << "origin/#{production_branch}..origin/#{staging_branch}"
+          shas = git(:log, *git_log_options).map(&:chomp)
 
           pr_nums = []
           query_base = "repo:#{repository} is:pr is:closed"
