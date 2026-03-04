@@ -175,9 +175,13 @@ module Git
           # This is difficult to read from the current documentation, but that is the current
           # behavior and GitHub support has responded that this is the spec.
           shas.each do |sha|
-            # Longer than 256 characters are not supported in the query.
+            # GitHub documents a 256-character limit for search queries, but in practice
+            # the API enforces a stricter limit, likely due to URL-encoded length counting.
+            # Multiple users have reported errors at 220-240 characters, with 200 being stable.
             # ref. https://docs.github.com/en/rest/reference/search#limitations-on-query-length
-            if (query.length + 1 + sha.length) - query_base.length >= 256
+            # ref. https://github.com/x-motemen/git-pr-release/issues/103
+            # ref. https://github.com/orgs/community/discussions/186957
+            if query.length + 1 + sha.length >= 200
               pr_nums.concat(search_issue_numbers(query))
               query = query_base
             end
