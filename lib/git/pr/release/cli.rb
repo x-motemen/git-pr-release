@@ -145,12 +145,22 @@ module Git
         end
 
         def search_issue_numbers(query)
-          sleep 1
-          say "search issues with query:#{query}", :debug
-          # Fortunately, we don't need to take care of the page count in response, because
-          # the default value of per_page is 30 and we can't specify more than 30 commits due to
-          # the length limit specification of the query string.
-          client.search_issues("#{query}")[:items].map(&:number)
+          try = 0
+          begin
+            try += 1
+            say "search issues with query:#{query}", :debug
+            # Fortunately, we don't need to take care of the page count in response, because
+            # the default value of per_page is 30 and we can't specify more than 30 commits due to
+            # the length limit specification of the query string.
+            client.search_issues("#{query}")[:items].map(&:number)
+          rescue
+            if try <= 3 # try 3 times considering Secondary rate limit
+              say "Failed to search issues. Retry after 30 seconds", :warn
+              sleep 30
+              retry
+            end
+            raise
+          end
         end
 
         def fetch_squash_merged_pr_numbers_from_github
