@@ -5,13 +5,23 @@ on:
 
 jobs:
   release:
+    if: github.repository == 'x-motemen/git-pr-release'
     runs-on: ubuntu-slim
+
+    environment:
+      name: rubygems.org
+      url: https://rubygems.org/gems/git-pr-release
 
     permissions:
       contents: write
       id-token: write
 
     steps:
+      - name: Harden Runner
+        uses: step-security/harden-runner@ec9f2d5744a09debf3a187a3f4f675c53b671911 # v2.13.0
+        with:
+          egress-policy: audit
+
       - uses: actions/checkout@8e8c483db84b4bee98b60c0593521ed34d9990e8 # v6.0.1
         with:
           persist-credentials: false
@@ -22,3 +32,10 @@ jobs:
           ruby-version: ruby
 
       - uses: rubygems/release-gem@1c162a739e8b4cb21a676e97b087e8268d8fc40b # v1.1.2
+
+      - name: Create GitHub release
+        run: |
+          tag_name="$(git describe --tags --abbrev=0)"
+          gh release create "${tag_name}" --verify-tag --generate-notes
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
