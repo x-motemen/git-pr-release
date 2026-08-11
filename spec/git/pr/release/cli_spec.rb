@@ -313,6 +313,64 @@ RSpec.describe Git::Pr::Release::CLI do
     end
   end
 
+  describe "#client" do
+    subject { @cli.client }
+
+    let(:pull_request_url) { "https://api.github.com/repos/motemen/git-pr-release/pulls/1023" }
+
+    before {
+      @cli = configured_cli
+
+      allow(@cli).to receive(:obtain_token!) { "dummy token" }
+    }
+
+    context "When the GitHub API responds a server error to an idempotent request" do
+      before {
+        stub_request(:patch, pull_request_url).to_return(
+          { status: 502, body: "", headers: {} },
+          { status: 200, body: %({"number":1023}), headers: { "Content-Type" => "application/json" } },
+        )
+      }
+
+      it "retries the request" do
+        expect(subject.update_pull_request("motemen/git-pr-release", 1023, title: "PR Title").number).to eq 1023
+        expect(a_request(:patch, pull_request_url)).to have_been_made.twice
+      end
+    end
+
+    context "When the GitHub API responds a server error to a request creating a pull request" do
+      let(:pull_requests_url) { "https://api.github.com/repos/motemen/git-pr-release/pulls" }
+
+      before {
+        stub_request(:post, pull_requests_url).to_return(status: 502, body: "", headers: {})
+      }
+
+      it "does not retry the request" do
+        expect {
+          subject.create_pull_request("motemen/git-pr-release", "master", "staging", "PR Title", "")
+        }.to raise_error Octokit::BadGateway
+        expect(a_request(:post, pull_requests_url)).to have_been_made.once
+      end
+    end
+
+    context "When the GitHub API responds a client error" do
+      before {
+        stub_request(:patch, pull_request_url).to_return(status: 404, body: "", headers: {})
+      }
+
+      it "does not retry the request" do
+        expect {
+          subject.update_pull_request("motemen/git-pr-release", 1023, title: "PR Title")
+        }.to raise_error Octokit::NotFound
+        expect(a_request(:patch, pull_request_url)).to have_been_made.once
+      end
+    end
+
+    it "does not modify the middleware shared by every Octokit client" do
+      expect { subject }.not_to change { Octokit::Default::MIDDLEWARE.handlers }
+    end
+  end
+
   describe "#fetch_merged_prs" do
     subject { @cli.fetch_merged_prs }
 

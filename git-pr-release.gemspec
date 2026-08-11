@@ -20,6 +20,7 @@ Gem::Specification.new do |spec|
   spec.required_ruby_version = '>= 3.0'
 
   spec.add_dependency 'octokit'
+  spec.add_dependency 'faraday-retry'
   spec.add_dependency 'highline'
   spec.add_dependency 'colorize'
   spec.add_dependency 'diff-lcs'

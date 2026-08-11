@@ -1,3 +1,4 @@
+require 'faraday/retry'
 require 'octokit'
 require 'optparse'
 
@@ -54,8 +55,23 @@ module Git
           return 0
         end
 
+        # POST is left out: retrying it could create a duplicated release pull request.
+        RETRY_OPTIONS = {
+          max: 5,
+          interval: 1,
+          interval_randomness: 0.5,
+          backoff_factor: 2,
+          retry_statuses: [500, 502, 503, 504],
+          methods: %i[delete get head options patch put]
+        }.freeze
+
         def client
-          @client ||= Octokit::Client.new :access_token => obtain_token!
+          @client ||= Octokit::Client.new(:access_token => obtain_token!).tap do |client|
+            # Inside RaiseError so retry_statuses sees the response, not Octokit::ServerError.
+            client.middleware = client.middleware.dup.tap do |builder|
+              builder.insert_after Octokit::Response::RaiseError, Faraday::Retry::Middleware, RETRY_OPTIONS
+            end
+          end
         end
 
         def configure
