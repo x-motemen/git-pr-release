@@ -34,7 +34,7 @@ jobs:
           set -xe
           bundle update --jobs $(nproc) --retry 3
         continue-on-error: ${{ matrix.allow_failures == 'true' }}
-      - name: Run ${{ matrix.test_framework }}
+      - name: Run RSpec
         run: |
           set -xe
           bundle exec rspec
