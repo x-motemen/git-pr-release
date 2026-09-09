@@ -30,12 +30,8 @@ jobs:
           ruby-version: ${{ matrix.ruby }}
           bundler-cache: true
       - name: bundle update
-        run: |
-          set -xe
-          bundle update --jobs $(nproc) --retry 3
+        run: bundle update --jobs $(nproc) --retry 3
         continue-on-error: ${{ matrix.allow_failures == 'true' }}
       - name: Run RSpec
-        run: |
-          set -xe
-          bundle exec rspec
+        run: bundle exec rspec
         continue-on-error: ${{ matrix.allow_failures == 'true' }}
