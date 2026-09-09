@@ -1,5 +1,11 @@
 # git-pr-release
 
+## v2.6.0 (2026-09-09)
+
+[full changelog](https://github.com/x-motemen/git-pr-release/compare/v2.5.0...v2.6.0)
+
+* (#123) Retry GitHub API requests failing with a server error (@exoego)
+
 ## v2.5.0 (2025-12-16)
 
 [full changelog](https://github.com/x-motemen/git-pr-release/compare/v2.4.0...v2.5.0)
