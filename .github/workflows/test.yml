@@ -24,27 +24,16 @@ jobs:
           - head
 
     steps:
-      - uses: actions/checkout@v4
-      - uses: ruby/setup-ruby@v1
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+      - uses: ruby/setup-ruby@95ef2b042f9d7a56d8268cba8559e2842e2ad01b # v1.321.0
         with:
           ruby-version: ${{ matrix.ruby }}
           bundler-cache: true
-      - name: Cache vendor/bundle
-        uses: actions/cache@v4
-        with:
-          path: vendor/bundle
-          key: v1-gem-${{ runner.os }}-${{ matrix.ruby }}-${{ github.sha }}
-          restore-keys: |
-            v1-gem-${{ runner.os }}-${{ matrix.ruby }}-
-        continue-on-error: ${{ matrix.allow_failures == 'true' }}
       - name: bundle update
-        run: |
-          set -xe
-          bundle config path vendor/bundle
-          bundle update --jobs $(nproc) --retry 3
+        run: bundle update --jobs $(nproc) --retry 3
         continue-on-error: ${{ matrix.allow_failures == 'true' }}
-      - name: Run ${{ matrix.test_framework }}
-        run: |
-          set -xe
-          bundle exec rspec
+      - name: Run RSpec
+        run: bundle exec rspec
         continue-on-error: ${{ matrix.allow_failures == 'true' }}
